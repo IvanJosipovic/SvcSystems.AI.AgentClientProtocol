@@ -17,10 +17,15 @@ public sealed class ClientOptions
     public IReadOnlyDictionary<string, JsonElement>? CapabilityMetadata { get; init; }
 
     /// <summary>Handlers for incoming custom requests. Method names must begin with an underscore.</summary>
-    /// <remarks>Handlers run concurrently and may send requests. Throw RpcException to return a protocol error.
+    /// <remarks>Handlers run concurrently, up to <see cref="MaximumConcurrentIncomingRequests"/>, and may send requests.
+    /// Excess incoming requests receive a server-busy error. Throw RpcException to return a protocol error.
     /// Returned JSON is serialized immediately after the handler completes and must still be valid then.</remarks>
     public IReadOnlyDictionary<string, Func<JsonElement, CancellationToken, ValueTask<JsonElement>>> ExtensionRequestHandlers { get; init; } =
         new Dictionary<string, Func<JsonElement, CancellationToken, ValueTask<JsonElement>>>();
+
+    /// <summary>Receives method names and exceptions when incoming request handlers fail unexpectedly.</summary>
+    /// <remarks>When unset, failures are reported through <see cref="System.Diagnostics.Trace"/>.</remarks>
+    public Action<string, Exception>? RequestHandlerException { get; init; }
 
     /// <summary>Receives unrecognized notifications and supported extension notifications, including authentication status.</summary>
     /// <remarks>Runs on the receive loop, including during initialization. Do not block or wait for ACP operations.
@@ -65,4 +70,8 @@ public sealed class ClientOptions
 
     /// <summary>Maximum number of unread session updates buffered per session before its update stream fails.</summary>
     public int MaximumBufferedSessionUpdates { get; init; } = 1024;
+
+    /// <summary>Maximum number of agent requests handled concurrently by this client.</summary>
+    /// <remarks>Excess requests receive a JSON-RPC server-busy error.</remarks>
+    public int MaximumConcurrentIncomingRequests { get; init; } = 32;
 }

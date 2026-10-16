@@ -1,0 +1,102 @@
+namespace SvcSystems.AI.AgentClientProtocol;
+
+internal static class WorkspacePathPolicy
+{
+    private static readonly StringComparison PathComparison =
+        OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+    public static IReadOnlyList<string> CreateRoots(string workingDirectory, IReadOnlyList<string> additionalDirectories)
+    {
+        var roots = new List<string>(additionalDirectories.Count + 1)
+        {
+            ResolvePath(workingDirectory)
+        };
+        roots.AddRange(additionalDirectories.Select(ResolvePath));
+        return roots.Distinct(PathComparer).ToArray();
+    }
+
+    public static bool AllowsPath(string path, IReadOnlyList<string> roots)
+    {
+        if (!Path.IsPathFullyQualified(path)) return false;
+        var resolvedPath = ResolvePath(path);
+        return roots.Any(root => IsWithinRoot(resolvedPath, root));
+    }
+
+    private static string ResolvePath(string path)
+    {
+        if (!Path.IsPathFullyQualified(path))
+        {
+            throw new ArgumentException("Workspace paths must be absolute.", nameof(path));
+        }
+
+        var pathRoot = Path.GetPathRoot(path)
+            ?? throw new ArgumentException("Workspace path has no filesystem root.", nameof(path));
+        var currentPath = pathRoot;
+        var segments = path[pathRoot.Length..].Split(
+            [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
+            StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var segment in segments)
+        {
+            if (segment == ".") continue;
+            if (segment == "..")
+            {
+                currentPath = Directory.GetParent(currentPath)?.FullName ?? pathRoot;
+                continue;
+            }
+
+            currentPath = Path.Combine(currentPath, segment);
+            currentPath = ResolveExistingLink(currentPath);
+        }
+
+        return Path.GetFullPath(currentPath);
+    }
+
+    private static string ResolveExistingLink(string path)
+    {
+        FileAttributes attributes;
+        try
+        {
+            attributes = File.GetAttributes(path);
+        }
+        catch (FileNotFoundException)
+        {
+            ThrowIfDanglingLink(path);
+            return path;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            ThrowIfDanglingLink(path);
+            return path;
+        }
+
+        if ((attributes & FileAttributes.ReparsePoint) == 0) return path;
+
+        FileSystemInfo info = (attributes & FileAttributes.Directory) != 0
+            ? new DirectoryInfo(path)
+            : new FileInfo(path);
+        var target = info.ResolveLinkTarget(returnFinalTarget: true)
+            ?? throw new IOException($"Could not resolve filesystem link '{path}'.");
+        return Path.GetFullPath(target.FullName);
+    }
+
+    private static void ThrowIfDanglingLink(string path)
+    {
+        if (new FileInfo(path).LinkTarget is not null || new DirectoryInfo(path).LinkTarget is not null)
+        {
+            throw new IOException($"Could not resolve filesystem link '{path}'.");
+        }
+    }
+
+    private static bool IsWithinRoot(string path, string root)
+    {
+        if (string.Equals(path, root, PathComparison)) return true;
+        var rootPrefix = Path.EndsInDirectorySeparator(root)
+            ? root
+            : root + Path.DirectorySeparatorChar;
+        return path.StartsWith(rootPrefix, PathComparison);
+    }
+
+    private static StringComparer PathComparer =>
+        OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+}

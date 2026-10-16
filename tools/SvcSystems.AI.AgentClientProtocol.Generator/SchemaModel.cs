@@ -16,6 +16,7 @@ internal sealed class RpcMethodModel(string name, string side, string messageTyp
 internal abstract class TypeModel(string name)
 {
     public string Name { get; } = name;
+    public bool IsInternal { get; set; }
 }
 
 internal sealed class ClassModel(

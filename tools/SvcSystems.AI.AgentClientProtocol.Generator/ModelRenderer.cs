@@ -175,7 +175,7 @@ internal static class ModelRenderer
     private static MemberDeclarationSyntax RenderClass(ClassModel model)
     {
         var declaration = SyntaxFactory.ClassDeclaration(model.Name)
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
+            .AddModifiers(SyntaxFactory.Token(model.IsInternal ? SyntaxKind.InternalKeyword : SyntaxKind.PublicKeyword));
 
         if (model.DiscriminatorName is not null)
         {
@@ -253,7 +253,7 @@ internal static class ModelRenderer
     private static MemberDeclarationSyntax RenderEnum(EnumModel model)
     {
         var declaration = SyntaxFactory.EnumDeclaration(model.Name)
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+            .AddModifiers(SyntaxFactory.Token(model.IsInternal ? SyntaxKind.InternalKeyword : SyntaxKind.PublicKeyword))
             .AddAttributeLists(AttributeList("JsonConverter", TypeOfArgument("JsonStringEnumConverter<" + model.Name + ">")));
 
         foreach (var (value, index) in model.Values.Select((value, index) => (value, index)))
@@ -274,13 +274,15 @@ internal static class ModelRenderer
         // non-object unions with its exact schema mapping; this classifier enables
         // STJ metadata generation for the models and object-shaped unions.
         const string classifier = "[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]\n";
-        var code = new StringBuilder(GeneratedHeaderText())
-            .AppendLine("using System.Text.Json.Serialization;")
+        var code = new StringBuilder(GeneratedHeaderText());
+        if (model.Cases.Contains("JsonElement", StringComparer.Ordinal))
+            code.AppendLine("using System.Text.Json;");
+        code.AppendLine("using System.Text.Json.Serialization;")
             .AppendLine()
             .Append("namespace ").Append(GeneratedNamespace).AppendLine(";")
             .AppendLine()
             .Append(classifier)
-            .Append("public union ").Append(model.Name).Append('(').Append(string.Join(", ", model.Cases)).AppendLine(");");
+            .Append(model.IsInternal ? "internal union " : "public union ").Append(model.Name).Append('(').Append(string.Join(", ", model.Cases)).AppendLine(");");
         return code.ToString();
     }
 

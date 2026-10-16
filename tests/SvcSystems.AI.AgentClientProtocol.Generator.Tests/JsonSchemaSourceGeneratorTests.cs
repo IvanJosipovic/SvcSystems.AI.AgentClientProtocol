@@ -136,6 +136,80 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void ReportsUnresolvedSchemaReferencesAsErrors()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Request": {
+                  "type": "object",
+                  "properties": {
+                    "payload": { "$ref": "#/$defs/MissingPayload" }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "unresolved-reference.schema.json");
+
+        var diagnostic = Assert.Single(result.Diagnostics.Where(item => item.Id == "ACPGEN003"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+        Assert.Contains("unresolved schema reference", diagnostic.GetMessage(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReportsUnsupportedObjectShapesAsErrors()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Request": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^item": { "type": "integer" }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "unsupported-object-shape.schema.json");
+
+        var diagnostic = Assert.Single(result.Diagnostics.Where(item => item.Id == "ACPGEN003"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+        Assert.Contains("patternProperties", diagnostic.GetMessage(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void IntentionallyUnconstrainedReferencesRemainJsonElements()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Raw-Payload": {},
+                "Request": {
+                  "type": "object",
+                  "properties": {
+                    "payload": { "$ref": "#/$defs/Raw-Payload" }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "open-payload.schema.json");
+
+        Assert.DoesNotContain(result.Diagnostics, diagnostic => diagnostic.Id == "ACPGEN003");
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("class Request", StringComparison.Ordinal) &&
+            source.Contains("JsonElement? Payload", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void NullableArraysGenerateNullableCollectionsNotUnionTypes()
     {
         const string schema = """

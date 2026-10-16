@@ -38,7 +38,7 @@ Unrecognized JSON-RPC notifications, including agent-specific extensions such as
 
 ## Host capabilities
 
-ACP callbacks are enabled only when the host provides a handler. The client can host filesystem, terminal, permission, and elicitation operations. Do not configure filesystem or terminal handlers unless the application has an appropriate workspace/command security policy.
+ACP callbacks are enabled only when the host provides a handler. The client can host filesystem, terminal, permission, and elicitation operations. Filesystem callbacks are restricted to each active session's working directory and explicitly configured additional directories; paths that resolve through symlinks or reparse points outside those roots are rejected. Filesystem handlers should still enforce their own authorization and operation-specific policy. Do not configure terminal handlers unless the application has an appropriate workspace/command security policy.
 
 ```csharp
 var clientOptions = new ClientOptions

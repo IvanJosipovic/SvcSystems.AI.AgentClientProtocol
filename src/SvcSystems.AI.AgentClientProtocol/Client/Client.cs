@@ -15,6 +15,7 @@ public sealed class Client : IClient
     private readonly ClientOptions _options;
     private readonly ProcessOptions? _processOptions;
     private readonly ConcurrentDictionary<string, Session> _sessions = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _fileSystemRoots = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activePromptCancellation = new(StringComparer.Ordinal);
     private AuthenticationStatus? _authenticationStatus;
     private int _disposed;
@@ -24,6 +25,10 @@ public sealed class Client : IClient
         if (options.MaximumBufferedSessionUpdates <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(options), "The maximum buffered session update count must be positive.");
+        }
+        if (options.MaximumConcurrentIncomingRequests <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "The maximum concurrent incoming request count must be positive.");
         }
         _connection = connection;
         _processOptions = processOptions;
@@ -99,7 +104,10 @@ public sealed class Client : IClient
         JsonRpcConnection? connection = null;
         try
         {
-            connection = new JsonRpcConnection(transport);
+            connection = new JsonRpcConnection(
+                transport,
+                clientOptions.MaximumConcurrentIncomingRequests,
+                clientOptions.RequestHandlerException);
             var client = new Client(connection, processOptions, clientOptions);
             await client.InitializeAsync(cancellationToken).ConfigureAwait(false);
             return client;
@@ -131,7 +139,10 @@ public sealed class Client : IClient
         JsonRpcConnection? connection = null;
         try
         {
-            connection = new JsonRpcConnection(transport);
+            connection = new JsonRpcConnection(
+                transport,
+                clientOptions.MaximumConcurrentIncomingRequests,
+                clientOptions.RequestHandlerException);
             var client = new Client(connection, terminalAuthenticationProcessOptions, clientOptions);
             await client.InitializeAsync(cancellationToken).ConfigureAwait(false);
             return client;
@@ -150,6 +161,7 @@ public sealed class Client : IClient
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(options);
         ValidateSessionOptions(options);
+        var fileSystemRoots = GetFileSystemRoots(options);
 
         var request = new NewSessionRequest
         {
@@ -168,6 +180,7 @@ public sealed class Client : IClient
         {
             throw new ProtocolException($"ACP agent returned duplicate session id '{session.Id}'.");
         }
+        if (fileSystemRoots is not null) _fileSystemRoots[session.Id] = fileSystemRoots;
         return session;
     }
 
@@ -180,8 +193,10 @@ public sealed class Client : IClient
         if (Agent.Capabilities.LoadSession != true) throw new NotSupportedException("The ACP agent does not advertise session loading.");
         ValidateSessionOptions(options);
 
+        var fileSystemRoots = GetFileSystemRoots(options);
         var created = new Session(this, sessionId, _options.MaximumBufferedSessionUpdates);
         var session = _sessions.GetOrAdd(sessionId, created);
+        if (ReferenceEquals(session, created) && fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
 
         try
         {
@@ -199,7 +214,11 @@ public sealed class Client : IClient
         }
         catch
         {
-            if (ReferenceEquals(session, created)) _sessions.TryRemove(sessionId, out _);
+            if (ReferenceEquals(session, created))
+            {
+                _sessions.TryRemove(sessionId, out _);
+                _fileSystemRoots.TryRemove(sessionId, out _);
+            }
             throw;
         }
     }
@@ -276,6 +295,7 @@ public sealed class Client : IClient
         if (Agent.Capabilities.SessionCapabilities?.Delete is null) throw new NotSupportedException("The ACP agent does not advertise session deletion.");
         _ = await _connection.SendRequestAsync(Methods.SessionDelete, WireJson.WriteSessionIdRequest(sessionId), cancellationToken).ConfigureAwait(false);
         _sessions.TryRemove(sessionId, out _);
+        _fileSystemRoots.TryRemove(sessionId, out _);
     }
 
     /// <inheritdoc />
@@ -287,8 +307,10 @@ public sealed class Client : IClient
         if (Agent.Capabilities.SessionCapabilities?.Resume is null) throw new NotSupportedException("The ACP agent does not advertise session resume.");
         ValidateSessionOptions(options);
 
+        var fileSystemRoots = GetFileSystemRoots(options);
         var created = new Session(this, sessionId, _options.MaximumBufferedSessionUpdates);
         var session = _sessions.GetOrAdd(sessionId, created);
+        if (ReferenceEquals(session, created) && fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
         try
         {
             var response = await _connection.SendRequestAsync(Methods.SessionResume, WireJson.WriteResumeSessionRequest(sessionId, options), cancellationToken).ConfigureAwait(false);
@@ -297,7 +319,11 @@ public sealed class Client : IClient
         }
         catch
         {
-            if (ReferenceEquals(session, created)) _sessions.TryRemove(sessionId, out _);
+            if (ReferenceEquals(session, created))
+            {
+                _sessions.TryRemove(sessionId, out _);
+                _fileSystemRoots.TryRemove(sessionId, out _);
+            }
             throw;
         }
     }
@@ -310,6 +336,7 @@ public sealed class Client : IClient
         if (Agent.Capabilities.SessionCapabilities?.Close is null) throw new NotSupportedException("The ACP agent does not advertise session close.");
         _ = await _connection.SendRequestAsync(Methods.SessionClose, WireJson.WriteSessionIdRequest(sessionId), cancellationToken).ConfigureAwait(false);
         _sessions.TryRemove(sessionId, out _);
+        _fileSystemRoots.TryRemove(sessionId, out _);
     }
 
     internal async Task SetSessionModeAsync(string sessionId, string modeId, CancellationToken cancellationToken)
@@ -450,6 +477,7 @@ public sealed class Client : IClient
             {
                 var request = WireJson.ReadTextFileReadRequest(parameters);
                 ValidateAbsolutePath(request.Path, "path");
+                ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsReadTextFile);
                 var content = await fileSystem.ReadTextFileAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteTextFileReadResponse(content);
             };
@@ -457,6 +485,7 @@ public sealed class Client : IClient
             {
                 var request = WireJson.ReadTextFileWriteRequest(parameters);
                 ValidateAbsolutePath(request.Path, "path");
+                ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsWriteTextFile);
                 await fileSystem.WriteTextFileAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyResponse();
             };
@@ -565,6 +594,30 @@ public sealed class Client : IClient
         }
     }
 
+    private IReadOnlyList<string>? GetFileSystemRoots(SessionOptions options) =>
+        _options.FileSystemHandler is null
+            ? null
+            : WorkspacePathPolicy.CreateRoots(options.WorkingDirectory, options.AdditionalDirectories);
+
+    private void ValidateFileSystemPath(string sessionId, string path, string method)
+    {
+        if (!_fileSystemRoots.TryGetValue(sessionId, out var roots))
+        {
+            throw new RpcException(-32602, "Filesystem access requires an active session with an authorized workspace.", method);
+        }
+
+        try
+        {
+            if (WorkspacePathPolicy.AllowsPath(path, roots)) return;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or System.Security.SecurityException)
+        {
+            throw new RpcException(-32602, "Filesystem path could not be resolved safely.", method);
+        }
+
+        throw new RpcException(-32602, "Filesystem path is outside the session's authorized workspace.", method);
+    }
+
     private static void ValidateWorkingDirectory(string directory)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);
@@ -622,6 +675,7 @@ public sealed class Client : IClient
             try { await cancellation.CancelAsync().ConfigureAwait(false); }
             catch (ObjectDisposedException) { }
         }
+        _fileSystemRoots.Clear();
         await _connection.DisposeAsync().ConfigureAwait(false);
     }
 }

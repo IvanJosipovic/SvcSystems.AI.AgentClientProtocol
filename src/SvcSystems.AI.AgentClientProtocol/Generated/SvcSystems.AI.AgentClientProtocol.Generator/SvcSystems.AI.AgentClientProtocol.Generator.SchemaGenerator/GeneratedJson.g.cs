@@ -29,14 +29,6 @@ internal static class GeneratedJson
     internal static byte[] Serialize(ToolCallUpdate value) => Serialize(writer => WriteToolCallUpdate(writer, value));
     internal static byte[] Serialize(PermissionOption value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.PermissionOption);
     internal static byte[] Serialize(RequestPermissionRequest value) => Serialize(writer => WriteRequestPermissionRequest(writer, value));
-    internal static byte[] Serialize(TextContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.TextContent);
-    internal static byte[] Serialize(ImageContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ImageContent);
-    internal static byte[] Serialize(AudioContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.AudioContent);
-    internal static byte[] Serialize(ResourceLink value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ResourceLink);
-    internal static byte[] Serialize(EmbeddedResource value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.EmbeddedResource);
-    internal static byte[] Serialize(Content value) => Serialize(writer => WriteContent(writer, value));
-    internal static byte[] Serialize(Diff value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Diff);
-    internal static byte[] Serialize(Terminal value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Terminal);
     internal static byte[] Serialize(EnvVariable value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.EnvVariable);
     internal static byte[] Serialize(CreateTerminalRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateTerminalRequest);
     internal static byte[] Serialize(TerminalOutputRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.TerminalOutputRequest);
@@ -45,6 +37,15 @@ internal static class GeneratedJson
     internal static byte[] Serialize(KillTerminalRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.KillTerminalRequest);
     internal static byte[] Serialize(ElicitationSessionScope value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationSessionScope);
     internal static byte[] Serialize(ElicitationRequestScope value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationRequestScope);
+    internal static byte[] Serialize(AgentRequest value) => Serialize(writer => WriteAgentRequest(writer, value));
+    internal static byte[] Serialize(TextContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.TextContent);
+    internal static byte[] Serialize(ImageContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ImageContent);
+    internal static byte[] Serialize(AudioContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.AudioContent);
+    internal static byte[] Serialize(ResourceLink value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ResourceLink);
+    internal static byte[] Serialize(EmbeddedResource value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.EmbeddedResource);
+    internal static byte[] Serialize(Content value) => Serialize(writer => WriteContent(writer, value));
+    internal static byte[] Serialize(Diff value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Diff);
+    internal static byte[] Serialize(Terminal value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Terminal);
     internal static byte[] Serialize(EnumOption value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.EnumOption);
     internal static byte[] Serialize(StringPropertySchema value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.StringPropertySchema);
     internal static byte[] Serialize(NumberPropertySchema value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.NumberPropertySchema);
@@ -79,8 +80,6 @@ internal static class GeneratedJson
     internal static byte[] Serialize(SessionConfigSelectGroup value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SessionConfigSelectGroup);
     internal static byte[] Serialize(SessionConfigOption value) => Serialize(writer => WriteSessionConfigOption(writer, value));
     internal static byte[] Serialize(NewSessionResponse value) => Serialize(writer => WriteNewSessionResponse(writer, value));
-    internal static byte[] Serialize(SessionConfigSelect value) => Serialize(writer => WriteSessionConfigSelect(writer, value));
-    internal static byte[] Serialize(SessionConfigBoolean value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SessionConfigBoolean);
     internal static byte[] Serialize(LoadSessionResponse value) => Serialize(writer => WriteLoadSessionResponse(writer, value));
     internal static byte[] Serialize(SessionInfo value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SessionInfo);
     internal static byte[] Serialize(ListSessionsResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ListSessionsResponse);
@@ -90,13 +89,19 @@ internal static class GeneratedJson
     internal static byte[] Serialize(SetSessionModeResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SetSessionModeResponse);
     internal static byte[] Serialize(SetSessionConfigOptionResponse value) => Serialize(writer => WriteSetSessionConfigOptionResponse(writer, value));
     internal static byte[] Serialize(PromptResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.PromptResponse);
+    internal static byte[] Serialize(AgentResponseCase0 value) => Serialize(writer => WriteAgentResponseCase0(writer, value));
     internal static byte[] Serialize(Error value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Error);
+    internal static byte[] Serialize(AgentResponseCase1 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.AgentResponseCase1);
+    internal static byte[] Serialize(SessionConfigSelect value) => Serialize(writer => WriteSessionConfigSelect(writer, value));
+    internal static byte[] Serialize(SessionConfigBoolean value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SessionConfigBoolean);
     internal static byte[] Serialize(PlanEntry value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.PlanEntry);
     internal static byte[] Serialize(UnstructuredCommandInput value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.UnstructuredCommandInput);
     internal static byte[] Serialize(AvailableCommand value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.AvailableCommand);
     internal static byte[] Serialize(Cost value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Cost);
     internal static byte[] Serialize(SessionUpdate value) => Serialize(writer => WriteSessionUpdate(writer, value));
     internal static byte[] Serialize(SessionNotification value) => Serialize(writer => WriteSessionNotification(writer, value));
+    internal static byte[] Serialize(CompleteElicitationNotification value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CompleteElicitationNotification);
+    internal static byte[] Serialize(AgentNotification value) => Serialize(writer => WriteAgentNotification(writer, value));
     internal static byte[] Serialize(ContentChunk value) => Serialize(writer => WriteContentChunk(writer, value));
     internal static byte[] Serialize(ToolCall value) => Serialize(writer => WriteToolCall(writer, value));
     internal static byte[] Serialize(Plan value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Plan);
@@ -108,7 +113,6 @@ internal static class GeneratedJson
     internal static byte[] Serialize(Notice value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Notice);
     internal static byte[] Serialize(CompactionUpdate value) => Serialize(writer => WriteCompactionUpdate(writer, value));
     internal static byte[] Serialize(CompactionSummaryChunk value) => Serialize(writer => WriteCompactionSummaryChunk(writer, value));
-    internal static byte[] Serialize(CompleteElicitationNotification value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CompleteElicitationNotification);
     internal static byte[] Serialize(FileSystemCapabilities value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.FileSystemCapabilities);
     internal static byte[] Serialize(CompactionCapabilities value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CompactionCapabilities);
     internal static byte[] Serialize(BooleanConfigOptionCapabilities value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.BooleanConfigOptionCapabilities);
@@ -135,11 +139,11 @@ internal static class GeneratedJson
     internal static byte[] Serialize(SetSessionConfigOptionRequestCase0 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SetSessionConfigOptionRequestCase0);
     internal static byte[] Serialize(SetSessionConfigOptionRequestCase1 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SetSessionConfigOptionRequestCase1);
     internal static byte[] Serialize(PromptRequest value) => Serialize(writer => WritePromptRequest(writer, value));
+    internal static byte[] Serialize(ClientRequest value) => Serialize(writer => WriteClientRequest(writer, value));
     internal static byte[] Serialize(WriteTextFileResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.WriteTextFileResponse);
     internal static byte[] Serialize(ReadTextFileResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ReadTextFileResponse);
     internal static byte[] Serialize(RequestPermissionOutcome value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.RequestPermissionOutcome);
     internal static byte[] Serialize(RequestPermissionResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.RequestPermissionResponse);
-    internal static byte[] Serialize(SelectedPermissionOutcome value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SelectedPermissionOutcome);
     internal static byte[] Serialize(CreateTerminalResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateTerminalResponse);
     internal static byte[] Serialize(TerminalExitStatus value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.TerminalExitStatus);
     internal static byte[] Serialize(TerminalOutputResponse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.TerminalOutputResponse);
@@ -150,7 +154,11 @@ internal static class GeneratedJson
     internal static byte[] Serialize(CreateElicitationResponseCase1 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationResponseCase1);
     internal static byte[] Serialize(CreateElicitationResponseCase2 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationResponseCase2);
     internal static byte[] Serialize(CreateElicitationResponseCase3 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationResponseCase3);
+    internal static byte[] Serialize(ClientResponseCase0 value) => Serialize(writer => WriteClientResponseCase0(writer, value));
+    internal static byte[] Serialize(ClientResponseCase1 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ClientResponseCase1);
+    internal static byte[] Serialize(SelectedPermissionOutcome value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SelectedPermissionOutcome);
     internal static byte[] Serialize(CancelNotification value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CancelNotification);
+    internal static byte[] Serialize(ClientNotification value) => Serialize(writer => WriteClientNotification(writer, value));
     internal static byte[] Serialize(CancelRequestNotification value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CancelRequestNotification);
     internal static byte[] Serialize(ContentBlockDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ContentBlockDiscriminator);
     internal static byte[] Serialize(ToolCallContentDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ToolCallContentDiscriminator);
@@ -171,13 +179,21 @@ internal static class GeneratedJson
     internal static byte[] Serialize(ElicitationUrlMode value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationUrlMode);
     internal static byte[] Serialize(CreateElicitationRequestCase2 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationRequestCase2);
     internal static byte[] Serialize(CreateElicitationRequest value) => Serialize(writer => WriteCreateElicitationRequest(writer, value));
+    internal static byte[] Serialize(AgentRequestParams value) => Serialize(writer => WriteAgentRequestParams(writer, value));
     internal static byte[] Serialize(MultiSelectItems value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.MultiSelectItems);
     internal static byte[] Serialize(ElicitationPropertySchema value) => Serialize(writer => WriteElicitationPropertySchema(writer, value));
     internal static byte[] Serialize(AuthMethod value) => Serialize(writer => WriteAuthMethod(writer, value));
     internal static byte[] Serialize(SessionConfigSelectOptions value) => Serialize(writer => WriteSessionConfigSelectOptions(writer, value));
+    internal static byte[] Serialize(AgentResponseCase0Result value) => Serialize(writer => WriteAgentResponseCase0Result(writer, value));
+    internal static byte[] Serialize(AgentResponse value) => Serialize(writer => WriteAgentResponse(writer, value));
+    internal static byte[] Serialize(AgentNotificationParams value) => Serialize(writer => WriteAgentNotificationParams(writer, value));
     internal static byte[] Serialize(SetSessionConfigOptionRequest value) => Serialize(writer => WriteSetSessionConfigOptionRequest(writer, value));
+    internal static byte[] Serialize(ClientRequestParams value) => Serialize(writer => WriteClientRequestParams(writer, value));
     internal static byte[] Serialize(ElicitationContentValue value) => Serialize(writer => WriteElicitationContentValue(writer, value));
     internal static byte[] Serialize(CreateElicitationResponse value) => Serialize(writer => WriteCreateElicitationResponse(writer, value));
+    internal static byte[] Serialize(ClientResponseCase0Result value) => Serialize(writer => WriteClientResponseCase0Result(writer, value));
+    internal static byte[] Serialize(ClientResponse value) => Serialize(writer => WriteClientResponse(writer, value));
+    internal static byte[] Serialize(ClientNotificationParams value) => Serialize(writer => WriteClientNotificationParams(writer, value));
 
     private static void WriteWriteTextFileRequest(Utf8JsonWriter writer, WriteTextFileRequest value)
     {
@@ -1102,6 +1118,278 @@ internal static class GeneratedJson
         writer.WriteEndObject();
     }
 
+    private static void WriteEnvVariable(Utf8JsonWriter writer, EnvVariable value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("name");
+        writer.WriteStringValue(value.Name);
+        writer.WritePropertyName("value");
+        writer.WriteStringValue(value.Value);
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteCreateTerminalRequest(Utf8JsonWriter writer, CreateTerminalRequest value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("sessionId");
+        writer.WriteStringValue(value.SessionId);
+        writer.WritePropertyName("command");
+        writer.WriteStringValue(value.Command);
+        if (value.Args is not null)
+        {
+            writer.WritePropertyName("args");
+            writer.WriteStartArray();
+            foreach (var item in value.Args!)
+            {
+                writer.WriteStringValue(item);
+            }
+            writer.WriteEndArray();
+        }
+        if (value.Env is not null)
+        {
+            writer.WritePropertyName("env");
+            writer.WriteStartArray();
+            foreach (var item in value.Env!)
+            {
+                WriteEnvVariable(writer, item);
+            }
+            writer.WriteEndArray();
+        }
+        if (value.Cwd is not null)
+        {
+            writer.WritePropertyName("cwd");
+            writer.WriteStringValue(value.Cwd!);
+        }
+        if (value.OutputByteLimit is not null)
+        {
+            writer.WritePropertyName("outputByteLimit");
+            writer.WriteNumberValue(value.OutputByteLimit.Value);
+        }
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteTerminalOutputRequest(Utf8JsonWriter writer, TerminalOutputRequest value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("sessionId");
+        writer.WriteStringValue(value.SessionId);
+        writer.WritePropertyName("terminalId");
+        writer.WriteStringValue(value.TerminalId);
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteReleaseTerminalRequest(Utf8JsonWriter writer, ReleaseTerminalRequest value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("sessionId");
+        writer.WriteStringValue(value.SessionId);
+        writer.WritePropertyName("terminalId");
+        writer.WriteStringValue(value.TerminalId);
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteWaitForTerminalExitRequest(Utf8JsonWriter writer, WaitForTerminalExitRequest value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("sessionId");
+        writer.WriteStringValue(value.SessionId);
+        writer.WritePropertyName("terminalId");
+        writer.WriteStringValue(value.TerminalId);
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteKillTerminalRequest(Utf8JsonWriter writer, KillTerminalRequest value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("sessionId");
+        writer.WriteStringValue(value.SessionId);
+        writer.WritePropertyName("terminalId");
+        writer.WriteStringValue(value.TerminalId);
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteElicitationSessionScope(Utf8JsonWriter writer, ElicitationSessionScope value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("sessionId");
+        writer.WriteStringValue(value.SessionId);
+        if (value.ToolCallId is not null)
+        {
+            writer.WritePropertyName("toolCallId");
+            writer.WriteStringValue(value.ToolCallId!);
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteElicitationRequestScope(Utf8JsonWriter writer, ElicitationRequestScope value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("requestId");
+        if (value.RequestId is null) writer.WriteNullValue();
+        else
+        {
+            WriteRequestId(writer, value.RequestId.Value);
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteAgentRequest(Utf8JsonWriter writer, AgentRequest value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("id");
+        if (value.Id is null) writer.WriteNullValue();
+        else
+        {
+            WriteRequestId(writer, value.Id.Value);
+        }
+        writer.WritePropertyName("method");
+        writer.WriteStringValue(value.Method);
+        if (value.Params is not null)
+        {
+            writer.WritePropertyName("params");
+            WriteAgentRequestParams(writer, value.Params.Value);
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
     private static void WriteTextContent(Utf8JsonWriter writer, TextContent value)
     {
         writer.WriteStartObject();
@@ -1369,251 +1657,6 @@ internal static class GeneratedJson
                 item.Value.WriteTo(writer);
             }
             writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteEnvVariable(Utf8JsonWriter writer, EnvVariable value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("name");
-        writer.WriteStringValue(value.Name);
-        writer.WritePropertyName("value");
-        writer.WriteStringValue(value.Value);
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteCreateTerminalRequest(Utf8JsonWriter writer, CreateTerminalRequest value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("sessionId");
-        writer.WriteStringValue(value.SessionId);
-        writer.WritePropertyName("command");
-        writer.WriteStringValue(value.Command);
-        if (value.Args is not null)
-        {
-            writer.WritePropertyName("args");
-            writer.WriteStartArray();
-            foreach (var item in value.Args!)
-            {
-                writer.WriteStringValue(item);
-            }
-            writer.WriteEndArray();
-        }
-        if (value.Env is not null)
-        {
-            writer.WritePropertyName("env");
-            writer.WriteStartArray();
-            foreach (var item in value.Env!)
-            {
-                WriteEnvVariable(writer, item);
-            }
-            writer.WriteEndArray();
-        }
-        if (value.Cwd is not null)
-        {
-            writer.WritePropertyName("cwd");
-            writer.WriteStringValue(value.Cwd!);
-        }
-        if (value.OutputByteLimit is not null)
-        {
-            writer.WritePropertyName("outputByteLimit");
-            writer.WriteNumberValue(value.OutputByteLimit.Value);
-        }
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteTerminalOutputRequest(Utf8JsonWriter writer, TerminalOutputRequest value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("sessionId");
-        writer.WriteStringValue(value.SessionId);
-        writer.WritePropertyName("terminalId");
-        writer.WriteStringValue(value.TerminalId);
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteReleaseTerminalRequest(Utf8JsonWriter writer, ReleaseTerminalRequest value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("sessionId");
-        writer.WriteStringValue(value.SessionId);
-        writer.WritePropertyName("terminalId");
-        writer.WriteStringValue(value.TerminalId);
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteWaitForTerminalExitRequest(Utf8JsonWriter writer, WaitForTerminalExitRequest value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("sessionId");
-        writer.WriteStringValue(value.SessionId);
-        writer.WritePropertyName("terminalId");
-        writer.WriteStringValue(value.TerminalId);
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteKillTerminalRequest(Utf8JsonWriter writer, KillTerminalRequest value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("sessionId");
-        writer.WriteStringValue(value.SessionId);
-        writer.WritePropertyName("terminalId");
-        writer.WriteStringValue(value.TerminalId);
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteElicitationSessionScope(Utf8JsonWriter writer, ElicitationSessionScope value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("sessionId");
-        writer.WriteStringValue(value.SessionId);
-        if (value.ToolCallId is not null)
-        {
-            writer.WritePropertyName("toolCallId");
-            writer.WriteStringValue(value.ToolCallId!);
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteElicitationRequestScope(Utf8JsonWriter writer, ElicitationRequestScope value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("requestId");
-        if (value.RequestId is null) writer.WriteNullValue();
-        else
-        {
-            WriteRequestId(writer, value.RequestId.Value);
         }
         if (value.ExtensionData is not null)
         {
@@ -3021,40 +3064,6 @@ internal static class GeneratedJson
         writer.WriteEndObject();
     }
 
-    private static void WriteSessionConfigSelect(Utf8JsonWriter writer, SessionConfigSelect value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("currentValue");
-        writer.WriteStringValue(value.CurrentValue);
-        writer.WritePropertyName("options");
-        WriteSessionConfigSelectOptions(writer, value.Options);
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteSessionConfigBoolean(Utf8JsonWriter writer, SessionConfigBoolean value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("currentValue");
-        writer.WriteBooleanValue(value.CurrentValue);
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
     private static void WriteLoadSessionResponse(Utf8JsonWriter writer, LoadSessionResponse value)
     {
         writer.WriteStartObject();
@@ -3355,6 +3364,28 @@ internal static class GeneratedJson
         writer.WriteEndObject();
     }
 
+    private static void WriteAgentResponseCase0(Utf8JsonWriter writer, AgentResponseCase0 value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("id");
+        if (value.Id is null) writer.WriteNullValue();
+        else
+        {
+            WriteRequestId(writer, value.Id.Value);
+        }
+        writer.WritePropertyName("result");
+        WriteAgentResponseCase0Result(writer, value.Result);
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
     private static void WriteError(Utf8JsonWriter writer, Error value)
     {
         writer.WriteStartObject();
@@ -3367,6 +3398,62 @@ internal static class GeneratedJson
             writer.WritePropertyName("data");
             value.Data.Value.WriteTo(writer);
         }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteAgentResponseCase1(Utf8JsonWriter writer, AgentResponseCase1 value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("id");
+        if (value.Id is null) writer.WriteNullValue();
+        else
+        {
+            WriteRequestId(writer, value.Id.Value);
+        }
+        writer.WritePropertyName("error");
+        WriteError(writer, value.Error);
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteSessionConfigSelect(Utf8JsonWriter writer, SessionConfigSelect value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("currentValue");
+        writer.WriteStringValue(value.CurrentValue);
+        writer.WritePropertyName("options");
+        WriteSessionConfigSelectOptions(writer, value.Options);
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteSessionConfigBoolean(Utf8JsonWriter writer, SessionConfigBoolean value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("currentValue");
+        writer.WriteBooleanValue(value.CurrentValue);
         if (value.ExtensionData is not null)
         {
             foreach (var item in value.ExtensionData)
@@ -4588,6 +4675,54 @@ internal static class GeneratedJson
         writer.WriteEndObject();
     }
 
+    private static void WriteCompleteElicitationNotification(Utf8JsonWriter writer, CompleteElicitationNotification value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("elicitationId");
+        writer.WriteStringValue(value.ElicitationId);
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteAgentNotification(Utf8JsonWriter writer, AgentNotification value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("method");
+        writer.WriteStringValue(value.Method);
+        if (value.Params is not null)
+        {
+            writer.WritePropertyName("params");
+            WriteAgentNotificationParams(writer, value.Params.Value);
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
     private static void WriteContentChunk(Utf8JsonWriter writer, ContentChunk value)
     {
         writer.WriteStartObject();
@@ -4971,33 +5106,6 @@ internal static class GeneratedJson
         writer.WriteStringValue(value.CompactionId);
         writer.WritePropertyName("content");
         WriteContentBlock(writer, value.Content);
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteCompleteElicitationNotification(Utf8JsonWriter writer, CompleteElicitationNotification value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("elicitationId");
-        writer.WriteStringValue(value.ElicitationId);
         if (value.Meta is not null)
         {
             writer.WritePropertyName("_meta");
@@ -6001,6 +6109,33 @@ internal static class GeneratedJson
         writer.WriteEndObject();
     }
 
+    private static void WriteClientRequest(Utf8JsonWriter writer, ClientRequest value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("id");
+        if (value.Id is null) writer.WriteNullValue();
+        else
+        {
+            WriteRequestId(writer, value.Id.Value);
+        }
+        writer.WritePropertyName("method");
+        writer.WriteStringValue(value.Method);
+        if (value.Params is not null)
+        {
+            writer.WritePropertyName("params");
+            WriteClientRequestParams(writer, value.Params.Value);
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
     private static void WriteWriteTextFileResponse(Utf8JsonWriter writer, WriteTextFileResponse value)
     {
         writer.WriteStartObject();
@@ -6144,33 +6279,6 @@ internal static class GeneratedJson
         writer.WriteStartObject();
         writer.WritePropertyName("outcome");
         WriteRequestPermissionOutcome(writer, value.Outcome);
-        if (value.Meta is not null)
-        {
-            writer.WritePropertyName("_meta");
-            writer.WriteStartObject();
-            foreach (var item in value.Meta!)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-            writer.WriteEndObject();
-        }
-        if (value.ExtensionData is not null)
-        {
-            foreach (var item in value.ExtensionData)
-            {
-                writer.WritePropertyName(item.Key);
-                item.Value.WriteTo(writer);
-            }
-        }
-        writer.WriteEndObject();
-    }
-
-    private static void WriteSelectedPermissionOutcome(Utf8JsonWriter writer, SelectedPermissionOutcome value)
-    {
-        writer.WriteStartObject();
-        writer.WritePropertyName("optionId");
-        writer.WriteStringValue(value.OptionId);
         if (value.Meta is not null)
         {
             writer.WritePropertyName("_meta");
@@ -6447,6 +6555,77 @@ internal static class GeneratedJson
         writer.WriteEndObject();
     }
 
+    private static void WriteClientResponseCase0(Utf8JsonWriter writer, ClientResponseCase0 value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("id");
+        if (value.Id is null) writer.WriteNullValue();
+        else
+        {
+            WriteRequestId(writer, value.Id.Value);
+        }
+        writer.WritePropertyName("result");
+        WriteClientResponseCase0Result(writer, value.Result);
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteClientResponseCase1(Utf8JsonWriter writer, ClientResponseCase1 value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("id");
+        if (value.Id is null) writer.WriteNullValue();
+        else
+        {
+            WriteRequestId(writer, value.Id.Value);
+        }
+        writer.WritePropertyName("error");
+        WriteError(writer, value.Error);
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteSelectedPermissionOutcome(Utf8JsonWriter writer, SelectedPermissionOutcome value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("optionId");
+        writer.WriteStringValue(value.OptionId);
+        if (value.Meta is not null)
+        {
+            writer.WritePropertyName("_meta");
+            writer.WriteStartObject();
+            foreach (var item in value.Meta!)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+            writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
     private static void WriteCancelNotification(Utf8JsonWriter writer, CancelNotification value)
     {
         writer.WriteStartObject();
@@ -6462,6 +6641,27 @@ internal static class GeneratedJson
                 item.Value.WriteTo(writer);
             }
             writer.WriteEndObject();
+        }
+        if (value.ExtensionData is not null)
+        {
+            foreach (var item in value.ExtensionData)
+            {
+                writer.WritePropertyName(item.Key);
+                item.Value.WriteTo(writer);
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void WriteClientNotification(Utf8JsonWriter writer, ClientNotification value)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("method");
+        writer.WriteStringValue(value.Method);
+        if (value.Params is not null)
+        {
+            writer.WritePropertyName("params");
+            WriteClientNotificationParams(writer, value.Params.Value);
         }
         if (value.ExtensionData is not null)
         {
@@ -6751,6 +6951,44 @@ internal static class GeneratedJson
         }
     }
 
+    private static void WriteAgentRequestParams(Utf8JsonWriter writer, AgentRequestParams value)
+    {
+        switch (value)
+        {
+            case WriteTextFileRequest caseValue:
+                WriteWriteTextFileRequest(writer, caseValue);
+                break;
+            case ReadTextFileRequest caseValue:
+                WriteReadTextFileRequest(writer, caseValue);
+                break;
+            case RequestPermissionRequest caseValue:
+                WriteRequestPermissionRequest(writer, caseValue);
+                break;
+            case CreateTerminalRequest caseValue:
+                WriteCreateTerminalRequest(writer, caseValue);
+                break;
+            case TerminalOutputRequest caseValue:
+                WriteTerminalOutputRequest(writer, caseValue);
+                break;
+            case ReleaseTerminalRequest caseValue:
+                WriteReleaseTerminalRequest(writer, caseValue);
+                break;
+            case WaitForTerminalExitRequest caseValue:
+                WriteWaitForTerminalExitRequest(writer, caseValue);
+                break;
+            case KillTerminalRequest caseValue:
+                WriteKillTerminalRequest(writer, caseValue);
+                break;
+            case CreateElicitationRequest caseValue:
+                WriteCreateElicitationRequest(writer, caseValue);
+                break;
+            case JsonElement caseValue:
+                caseValue.WriteTo(writer);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
     private static void WriteMultiSelectItems(Utf8JsonWriter writer, MultiSelectItems value)
     {
         switch (value)
@@ -6832,6 +7070,84 @@ internal static class GeneratedJson
         }
     }
 
+    private static void WriteAgentResponseCase0Result(Utf8JsonWriter writer, AgentResponseCase0Result value)
+    {
+        switch (value)
+        {
+            case InitializeResponse caseValue:
+                WriteInitializeResponse(writer, caseValue);
+                break;
+            case AuthenticateResponse caseValue:
+                WriteAuthenticateResponse(writer, caseValue);
+                break;
+            case LogoutResponse caseValue:
+                WriteLogoutResponse(writer, caseValue);
+                break;
+            case NewSessionResponse caseValue:
+                WriteNewSessionResponse(writer, caseValue);
+                break;
+            case LoadSessionResponse caseValue:
+                WriteLoadSessionResponse(writer, caseValue);
+                break;
+            case ListSessionsResponse caseValue:
+                WriteListSessionsResponse(writer, caseValue);
+                break;
+            case DeleteSessionResponse caseValue:
+                WriteDeleteSessionResponse(writer, caseValue);
+                break;
+            case ResumeSessionResponse caseValue:
+                WriteResumeSessionResponse(writer, caseValue);
+                break;
+            case CloseSessionResponse caseValue:
+                WriteCloseSessionResponse(writer, caseValue);
+                break;
+            case SetSessionModeResponse caseValue:
+                WriteSetSessionModeResponse(writer, caseValue);
+                break;
+            case SetSessionConfigOptionResponse caseValue:
+                WriteSetSessionConfigOptionResponse(writer, caseValue);
+                break;
+            case PromptResponse caseValue:
+                WritePromptResponse(writer, caseValue);
+                break;
+            case JsonElement caseValue:
+                caseValue.WriteTo(writer);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
+    private static void WriteAgentResponse(Utf8JsonWriter writer, AgentResponse value)
+    {
+        switch (value)
+        {
+            case AgentResponseCase0 caseValue:
+                WriteAgentResponseCase0(writer, caseValue);
+                break;
+            case AgentResponseCase1 caseValue:
+                WriteAgentResponseCase1(writer, caseValue);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
+    private static void WriteAgentNotificationParams(Utf8JsonWriter writer, AgentNotificationParams value)
+    {
+        switch (value)
+        {
+            case SessionNotification caseValue:
+                WriteSessionNotification(writer, caseValue);
+                break;
+            case CompleteElicitationNotification caseValue:
+                WriteCompleteElicitationNotification(writer, caseValue);
+                break;
+            case JsonElement caseValue:
+                caseValue.WriteTo(writer);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
     private static void WriteSetSessionConfigOptionRequest(Utf8JsonWriter writer, SetSessionConfigOptionRequest value)
     {
         switch (value)
@@ -6841,6 +7157,53 @@ internal static class GeneratedJson
                 break;
             case SetSessionConfigOptionRequestCase1 caseValue:
                 WriteSetSessionConfigOptionRequestCase1(writer, caseValue);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
+    private static void WriteClientRequestParams(Utf8JsonWriter writer, ClientRequestParams value)
+    {
+        switch (value)
+        {
+            case InitializeRequest caseValue:
+                WriteInitializeRequest(writer, caseValue);
+                break;
+            case AuthenticateRequest caseValue:
+                WriteAuthenticateRequest(writer, caseValue);
+                break;
+            case LogoutRequest caseValue:
+                WriteLogoutRequest(writer, caseValue);
+                break;
+            case NewSessionRequest caseValue:
+                WriteNewSessionRequest(writer, caseValue);
+                break;
+            case LoadSessionRequest caseValue:
+                WriteLoadSessionRequest(writer, caseValue);
+                break;
+            case ListSessionsRequest caseValue:
+                WriteListSessionsRequest(writer, caseValue);
+                break;
+            case DeleteSessionRequest caseValue:
+                WriteDeleteSessionRequest(writer, caseValue);
+                break;
+            case ResumeSessionRequest caseValue:
+                WriteResumeSessionRequest(writer, caseValue);
+                break;
+            case CloseSessionRequest caseValue:
+                WriteCloseSessionRequest(writer, caseValue);
+                break;
+            case SetSessionModeRequest caseValue:
+                WriteSetSessionModeRequest(writer, caseValue);
+                break;
+            case SetSessionConfigOptionRequest caseValue:
+                WriteSetSessionConfigOptionRequest(writer, caseValue);
+                break;
+            case PromptRequest caseValue:
+                WritePromptRequest(writer, caseValue);
+                break;
+            case JsonElement caseValue:
+                caseValue.WriteTo(writer);
                 break;
             default: throw new ArgumentOutOfRangeException(nameof(value));
         }
@@ -6889,6 +7252,72 @@ internal static class GeneratedJson
                 break;
             case CreateElicitationResponseCase3 caseValue:
                 WriteCreateElicitationResponseCase3(writer, caseValue);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
+    private static void WriteClientResponseCase0Result(Utf8JsonWriter writer, ClientResponseCase0Result value)
+    {
+        switch (value)
+        {
+            case WriteTextFileResponse caseValue:
+                WriteWriteTextFileResponse(writer, caseValue);
+                break;
+            case ReadTextFileResponse caseValue:
+                WriteReadTextFileResponse(writer, caseValue);
+                break;
+            case RequestPermissionResponse caseValue:
+                WriteRequestPermissionResponse(writer, caseValue);
+                break;
+            case CreateTerminalResponse caseValue:
+                WriteCreateTerminalResponse(writer, caseValue);
+                break;
+            case TerminalOutputResponse caseValue:
+                WriteTerminalOutputResponse(writer, caseValue);
+                break;
+            case ReleaseTerminalResponse caseValue:
+                WriteReleaseTerminalResponse(writer, caseValue);
+                break;
+            case WaitForTerminalExitResponse caseValue:
+                WriteWaitForTerminalExitResponse(writer, caseValue);
+                break;
+            case KillTerminalResponse caseValue:
+                WriteKillTerminalResponse(writer, caseValue);
+                break;
+            case CreateElicitationResponse caseValue:
+                WriteCreateElicitationResponse(writer, caseValue);
+                break;
+            case JsonElement caseValue:
+                caseValue.WriteTo(writer);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
+    private static void WriteClientResponse(Utf8JsonWriter writer, ClientResponse value)
+    {
+        switch (value)
+        {
+            case ClientResponseCase0 caseValue:
+                WriteClientResponseCase0(writer, caseValue);
+                break;
+            case ClientResponseCase1 caseValue:
+                WriteClientResponseCase1(writer, caseValue);
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+    }
+
+    private static void WriteClientNotificationParams(Utf8JsonWriter writer, ClientNotificationParams value)
+    {
+        switch (value)
+        {
+            case CancelNotification caseValue:
+                WriteCancelNotification(writer, caseValue);
+                break;
+            case JsonElement caseValue:
+                caseValue.WriteTo(writer);
                 break;
             default: throw new ArgumentOutOfRangeException(nameof(value));
         }
@@ -7074,6 +7503,48 @@ internal static class GeneratedJson
         };
     }
 
+    internal static EnvVariable DeserializeEnvVariable(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.EnvVariable) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static CreateTerminalRequest DeserializeCreateTerminalRequest(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.CreateTerminalRequest) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static TerminalOutputRequest DeserializeTerminalOutputRequest(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.TerminalOutputRequest) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static ReleaseTerminalRequest DeserializeReleaseTerminalRequest(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.ReleaseTerminalRequest) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static WaitForTerminalExitRequest DeserializeWaitForTerminalExitRequest(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.WaitForTerminalExitRequest) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static KillTerminalRequest DeserializeKillTerminalRequest(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.KillTerminalRequest) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static ElicitationSessionScope DeserializeElicitationSessionScope(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.ElicitationSessionScope) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
     internal static TextContent DeserializeTextContent(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
@@ -7125,48 +7596,6 @@ internal static class GeneratedJson
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
         return value.Deserialize(JsonContext.Default.Terminal) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
-    internal static EnvVariable DeserializeEnvVariable(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.EnvVariable) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
-    internal static CreateTerminalRequest DeserializeCreateTerminalRequest(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.CreateTerminalRequest) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
-    internal static TerminalOutputRequest DeserializeTerminalOutputRequest(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.TerminalOutputRequest) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
-    internal static ReleaseTerminalRequest DeserializeReleaseTerminalRequest(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.ReleaseTerminalRequest) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
-    internal static WaitForTerminalExitRequest DeserializeWaitForTerminalExitRequest(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.WaitForTerminalExitRequest) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
-    internal static KillTerminalRequest DeserializeKillTerminalRequest(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.KillTerminalRequest) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
-    internal static ElicitationSessionScope DeserializeElicitationSessionScope(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.ElicitationSessionScope) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static EnumOption DeserializeEnumOption(JsonElement value)
@@ -7407,23 +7836,6 @@ internal static class GeneratedJson
         };
     }
 
-    internal static SessionConfigSelect DeserializeSessionConfigSelect(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return new SessionConfigSelect
-        {
-            CurrentValue = ReadStringValue(Required(value, "currentValue")),
-            Options = DeserializeSessionConfigSelectOptions(Required(value, "options")),
-            ExtensionData = ReadExtensionData(value, "currentValue", "options"),
-        };
-    }
-
-    internal static SessionConfigBoolean DeserializeSessionConfigBoolean(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.SessionConfigBoolean) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
     internal static LoadSessionResponse DeserializeLoadSessionResponse(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
@@ -7499,6 +7911,23 @@ internal static class GeneratedJson
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
         return value.Deserialize(JsonContext.Default.Error) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static SessionConfigSelect DeserializeSessionConfigSelect(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return new SessionConfigSelect
+        {
+            CurrentValue = ReadStringValue(Required(value, "currentValue")),
+            Options = DeserializeSessionConfigSelectOptions(Required(value, "options")),
+            ExtensionData = ReadExtensionData(value, "currentValue", "options"),
+        };
+    }
+
+    internal static SessionConfigBoolean DeserializeSessionConfigBoolean(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.SessionConfigBoolean) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static PlanEntry DeserializePlanEntry(JsonElement value)
@@ -7719,6 +8148,12 @@ internal static class GeneratedJson
         };
     }
 
+    internal static CompleteElicitationNotification DeserializeCompleteElicitationNotification(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.CompleteElicitationNotification) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
     internal static ContentChunk DeserializeContentChunk(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
@@ -7821,12 +8256,6 @@ internal static class GeneratedJson
             Meta = (value.TryGetProperty("_meta", out var property_Meta) && property_Meta.ValueKind != JsonValueKind.Null ? ReadElementDictionary(property_Meta) : null),
             ExtensionData = ReadExtensionData(value, "compactionId", "content", "_meta"),
         };
-    }
-
-    internal static CompleteElicitationNotification DeserializeCompleteElicitationNotification(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.CompleteElicitationNotification) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static FileSystemCapabilities DeserializeFileSystemCapabilities(JsonElement value)
@@ -8035,12 +8464,6 @@ internal static class GeneratedJson
         return value.Deserialize(JsonContext.Default.RequestPermissionResponse) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
-    internal static SelectedPermissionOutcome DeserializeSelectedPermissionOutcome(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return value.Deserialize(JsonContext.Default.SelectedPermissionOutcome) ?? throw new JsonException("Expected a non-null JSON value.");
-    }
-
     internal static CreateTerminalResponse DeserializeCreateTerminalResponse(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
@@ -8097,6 +8520,12 @@ internal static class GeneratedJson
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
         return value.Deserialize(JsonContext.Default.CreateElicitationResponseCase3) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
+    internal static SelectedPermissionOutcome DeserializeSelectedPermissionOutcome(JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
+        return value.Deserialize(JsonContext.Default.SelectedPermissionOutcome) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static CancelNotification DeserializeCancelNotification(JsonElement value)

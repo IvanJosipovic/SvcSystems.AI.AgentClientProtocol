@@ -1,6 +1,9 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.Json;
+using SvcSystems.AI.AgentClientProtocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Serialization;
 using SvcSystems.AI.AgentClientProtocol.Transport;
 
 namespace SvcSystems.AI.AgentClientProtocol.JsonRpc;
@@ -9,6 +12,10 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
 {
     private readonly ITransport _transport;
     private readonly CancellationTokenSource _shutdown = new();
+    private readonly SemaphoreSlim _incomingRequestSlots;
+    private readonly Action<string, Exception>? _requestHandlerException;
+    private readonly object _incomingRequestsLock = new();
+    private readonly HashSet<Task> _incomingRequests = [];
     private readonly ConcurrentDictionary<long, TaskCompletionSource<JsonElement>> _pendingRequests = new();
     private readonly Dictionary<string, Func<JsonElement, CancellationToken, ValueTask<byte[]>>> _requestHandlers = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Func<JsonElement, ValueTask>> _notificationHandlers = new(StringComparer.Ordinal);
@@ -20,9 +27,19 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
 
     public Action<string, JsonElement>? UnhandledNotificationReceived { get; set; }
 
-    public JsonRpcConnection(ITransport transport)
+    public JsonRpcConnection(
+        ITransport transport,
+        int maximumConcurrentIncomingRequests = 32,
+        Action<string, Exception>? requestHandlerException = null)
     {
+        ArgumentNullException.ThrowIfNull(transport);
+        if (maximumConcurrentIncomingRequests <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumConcurrentIncomingRequests));
+        }
         _transport = transport;
+        _incomingRequestSlots = new SemaphoreSlim(maximumConcurrentIncomingRequests);
+        _requestHandlerException = requestHandlerException;
         _receiveTask = ReceiveLoopAsync(_shutdown.Token);
     }
 
@@ -163,7 +180,14 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 var parameters = GetParameters(message);
                 if (message.TryGetProperty("id", out var id))
                 {
-                    _ = DispatchRequestAsync(method, id.Clone(), parameters);
+                    var requestId = ReadRequestId(id);
+                    if (!_incomingRequestSlots.Wait(0))
+                    {
+                        await SendIncomingErrorAsync(requestId, -32000, "Too many concurrent requests.").ConfigureAwait(false);
+                        return;
+                    }
+
+                    TrackIncomingRequest(DispatchTrackedRequestAsync(method, requestId, parameters));
                 }
                 else if (_notificationHandlers.TryGetValue(method, out var handler))
                 {
@@ -176,10 +200,13 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 return;
             }
 
-            if (!message.TryGetProperty("id", out var responseId) || responseId.ValueKind != JsonValueKind.Number || !responseId.TryGetInt64(out var idValue))
+            if (!message.TryGetProperty("id", out var responseId) || responseId.ValueKind != JsonValueKind.Number)
             {
                 throw new ProtocolException("ACP JSON-RPC response must include an integer request id.");
             }
+            var responseRequestId = ReadRequestId(responseId);
+            if (responseRequestId is not long idValue)
+                throw new ProtocolException("ACP JSON-RPC response must include an integer request id.");
 
             if (!_pendingRequests.TryRemove(idValue, out var pending))
             {
@@ -188,12 +215,15 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
 
             if (message.TryGetProperty("error", out var error))
             {
-                var code = error.TryGetProperty("code", out var codeValue) && codeValue.TryGetInt32(out var parsedCode) ? parsedCode : -32603;
-                var errorMessage = error.TryGetProperty("message", out var messageValue) ? messageValue.GetString() ?? "Unknown JSON-RPC error." : "Unknown JSON-RPC error.";
-                JsonElement? data = error.ValueKind == JsonValueKind.Object && error.TryGetProperty("data", out var dataValue)
-                    ? dataValue.Clone()
-                    : null;
-                pending.TrySetException(new RpcException(code, errorMessage, data: data));
+                try
+                {
+                    var rpcError = GeneratedJson.DeserializeError(error);
+                    pending.TrySetException(new RpcException(rpcError.Code, rpcError.Message, data: rpcError.Data));
+                }
+                catch (JsonException exception)
+                {
+                    pending.TrySetException(new ProtocolException("JSON-RPC error response is malformed.", exception));
+                }
             }
             else if (message.TryGetProperty("result", out var result))
             {
@@ -206,40 +236,112 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
     }
 
-    private async Task DispatchRequestAsync(string method, JsonElement id, JsonElement parameters)
+    private async Task DispatchRequestAsync(string method, RequestId? id, JsonElement parameters)
     {
+        if (!_requestHandlers.TryGetValue(method, out var handler))
+        {
+            await SendIncomingErrorAsync(id, -32601, $"Method '{method}' is not supported.").ConfigureAwait(false);
+            return;
+        }
+
+        byte[] result;
         try
         {
-            if (!_requestHandlers.TryGetValue(method, out var handler))
-            {
-                await SendIncomingErrorAsync(id, -32601, $"Method '{method}' is not supported.").ConfigureAwait(false);
-                return;
-            }
-
-            var result = await handler(parameters, _shutdown.Token).ConfigureAwait(false);
-            await SendIncomingResultAsync(id, result).ConfigureAwait(false);
+            result = await handler(parameters, _shutdown.Token).ConfigureAwait(false);
         }
         catch (RpcException exception)
         {
             await SendIncomingErrorAsync(id, exception.Code, exception.Message, exception.ErrorData).ConfigureAwait(false);
+            return;
         }
         catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
         {
             await SendIncomingErrorAsync(id, -32800, "Request cancelled.").ConfigureAwait(false);
+            return;
         }
         catch (Exception exception)
         {
-            await SendIncomingErrorAsync(id, -32603, exception.Message).ConfigureAwait(false);
+            ReportRequestHandlerException(method, exception);
+            await SendIncomingErrorAsync(id, -32603, "Internal error while handling the request.").ConfigureAwait(false);
+            return;
+        }
+
+        await SendIncomingResultAsync(id, result).ConfigureAwait(false);
+    }
+
+    private async Task DispatchTrackedRequestAsync(string method, RequestId? id, JsonElement parameters)
+    {
+        try
+        {
+            await DispatchRequestAsync(method, id, parameters).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            Interlocked.CompareExchange(ref _terminalException, exception, null);
+            FailPending(_terminalException!);
+            _shutdown.Cancel();
+        }
+        finally
+        {
+            _incomingRequestSlots.Release();
+        }
+    }
+
+    private void TrackIncomingRequest(Task task)
+    {
+        lock (_incomingRequestsLock) _incomingRequests.Add(task);
+        _ = task.ContinueWith(
+            static (completed, state) =>
+            {
+                var connection = (JsonRpcConnection)state!;
+                lock (connection._incomingRequestsLock) connection._incomingRequests.Remove(completed);
+            },
+            this,
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
+    }
+
+    private async Task DrainIncomingRequestsAsync()
+    {
+        while (true)
+        {
+            Task[] tasks;
+            lock (_incomingRequestsLock)
+            {
+                if (_incomingRequests.Count == 0) return;
+                tasks = [.. _incomingRequests];
+            }
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+    }
+
+    private void ReportRequestHandlerException(string method, Exception exception)
+    {
+        try
+        {
+            if (_requestHandlerException is null)
+            {
+                Trace.TraceError("Incoming JSON-RPC request handler for '{0}' failed: {1}", method, exception);
+            }
+            else
+            {
+                _requestHandlerException(method, exception);
+            }
+        }
+        catch (Exception diagnosticException)
+        {
+            Trace.TraceError("The request-handler diagnostic callback failed: {0}", diagnosticException);
         }
     }
 
     private static Task DispatchNotificationAsync(Func<JsonElement, ValueTask> handler, JsonElement parameters) =>
         handler(parameters).AsTask();
 
-    private ValueTask SendIncomingResultAsync(JsonElement id, ReadOnlyMemory<byte> result) =>
+    private ValueTask SendIncomingResultAsync(RequestId? id, ReadOnlyMemory<byte> result) =>
         _transport.SendAsync(WriteResponse(id, result), _shutdown.Token);
 
-    private ValueTask SendIncomingErrorAsync(JsonElement id, int code, string message, JsonElement? data = null) =>
+    private ValueTask SendIncomingErrorAsync(RequestId? id, int code, string message, JsonElement? data = null) =>
         _transport.SendAsync(WriteError(id, code, message, data), _shutdown.Token);
 
     private static JsonElement GetParameters(JsonElement message)
@@ -264,30 +366,57 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             WriteParameters(writer, parameters);
         });
 
-    private static byte[] WriteResponse(JsonElement id, ReadOnlyMemory<byte> result) =>
+    private static byte[] WriteResponse(RequestId? id, ReadOnlyMemory<byte> result) =>
         WriteEnvelope(writer =>
         {
             writer.WritePropertyName("id");
-            id.WriteTo(writer);
+            WriteRequestId(writer, id);
             writer.WritePropertyName("result");
             writer.WriteRawValue(result.Span, skipInputValidation: true);
         });
 
-    private static byte[] WriteError(JsonElement id, int code, string message, JsonElement? data) =>
+    private static byte[] WriteError(RequestId? id, int code, string message, JsonElement? data) =>
         WriteEnvelope(writer =>
         {
             writer.WritePropertyName("id");
-            id.WriteTo(writer);
-            writer.WriteStartObject("error");
-            writer.WriteNumber("code", code);
-            writer.WriteString("message", message);
-            if (data is { } errorData)
-            {
-                writer.WritePropertyName("data");
-                errorData.WriteTo(writer);
-            }
-            writer.WriteEndObject();
+            WriteRequestId(writer, id);
+            writer.WritePropertyName("error");
+            writer.WriteRawValue(GeneratedJson.Serialize(new Error { Code = code, Message = message, Data = data }), skipInputValidation: true);
         });
+
+    private static RequestId? ReadRequestId(JsonElement value)
+    {
+        if (value.ValueKind == JsonValueKind.Null) return null;
+        try
+        {
+            return GeneratedJson.DeserializeRequestId(value);
+        }
+        catch (JsonException exception)
+        {
+            throw new ProtocolException("JSON-RPC request id must be a string, integer, or null.", exception);
+        }
+    }
+
+    private static void WriteRequestId(Utf8JsonWriter writer, RequestId? requestId)
+    {
+        if (requestId is null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
+        switch (requestId)
+        {
+            case long numericId:
+                writer.WriteNumberValue(numericId);
+                break;
+            case string stringId:
+                writer.WriteStringValue(stringId);
+                break;
+            default:
+                throw new ProtocolException("JSON-RPC request id used an unsupported schema variant.");
+        }
+    }
 
     private static void WriteParameters(Utf8JsonWriter writer, ReadOnlyMemory<byte> parameters)
     {
@@ -331,6 +460,8 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         await _transport.DisposeAsync().ConfigureAwait(false);
         try { await _receiveTask.ConfigureAwait(false); }
         catch { /* receive loop records and distributes terminal exceptions itself */ }
+        await DrainIncomingRequestsAsync().ConfigureAwait(false);
+        _incomingRequestSlots.Dispose();
         _shutdown.Dispose();
     }
 

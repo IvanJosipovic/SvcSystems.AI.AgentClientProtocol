@@ -47,6 +47,86 @@ public sealed class JsonRpcConnectionTests
     }
 
     [Fact]
+    public async Task UnexpectedHandlerExceptionsAreRedactedAndReportedToHost()
+    {
+        await using var transport = new FakeTransport();
+        var reported = new TaskCompletionSource<(string Method, Exception Exception)>(TaskCreationOptions.RunContinuationsAsynchronously);
+        await using var connection = new JsonRpcConnection(
+            transport,
+            requestHandlerException: (method, exception) => reported.TrySetResult((method, exception)));
+        connection.RegisterRequestHandler("host/fail", (_, _) => throw new InvalidOperationException("C:\\private\\secret.txt"));
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"failure","method":"host/fail","params":{}}"""));
+
+        using var response = await ReadMessageAsync(transport.Sent);
+        var error = response.RootElement.GetProperty("error");
+        Assert.Equal(-32603, error.GetProperty("code").GetInt32());
+        Assert.Equal("Internal error while handling the request.", error.GetProperty("message").GetString());
+        Assert.DoesNotContain("secret.txt", response.RootElement.GetRawText(), StringComparison.Ordinal);
+
+        var diagnostic = await reported.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        Assert.Equal("host/fail", diagnostic.Method);
+        Assert.Equal("C:\\private\\secret.txt", diagnostic.Exception.Message);
+    }
+
+    [Fact]
+    public async Task IncomingRequestsAreBoundedAndOverCapacityRequestsAreRejected()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport, maximumConcurrentIncomingRequests: 1);
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        connection.RegisterRequestHandler("host/slow", async (_, cancellationToken) =>
+        {
+            entered.TrySetResult();
+            await release.Task.WaitAsync(cancellationToken);
+            return Encoding.UTF8.GetBytes("{}");
+        });
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"first","method":"host/slow","params":{}}"""));
+        await entered.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"second","method":"host/slow","params":{}}"""));
+
+        using var rejected = await ReadMessageAsync(transport.Sent);
+        Assert.Equal("second", rejected.RootElement.GetProperty("id").GetString());
+        Assert.Equal(-32000, rejected.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+
+        release.TrySetResult();
+        using var completed = await ReadMessageAsync(transport.Sent);
+        Assert.Equal("first", completed.RootElement.GetProperty("id").GetString());
+        Assert.Equal(JsonValueKind.Object, completed.RootElement.GetProperty("result").ValueKind);
+    }
+
+    [Fact]
+    public async Task DisposalCancelsAndDrainsInFlightIncomingRequests()
+    {
+        await using var transport = new FakeTransport();
+        var connection = new JsonRpcConnection(transport);
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        connection.RegisterRequestHandler("host/wait", async (_, cancellationToken) =>
+        {
+            entered.TrySetResult();
+            try
+            {
+                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                cancelled.TrySetResult();
+                throw;
+            }
+            return Encoding.UTF8.GetBytes("{}");
+        });
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"waiting","method":"host/wait","params":{}}"""));
+        await entered.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+
+        await connection.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+
+        Assert.True(cancelled.Task.IsCompletedSuccessfully);
+    }
+
+    [Fact]
     public async Task RpcErrorResponseBecomesRpcException()
     {
         await using var transport = new FakeTransport();

@@ -1,0 +1,58 @@
+name: Update ACP schema
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download the latest upstream schema revision
+        id: upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          upstream_dir="$RUNNER_TEMP/acp"
+          git clone --depth 1 https://github.com/agentclientprotocol/agent-client-protocol.git "$upstream_dir"
+          commit=$(git -C "$upstream_dir" rev-parse HEAD)
+
+          if cmp -s schema/v1/schema.json "$upstream_dir/schema/v1/schema.json"; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'Upstream schema is unchanged.'
+            exit 0
+          fi
+
+          cp "$upstream_dir/schema/v1/schema.json" schema/v1/schema.json
+          sed -i "s|^- Commit:.*$|- Commit: \`$commit\`|" schema/v1/VENDORED.md
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+          echo "Updated schema from upstream commit $commit."
+
+      - name: Regenerate protocol models
+        if: steps.upstream.outputs.changed == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Build and emit generated protocol sources
+        if: steps.upstream.outputs.changed == 'true'
+        run: dotnet build SvcSystems.AI.AgentClientProtocol.slnx --configuration Release
+
+      - name: Create or update schema pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/update-acp-schema
+          delete-branch: true
+          commit-message: 'chore(schema): update vendored ACP schema'
+          title: 'chore(schema): update vendored ACP schema'
+          body: |
+            Updates `schema/v1/schema.json` from the upstream ACP repository, records the source commit in `schema/v1/VENDORED.md`, and regenerates the protocol model sources.

@@ -4,7 +4,7 @@
     <IsPackable>true</IsPackable>
     <PackageId>SvcSystems.AI.AgentClientProtocol</PackageId>
     <Authors>SVCSystems</Authors>
-    <Description>A trim- and NativeAOT-compatible .NET client for the Agent Client Protocol.</Description>
+    <Description>A NativeAOT-compatible .NET client for the Agent Client Protocol.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>ACP;Agent Client Protocol;AI;stdio</PackageTags>

@@ -43,6 +43,10 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             {
                 return Create_AgentCapabilities(options);
             }
+            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentResponseCase1))
+            {
+                return Create_AgentResponseCase1(options);
+            }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations))
             {
                 return Create_Annotations(options);
@@ -106,6 +110,10 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ClientCapabilities))
             {
                 return Create_ClientCapabilities(options);
+            }
+            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ClientResponseCase1))
+            {
+                return Create_ClientResponseCase1(options);
             }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ClientSessionCapabilities))
             {
