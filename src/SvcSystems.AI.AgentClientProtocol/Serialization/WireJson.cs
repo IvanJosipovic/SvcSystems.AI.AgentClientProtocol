@@ -205,6 +205,7 @@ internal static class WireJson
                 request.ToolCall.ToolCallId,
                 request.ToolCall.Title,
                 request.ToolCall.Name,
+                request.ToolCall.Kind,
                 request.ToolCall.Status,
                 request.ToolCall.RawInput,
                 request.ToolCall.Meta),

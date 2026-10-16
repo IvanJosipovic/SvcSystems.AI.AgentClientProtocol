@@ -14,6 +14,7 @@ public sealed record PermissionToolCall(
     string Id,
     string? Title,
     string? Name,
+    string? Kind,
     string? Status,
     JsonElement? RawInput,
     IReadOnlyDictionary<string, JsonElement>? Meta);
