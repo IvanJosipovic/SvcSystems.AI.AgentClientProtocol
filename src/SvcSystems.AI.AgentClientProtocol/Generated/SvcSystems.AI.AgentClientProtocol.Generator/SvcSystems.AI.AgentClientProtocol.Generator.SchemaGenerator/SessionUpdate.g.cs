@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+namespace SvcSystems.AI.AgentClientProtocol.Generated;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "sessionUpdate")]
 [JsonDerivedType(typeof(SessionUpdateVariant0UserMessageChunk), "user_message_chunk")]
 [JsonDerivedType(typeof(SessionUpdateVariant1AgentMessageChunk), "agent_message_chunk")]

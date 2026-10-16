@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.JsonRpc;
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 using SvcSystems.AI.AgentClientProtocol.Serialization;
 using SvcSystems.AI.AgentClientProtocol.Transport;
 

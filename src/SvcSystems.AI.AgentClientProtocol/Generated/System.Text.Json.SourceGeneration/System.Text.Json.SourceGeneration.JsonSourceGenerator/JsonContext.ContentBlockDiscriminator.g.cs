@@ -10,24 +10,24 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator>? _ContentBlockDiscriminator;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator>? _ContentBlockDiscriminator;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator> ContentBlockDiscriminator
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator> ContentBlockDiscriminator
         #nullable enable annotations
         {
-            get => _ContentBlockDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator));
+            get => _ContentBlockDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator> Create_ContentBlockDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator> Create_ContentBlockDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator> jsonTypeInfo))
             {
-                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator>(), options);
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockDiscriminator> (options, converter);
+                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator>(), options);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockDiscriminator> (options, converter);
             }
         
             jsonTypeInfo.OriginatingResolver = this;

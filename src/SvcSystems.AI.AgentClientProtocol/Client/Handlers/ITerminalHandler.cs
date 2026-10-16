@@ -1,6 +1,6 @@
 namespace SvcSystems.AI.AgentClientProtocol;
 
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 /// <summary>Host-provided terminal operations. Configure an implementation only when agent command execution is allowed.</summary>
 public interface ITerminalHandler

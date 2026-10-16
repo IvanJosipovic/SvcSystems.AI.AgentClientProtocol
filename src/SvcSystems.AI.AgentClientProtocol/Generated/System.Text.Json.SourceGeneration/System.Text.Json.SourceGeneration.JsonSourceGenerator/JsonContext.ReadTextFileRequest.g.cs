@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest>? _ReadTextFileRequest;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest>? _ReadTextFileRequest;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest> ReadTextFileRequest
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest> ReadTextFileRequest
         #nullable enable annotations
         {
-            get => _ReadTextFileRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest));
+            get => _ReadTextFileRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest> Create_ReadTextFileRequest(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest> Create_ReadTextFileRequest(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest(){ SessionId = (string)args[0], Path = (string)args[1] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest(){ SessionId = (string)args[0], Path = (string)args[1] },
                     PropertyMetadataInitializer = _ => ReadTextFileRequestPropInit(options),
                     ConstructorParameterMetadataInitializer = ReadTextFileRequestCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj).SessionId,
-                Setter = static (obj, value) => __set_ReadTextFileRequest_SessionId((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj).SessionId,
+                Setter = static (obj, value) => __set_ReadTextFileRequest_SessionId((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "SessionId",
                 JsonPropertyName = "sessionId",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest).GetProperty("SessionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest).GetProperty("SessionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj).Path,
-                Setter = static (obj, value) => __set_ReadTextFileRequest_Path((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj).Path,
+                Setter = static (obj, value) => __set_ReadTextFileRequest_Path((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Path",
                 JsonPropertyName = "path",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest).GetProperty("Path", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest).GetProperty("Path", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -101,17 +101,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj).Line,
-                Setter = static (obj, value) => __set_ReadTextFileRequest_Line((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj).Line,
+                Setter = static (obj, value) => __set_ReadTextFileRequest_Line((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Line",
                 JsonPropertyName = "line",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest).GetProperty("Line", InstanceMemberBindingFlags, null, typeof(uint?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest).GetProperty("Line", InstanceMemberBindingFlags, null, typeof(uint?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<uint?>(options, info2);
@@ -121,17 +121,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj).Limit,
-                Setter = static (obj, value) => __set_ReadTextFileRequest_Limit((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj).Limit,
+                Setter = static (obj, value) => __set_ReadTextFileRequest_Limit((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Limit",
                 JsonPropertyName = "limit",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest).GetProperty("Limit", InstanceMemberBindingFlags, null, typeof(uint?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest).GetProperty("Limit", InstanceMemberBindingFlags, null, typeof(uint?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<uint?>(options, info3);
@@ -141,17 +141,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj).Meta,
-                Setter = static (obj, value) => __set_ReadTextFileRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj).Meta,
+                Setter = static (obj, value) => __set_ReadTextFileRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -161,17 +161,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ReadTextFileRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ReadTextFileRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info5);
@@ -201,16 +201,16 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SessionId")]
-        private static extern void __set_ReadTextFileRequest_SessionId(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest obj, string value);
+        private static extern void __set_ReadTextFileRequest_SessionId(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Path")]
-        private static extern void __set_ReadTextFileRequest_Path(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest obj, string value);
+        private static extern void __set_ReadTextFileRequest_Path(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Line")]
-        private static extern void __set_ReadTextFileRequest_Line(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest obj, uint? value);
+        private static extern void __set_ReadTextFileRequest_Line(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest obj, uint? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Limit")]
-        private static extern void __set_ReadTextFileRequest_Limit(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest obj, uint? value);
+        private static extern void __set_ReadTextFileRequest_Limit(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest obj, uint? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ReadTextFileRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ReadTextFileRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ReadTextFileRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReadTextFileRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ReadTextFileRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ReadTextFileRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

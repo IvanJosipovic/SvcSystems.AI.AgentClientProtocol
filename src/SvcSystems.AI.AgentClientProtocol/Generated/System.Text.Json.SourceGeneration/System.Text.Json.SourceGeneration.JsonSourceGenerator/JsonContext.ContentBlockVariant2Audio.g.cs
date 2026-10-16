@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio>? _ContentBlockVariant2Audio;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio>? _ContentBlockVariant2Audio;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio> ContentBlockVariant2Audio
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio> ContentBlockVariant2Audio
         #nullable enable annotations
         {
-            get => _ContentBlockVariant2Audio ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio));
+            get => _ContentBlockVariant2Audio ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio> Create_ContentBlockVariant2Audio(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio> Create_ContentBlockVariant2Audio(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio(){ Data = (string)args[0], MimeType = (string)args[1] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio(){ Data = (string)args[0], MimeType = (string)args[1] },
                     PropertyMetadataInitializer = _ => ContentBlockVariant2AudioPropInit(options),
                     ConstructorParameterMetadataInitializer = ContentBlockVariant2AudioCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -50,42 +50,42 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         {
             var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[5];
 
-            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Annotations>
+            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj).Annotations,
-                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_Annotations((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj).Annotations,
+                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_Annotations((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Annotations",
                 JsonPropertyName = "annotations",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio).GetProperty("Annotations", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Annotations), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio).GetProperty("Annotations", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Annotations>(options, info0);
+            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations>(options, info0);
 
             var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<string>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj).Data,
-                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_Data((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj).Data,
+                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_Data((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Data",
                 JsonPropertyName = "data",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio).GetProperty("Data", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio).GetProperty("Data", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -98,17 +98,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj).MimeType,
-                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_MimeType((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj).MimeType,
+                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_MimeType((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "MimeType",
                 JsonPropertyName = "mimeType",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio).GetProperty("MimeType", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio).GetProperty("MimeType", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info2);
@@ -121,17 +121,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj).Meta,
-                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj).Meta,
+                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
@@ -141,17 +141,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ContentBlockVariant2Audio_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -181,14 +181,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Annotations")]
-        private static extern void __set_ContentBlockVariant2Audio_Annotations(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio obj, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Annotations value);
+        private static extern void __set_ContentBlockVariant2Audio_Annotations(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio obj, global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Data")]
-        private static extern void __set_ContentBlockVariant2Audio_Data(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio obj, string value);
+        private static extern void __set_ContentBlockVariant2Audio_Data(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_MimeType")]
-        private static extern void __set_ContentBlockVariant2Audio_MimeType(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio obj, string value);
+        private static extern void __set_ContentBlockVariant2Audio_MimeType(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ContentBlockVariant2Audio_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ContentBlockVariant2Audio_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ContentBlockVariant2Audio_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ContentBlockVariant2Audio_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

@@ -10,23 +10,23 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock>? _ContentBlock;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock>? _ContentBlock;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock> ContentBlock
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock> ContentBlock
         #nullable enable annotations
         {
-            get => _ContentBlock ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock));
+            get => _ContentBlock ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock> Create_ContentBlock(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock> Create_ContentBlock(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock>
                 {
                     ObjectCreator = null,
                     ObjectWithParameterizedConstructorCreator = null,
@@ -41,17 +41,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                     UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
                     DerivedTypes =
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant0Text), "text"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant1Image), "image"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant2Audio), "audio"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant3ResourceLink), "resource_link"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlockVariant4Resource), "resource"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant0Text), "text"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant1Image), "image"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant2Audio), "audio"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant3ResourceLink), "resource_link"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource), "resource"),
                     },
                 },
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

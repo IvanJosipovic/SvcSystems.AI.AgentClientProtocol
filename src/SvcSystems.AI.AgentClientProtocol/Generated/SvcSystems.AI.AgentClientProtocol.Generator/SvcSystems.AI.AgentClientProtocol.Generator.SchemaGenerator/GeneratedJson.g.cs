@@ -5,7 +5,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 

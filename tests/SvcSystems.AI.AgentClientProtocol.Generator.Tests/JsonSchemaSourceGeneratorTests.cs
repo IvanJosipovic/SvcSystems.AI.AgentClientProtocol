@@ -83,7 +83,7 @@ public sealed class JsonSchemaSourceGeneratorTests
             .ToArray();
 
         Assert.Contains(sources, source => source.Contains("internal partial class JsonContext : JsonSerializerContext", StringComparison.Ordinal));
-        Assert.Contains(sources, source => source.Contains("JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Thing))", StringComparison.Ordinal));
+        Assert.Contains(sources, source => source.Contains("JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.Thing))", StringComparison.Ordinal));
     }
 
     [Fact]

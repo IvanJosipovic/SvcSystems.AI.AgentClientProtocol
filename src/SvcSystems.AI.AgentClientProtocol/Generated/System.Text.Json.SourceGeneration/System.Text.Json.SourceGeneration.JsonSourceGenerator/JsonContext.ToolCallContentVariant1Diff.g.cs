@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff>? _ToolCallContentVariant1Diff;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff>? _ToolCallContentVariant1Diff;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff> ToolCallContentVariant1Diff
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff> ToolCallContentVariant1Diff
         #nullable enable annotations
         {
-            get => _ToolCallContentVariant1Diff ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff));
+            get => _ToolCallContentVariant1Diff ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff> Create_ToolCallContentVariant1Diff(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff> Create_ToolCallContentVariant1Diff(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff(){ Path = (string)args[0], NewText = (string)args[1] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff(){ Path = (string)args[0], NewText = (string)args[1] },
                     PropertyMetadataInitializer = _ => ToolCallContentVariant1DiffPropInit(options),
                     ConstructorParameterMetadataInitializer = ToolCallContentVariant1DiffCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj).Path,
-                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_Path((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj).Path,
+                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_Path((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Path",
                 JsonPropertyName = "path",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff).GetProperty("Path", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff).GetProperty("Path", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj).OldText,
-                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_OldText((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj).OldText,
+                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_OldText((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "OldText",
                 JsonPropertyName = "oldText",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff).GetProperty("OldText", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff).GetProperty("OldText", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -98,17 +98,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj).NewText,
-                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_NewText((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj).NewText,
+                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_NewText((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "NewText",
                 JsonPropertyName = "newText",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff).GetProperty("NewText", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff).GetProperty("NewText", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info2);
@@ -121,17 +121,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj).Meta,
-                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj).Meta,
+                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
@@ -141,17 +141,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ToolCallContentVariant1Diff_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -181,14 +181,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Path")]
-        private static extern void __set_ToolCallContentVariant1Diff_Path(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff obj, string value);
+        private static extern void __set_ToolCallContentVariant1Diff_Path(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_OldText")]
-        private static extern void __set_ToolCallContentVariant1Diff_OldText(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff obj, string value);
+        private static extern void __set_ToolCallContentVariant1Diff_OldText(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_NewText")]
-        private static extern void __set_ToolCallContentVariant1Diff_NewText(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff obj, string value);
+        private static extern void __set_ToolCallContentVariant1Diff_NewText(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ToolCallContentVariant1Diff_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ToolCallContentVariant1Diff_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ToolCallContentVariant1Diff_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ToolCallContentVariant1Diff_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

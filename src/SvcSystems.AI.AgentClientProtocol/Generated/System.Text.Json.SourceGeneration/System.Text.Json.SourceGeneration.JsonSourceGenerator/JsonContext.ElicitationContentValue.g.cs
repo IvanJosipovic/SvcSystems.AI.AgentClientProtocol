@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue>? _ElicitationContentValue;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue>? _ElicitationContentValue;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue> ElicitationContentValue
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue> ElicitationContentValue
         #nullable enable annotations
         {
-            get => _ElicitationContentValue ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue));
+            get => _ElicitationContentValue ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue> Create_ElicitationContentValue(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue> Create_ElicitationContentValue(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue> jsonTypeInfo))
             {
-                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue>
                 {
                     UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(string)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(long)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(double)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(bool)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Collections.Generic.List<string>)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        string caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue(caseValue0),
-                        long caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue(caseValue1),
-                        double caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue(caseValue2),
-                        bool caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue(caseValue3),
-                        global::System.Collections.Generic.List<string> caseValue4 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue(caseValue4),
+                        string caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue(caseValue0),
+                        long caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue(caseValue1),
+                        double caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue(caseValue2),
+                        bool caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue(caseValue3),
+                        global::System.Collections.Generic.List<string> caseValue4 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue(caseValue4),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
-                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue value) =>
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue value) =>
                     {
                         return value switch
                         {
@@ -54,7 +54,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                     TypeClassifierFactory = new global::System.Text.Json.Serialization.JsonUnionTypeStructuralClassifier(),
                 };
 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationContentValue>(options, unionInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationContentValue>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

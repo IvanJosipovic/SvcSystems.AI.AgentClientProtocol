@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio>? _McpServerStdio;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio>? _McpServerStdio;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio> McpServerStdio
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio> McpServerStdio
         #nullable enable annotations
         {
-            get => _McpServerStdio ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio));
+            get => _McpServerStdio ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio> Create_McpServerStdio(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio> Create_McpServerStdio(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio(){ Name = (string)args[0], Command = (string)args[1], Args = (global::System.Collections.Generic.List<string>)args[2], Env = (global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>)args[3] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio(){ Name = (string)args[0], Command = (string)args[1], Args = (global::System.Collections.Generic.List<string>)args[2], Env = (global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>)args[3] },
                     PropertyMetadataInitializer = _ => McpServerStdioPropInit(options),
                     ConstructorParameterMetadataInitializer = McpServerStdioCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj).Name,
-                Setter = static (obj, value) => __set_McpServerStdio_Name((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj).Name,
+                Setter = static (obj, value) => __set_McpServerStdio_Name((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Name",
                 JsonPropertyName = "name",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio).GetProperty("Name", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio).GetProperty("Name", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj).Command,
-                Setter = static (obj, value) => __set_McpServerStdio_Command((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj).Command,
+                Setter = static (obj, value) => __set_McpServerStdio_Command((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Command",
                 JsonPropertyName = "command",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio).GetProperty("Command", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio).GetProperty("Command", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -101,17 +101,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj).Args,
-                Setter = static (obj, value) => __set_McpServerStdio_Args((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj).Args,
+                Setter = static (obj, value) => __set_McpServerStdio_Args((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Args",
                 JsonPropertyName = "args",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio).GetProperty("Args", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio).GetProperty("Args", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<string>>(options, info2);
@@ -119,25 +119,25 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             properties[2].IsGetNullable = false;
             properties[2].IsSetNullable = false;
 
-            var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>>
+            var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj).Env,
-                Setter = static (obj, value) => __set_McpServerStdio_Env((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj).Env,
+                Setter = static (obj, value) => __set_McpServerStdio_Env((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Env",
                 JsonPropertyName = "env",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio).GetProperty("Env", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio).GetProperty("Env", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>>(options, info3);
+            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>>(options, info3);
             properties[3].IsRequired = true;
             properties[3].IsGetNullable = false;
             properties[3].IsSetNullable = false;
@@ -147,17 +147,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj).Meta,
-                Setter = static (obj, value) => __set_McpServerStdio_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj).Meta,
+                Setter = static (obj, value) => __set_McpServerStdio_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -167,17 +167,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj).ExtensionData,
-                Setter = static (obj, value) => __set_McpServerStdio_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj).ExtensionData,
+                Setter = static (obj, value) => __set_McpServerStdio_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info5);
@@ -217,7 +217,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             new()
             {
                 Name = "Env",
-                ParameterType = typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>),
+                ParameterType = typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>),
                 Position = 3,
                 IsNullable = false,
                 IsMemberInitializer = true,
@@ -225,16 +225,16 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Name")]
-        private static extern void __set_McpServerStdio_Name(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio obj, string value);
+        private static extern void __set_McpServerStdio_Name(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Command")]
-        private static extern void __set_McpServerStdio_Command(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio obj, string value);
+        private static extern void __set_McpServerStdio_Command(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Args")]
-        private static extern void __set_McpServerStdio_Args(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio obj, global::System.Collections.Generic.List<string> value);
+        private static extern void __set_McpServerStdio_Args(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio obj, global::System.Collections.Generic.List<string> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Env")]
-        private static extern void __set_McpServerStdio_Env(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable> value);
+        private static extern void __set_McpServerStdio_Env(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_McpServerStdio_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_McpServerStdio_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_McpServerStdio_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_McpServerStdio_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

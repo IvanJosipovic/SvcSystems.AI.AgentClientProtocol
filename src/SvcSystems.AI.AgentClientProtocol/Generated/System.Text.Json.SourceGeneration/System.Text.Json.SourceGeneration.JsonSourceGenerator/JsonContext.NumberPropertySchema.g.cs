@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema>? _NumberPropertySchema;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema>? _NumberPropertySchema;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema> NumberPropertySchema
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema> NumberPropertySchema
         #nullable enable annotations
         {
-            get => _NumberPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema));
+            get => _NumberPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema> Create_NumberPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema> Create_NumberPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema>
                 {
-                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema(),
+                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema(),
                     ObjectWithParameterizedConstructorCreator = null,
                     PropertyMetadataInitializer = _ => NumberPropertySchemaPropInit(options),
                     ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj).Title,
-                Setter = static (obj, value) => __set_NumberPropertySchema_Title((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj).Title,
+                Setter = static (obj, value) => __set_NumberPropertySchema_Title((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Title",
                 JsonPropertyName = "title",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -75,17 +75,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj).Description,
-                Setter = static (obj, value) => __set_NumberPropertySchema_Description((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj).Description,
+                Setter = static (obj, value) => __set_NumberPropertySchema_Description((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Description",
                 JsonPropertyName = "description",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetProperty("Description", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetProperty("Description", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -95,17 +95,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj).Minimum,
-                Setter = static (obj, value) => __set_NumberPropertySchema_Minimum((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj).Minimum,
+                Setter = static (obj, value) => __set_NumberPropertySchema_Minimum((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Minimum",
                 JsonPropertyName = "minimum",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetProperty("Minimum", InstanceMemberBindingFlags, null, typeof(double?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetProperty("Minimum", InstanceMemberBindingFlags, null, typeof(double?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<double?>(options, info2);
@@ -115,17 +115,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj).Maximum,
-                Setter = static (obj, value) => __set_NumberPropertySchema_Maximum((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj).Maximum,
+                Setter = static (obj, value) => __set_NumberPropertySchema_Maximum((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Maximum",
                 JsonPropertyName = "maximum",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetProperty("Maximum", InstanceMemberBindingFlags, null, typeof(double?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetProperty("Maximum", InstanceMemberBindingFlags, null, typeof(double?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<double?>(options, info3);
@@ -135,17 +135,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj).Default,
-                Setter = static (obj, value) => __set_NumberPropertySchema_Default((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj).Default,
+                Setter = static (obj, value) => __set_NumberPropertySchema_Default((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Default",
                 JsonPropertyName = "default",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetProperty("Default", InstanceMemberBindingFlags, null, typeof(double?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetProperty("Default", InstanceMemberBindingFlags, null, typeof(double?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<double?>(options, info4);
@@ -155,17 +155,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj).Meta,
-                Setter = static (obj, value) => __set_NumberPropertySchema_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj).Meta,
+                Setter = static (obj, value) => __set_NumberPropertySchema_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info5);
@@ -175,17 +175,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj).ExtensionData,
-                Setter = static (obj, value) => __set_NumberPropertySchema_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj).ExtensionData,
+                Setter = static (obj, value) => __set_NumberPropertySchema_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[6] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info6);
@@ -194,18 +194,18 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         }
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Title")]
-        private static extern void __set_NumberPropertySchema_Title(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema obj, string value);
+        private static extern void __set_NumberPropertySchema_Title(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Description")]
-        private static extern void __set_NumberPropertySchema_Description(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema obj, string value);
+        private static extern void __set_NumberPropertySchema_Description(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Minimum")]
-        private static extern void __set_NumberPropertySchema_Minimum(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema obj, double? value);
+        private static extern void __set_NumberPropertySchema_Minimum(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema obj, double? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Maximum")]
-        private static extern void __set_NumberPropertySchema_Maximum(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema obj, double? value);
+        private static extern void __set_NumberPropertySchema_Maximum(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema obj, double? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Default")]
-        private static extern void __set_NumberPropertySchema_Default(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema obj, double? value);
+        private static extern void __set_NumberPropertySchema_Default(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema obj, double? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_NumberPropertySchema_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_NumberPropertySchema_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_NumberPropertySchema_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.NumberPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_NumberPropertySchema_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

@@ -1,6 +1,6 @@
 namespace SvcSystems.AI.AgentClientProtocol;
 
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 /// <summary>Consumer-facing ACP client operations.</summary>
 public interface IClient : IAsyncDisposable

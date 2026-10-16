@@ -10,23 +10,23 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer>? _McpServer;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>? _McpServer;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer> McpServer
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer> McpServer
         #nullable enable annotations
         {
-            get => _McpServer ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer));
+            get => _McpServer ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer> Create_McpServer(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer> Create_McpServer(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>
                 {
                     ObjectCreator = null,
                     ObjectWithParameterizedConstructorCreator = null,
@@ -41,15 +41,15 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                     UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
                     DerivedTypes =
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerHttp), "http"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerSse), "sse"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServerStdio), "stdio"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerHttp), "http"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerSse), "sse"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpServerStdio), "stdio"),
                     },
                 },
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpServer>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

@@ -7,7 +7,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Generator;
 
 internal static class ModelRenderer
 {
-    private const string GeneratedNamespace = "SvcSystems.AI.AgentClientProtocol.Protocol.Generated";
+    private const string GeneratedNamespace = "SvcSystems.AI.AgentClientProtocol.Generated";
     private const string SerializationNamespace = "SvcSystems.AI.AgentClientProtocol.Serialization";
 
     public static IReadOnlyList<GeneratedSource> Render(SchemaModel model)
@@ -141,7 +141,7 @@ internal static class ModelRenderer
         foreach (var route in model.Methods.Where(item => item.Side == "client" && item.MessageType is "request" or "notification")
                      .GroupBy(item => (item.Name, item.MessageType)).Select(group => group.First()))
         {
-            var method = "global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods." + Identifier(Pascal(route.Name));
+            var method = "global::SvcSystems.AI.AgentClientProtocol.Generated.Methods." + Identifier(Pascal(route.Name));
             if (route.MessageType == "request")
                 code.Append("        if (requests.TryGetValue(").Append(method).AppendLine(", out var requestHandler_" + Identifier(Pascal(route.Name)) + "))")
                     .Append("            connection.RegisterRequestHandler(").Append(method).Append(", requestHandler_").Append(Identifier(Pascal(route.Name))).AppendLine(");");

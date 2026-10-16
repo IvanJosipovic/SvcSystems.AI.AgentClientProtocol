@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall>? _ToolCall;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall>? _ToolCall;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall> ToolCall
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall> ToolCall
         #nullable enable annotations
         {
-            get => _ToolCall ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall));
+            get => _ToolCall ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall> Create_ToolCall(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall> Create_ToolCall(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall(){ ToolCallId = (string)args[0], Title = (string)args[1] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall(){ ToolCallId = (string)args[0], Title = (string)args[1] },
                     PropertyMetadataInitializer = _ => ToolCallPropInit(options),
                     ConstructorParameterMetadataInitializer = ToolCallCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).ToolCallId,
-                Setter = static (obj, value) => __set_ToolCall_ToolCallId((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).ToolCallId,
+                Setter = static (obj, value) => __set_ToolCall_ToolCallId((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "ToolCallId",
                 JsonPropertyName = "toolCallId",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("ToolCallId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("ToolCallId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).Title,
-                Setter = static (obj, value) => __set_ToolCall_Title((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).Title,
+                Setter = static (obj, value) => __set_ToolCall_Title((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Title",
                 JsonPropertyName = "title",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -101,17 +101,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).Name,
-                Setter = static (obj, value) => __set_ToolCall_Name((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).Name,
+                Setter = static (obj, value) => __set_ToolCall_Name((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Name",
                 JsonPropertyName = "name",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("Name", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("Name", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info2);
@@ -121,17 +121,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).Kind,
-                Setter = static (obj, value) => __set_ToolCall_Kind((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).Kind,
+                Setter = static (obj, value) => __set_ToolCall_Kind((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Kind",
                 JsonPropertyName = "kind",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("Kind", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("Kind", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info3);
@@ -141,77 +141,77 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).Status,
-                Setter = static (obj, value) => __set_ToolCall_Status((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).Status,
+                Setter = static (obj, value) => __set_ToolCall_Status((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Status",
                 JsonPropertyName = "status",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("Status", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("Status", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info4);
 
-            var info5 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>>
+            var info5 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).Content,
-                Setter = static (obj, value) => __set_ToolCall_Content((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).Content,
+                Setter = static (obj, value) => __set_ToolCall_Content((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Content",
                 JsonPropertyName = "content",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("Content", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("Content", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>>(options, info5);
+            properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>>(options, info5);
 
-            var info6 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallLocation>>
+            var info6 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallLocation>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).Locations,
-                Setter = static (obj, value) => __set_ToolCall_Locations((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).Locations,
+                Setter = static (obj, value) => __set_ToolCall_Locations((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Locations",
                 JsonPropertyName = "locations",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("Locations", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallLocation>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("Locations", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallLocation>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[6] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallLocation>>(options, info6);
+            properties[6] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallLocation>>(options, info6);
 
             var info7 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Text.Json.JsonElement?>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).RawInput,
-                Setter = static (obj, value) => __set_ToolCall_RawInput((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).RawInput,
+                Setter = static (obj, value) => __set_ToolCall_RawInput((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "RawInput",
                 JsonPropertyName = "rawInput",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("RawInput", InstanceMemberBindingFlags, null, typeof(global::System.Text.Json.JsonElement?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("RawInput", InstanceMemberBindingFlags, null, typeof(global::System.Text.Json.JsonElement?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[7] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Text.Json.JsonElement?>(options, info7);
@@ -221,17 +221,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).RawOutput,
-                Setter = static (obj, value) => __set_ToolCall_RawOutput((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).RawOutput,
+                Setter = static (obj, value) => __set_ToolCall_RawOutput((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "RawOutput",
                 JsonPropertyName = "rawOutput",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("RawOutput", InstanceMemberBindingFlags, null, typeof(global::System.Text.Json.JsonElement?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("RawOutput", InstanceMemberBindingFlags, null, typeof(global::System.Text.Json.JsonElement?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[8] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Text.Json.JsonElement?>(options, info8);
@@ -241,17 +241,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).Meta,
-                Setter = static (obj, value) => __set_ToolCall_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).Meta,
+                Setter = static (obj, value) => __set_ToolCall_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[9] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info9);
@@ -261,17 +261,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ToolCall_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ToolCall_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[10] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info10);
@@ -301,26 +301,26 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ToolCallId")]
-        private static extern void __set_ToolCall_ToolCallId(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, string value);
+        private static extern void __set_ToolCall_ToolCallId(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Title")]
-        private static extern void __set_ToolCall_Title(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, string value);
+        private static extern void __set_ToolCall_Title(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Name")]
-        private static extern void __set_ToolCall_Name(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, string value);
+        private static extern void __set_ToolCall_Name(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Kind")]
-        private static extern void __set_ToolCall_Kind(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, string value);
+        private static extern void __set_ToolCall_Kind(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Status")]
-        private static extern void __set_ToolCall_Status(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, string value);
+        private static extern void __set_ToolCall_Status(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Content")]
-        private static extern void __set_ToolCall_Content(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent> value);
+        private static extern void __set_ToolCall_Content(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Locations")]
-        private static extern void __set_ToolCall_Locations(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallLocation> value);
+        private static extern void __set_ToolCall_Locations(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallLocation> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_RawInput")]
-        private static extern void __set_ToolCall_RawInput(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, global::System.Text.Json.JsonElement? value);
+        private static extern void __set_ToolCall_RawInput(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, global::System.Text.Json.JsonElement? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_RawOutput")]
-        private static extern void __set_ToolCall_RawOutput(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, global::System.Text.Json.JsonElement? value);
+        private static extern void __set_ToolCall_RawOutput(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, global::System.Text.Json.JsonElement? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ToolCall_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ToolCall_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ToolCall_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCall obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ToolCall_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCall obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

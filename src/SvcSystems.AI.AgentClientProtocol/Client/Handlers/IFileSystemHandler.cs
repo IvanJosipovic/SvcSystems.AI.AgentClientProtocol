@@ -1,6 +1,6 @@
 namespace SvcSystems.AI.AgentClientProtocol;
 
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 /// <summary>Host-provided filesystem operations that an ACP agent may request.</summary>
 public interface IFileSystemHandler

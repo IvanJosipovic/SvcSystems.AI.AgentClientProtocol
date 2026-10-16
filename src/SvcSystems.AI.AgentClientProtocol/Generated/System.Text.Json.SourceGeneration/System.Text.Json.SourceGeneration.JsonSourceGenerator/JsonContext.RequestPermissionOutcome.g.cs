@@ -10,23 +10,23 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome>? _RequestPermissionOutcome;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome>? _RequestPermissionOutcome;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome> RequestPermissionOutcome
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome> RequestPermissionOutcome
         #nullable enable annotations
         {
-            get => _RequestPermissionOutcome ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome));
+            get => _RequestPermissionOutcome ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome> Create_RequestPermissionOutcome(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome> Create_RequestPermissionOutcome(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome>
                 {
                     ObjectCreator = null,
                     ObjectWithParameterizedConstructorCreator = null,
@@ -41,14 +41,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                     UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
                     DerivedTypes =
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeVariant0Cancelled), "cancelled"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeVariant1Selected), "selected"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeVariant0Cancelled), "cancelled"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeVariant1Selected), "selected"),
                     },
                 },
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcome>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcome>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

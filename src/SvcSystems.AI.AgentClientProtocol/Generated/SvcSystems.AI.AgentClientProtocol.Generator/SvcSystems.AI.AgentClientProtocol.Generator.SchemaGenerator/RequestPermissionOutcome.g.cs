@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+namespace SvcSystems.AI.AgentClientProtocol.Generated;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "outcome")]
 [JsonDerivedType(typeof(RequestPermissionOutcomeVariant0Cancelled), "cancelled")]
 [JsonDerivedType(typeof(RequestPermissionOutcomeVariant1Selected), "selected")]

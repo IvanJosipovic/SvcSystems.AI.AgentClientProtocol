@@ -16,27 +16,27 @@ internal static class CallbackRoutes
         IReadOnlyDictionary<string, Func<JsonElement, CancellationToken, ValueTask<byte[]>>> requests,
         IReadOnlyDictionary<string, Func<JsonElement, ValueTask>> notifications)
     {
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.FsWriteTextFile, out var requestHandler_FsWriteTextFile))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.FsWriteTextFile, requestHandler_FsWriteTextFile);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.FsReadTextFile, out var requestHandler_FsReadTextFile))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.FsReadTextFile, requestHandler_FsReadTextFile);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.SessionRequestPermission, out var requestHandler_SessionRequestPermission))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.SessionRequestPermission, requestHandler_SessionRequestPermission);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalCreate, out var requestHandler_TerminalCreate))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalCreate, requestHandler_TerminalCreate);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalOutput, out var requestHandler_TerminalOutput))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalOutput, requestHandler_TerminalOutput);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalRelease, out var requestHandler_TerminalRelease))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalRelease, requestHandler_TerminalRelease);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalWaitForExit, out var requestHandler_TerminalWaitForExit))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalWaitForExit, requestHandler_TerminalWaitForExit);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalKill, out var requestHandler_TerminalKill))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.TerminalKill, requestHandler_TerminalKill);
-        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.ElicitationCreate, out var requestHandler_ElicitationCreate))
-            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.ElicitationCreate, requestHandler_ElicitationCreate);
-        if (notifications.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.SessionUpdate, out var notificationHandler_SessionUpdate))
-            connection.RegisterNotificationHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.SessionUpdate, notificationHandler_SessionUpdate);
-        if (notifications.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.ElicitationComplete, out var notificationHandler_ElicitationComplete))
-            connection.RegisterNotificationHandler(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Methods.ElicitationComplete, notificationHandler_ElicitationComplete);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.FsWriteTextFile, out var requestHandler_FsWriteTextFile))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.FsWriteTextFile, requestHandler_FsWriteTextFile);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.FsReadTextFile, out var requestHandler_FsReadTextFile))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.FsReadTextFile, requestHandler_FsReadTextFile);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.SessionRequestPermission, out var requestHandler_SessionRequestPermission))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.SessionRequestPermission, requestHandler_SessionRequestPermission);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalCreate, out var requestHandler_TerminalCreate))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalCreate, requestHandler_TerminalCreate);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalOutput, out var requestHandler_TerminalOutput))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalOutput, requestHandler_TerminalOutput);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalRelease, out var requestHandler_TerminalRelease))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalRelease, requestHandler_TerminalRelease);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalWaitForExit, out var requestHandler_TerminalWaitForExit))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalWaitForExit, requestHandler_TerminalWaitForExit);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalKill, out var requestHandler_TerminalKill))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.TerminalKill, requestHandler_TerminalKill);
+        if (requests.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.ElicitationCreate, out var requestHandler_ElicitationCreate))
+            connection.RegisterRequestHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.ElicitationCreate, requestHandler_ElicitationCreate);
+        if (notifications.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.SessionUpdate, out var notificationHandler_SessionUpdate))
+            connection.RegisterNotificationHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.SessionUpdate, notificationHandler_SessionUpdate);
+        if (notifications.TryGetValue(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.ElicitationComplete, out var notificationHandler_ElicitationComplete))
+            connection.RegisterNotificationHandler(global::SvcSystems.AI.AgentClientProtocol.Generated.Methods.ElicitationComplete, notificationHandler_ElicitationComplete);
     }
 }

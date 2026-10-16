@@ -10,45 +10,45 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>? _AuthMethod;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>? _AuthMethod;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod> AuthMethod
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod> AuthMethod
         #nullable enable annotations
         {
-            get => _AuthMethod ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod));
+            get => _AuthMethod ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod> Create_AuthMethod(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod> Create_AuthMethod(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod> jsonTypeInfo))
             {
-                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodTerminal)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodAgent)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodTerminal)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodAgent)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodTerminal caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodAgent caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodTerminal caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodAgent caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod(caseValue1),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
-                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod value) =>
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod value) =>
                     {
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodTerminal caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodTerminal), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodAgent caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodAgent), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodTerminal caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodTerminal), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodAgent caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodAgent), (object?)caseValue1),
                         };
                     },
                     TypeClassifier = null,
                     TypeClassifierFactory = new global::System.Text.Json.Serialization.JsonUnionTypeStructuralClassifier(),
                 };
 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>(options, unionInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

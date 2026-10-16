@@ -3,7 +3,7 @@
 #nullable enable
 using System.Text.Json.Serialization;
 
-namespace SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+namespace SvcSystems.AI.AgentClientProtocol.Generated;
 
 [JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]
 public union RequestId(long, string);

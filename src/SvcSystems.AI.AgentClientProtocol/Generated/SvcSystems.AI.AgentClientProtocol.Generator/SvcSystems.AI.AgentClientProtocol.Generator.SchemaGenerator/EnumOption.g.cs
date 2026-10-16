@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+namespace SvcSystems.AI.AgentClientProtocol.Generated;
 public sealed partial class EnumOption
 {
     [JsonPropertyName("const")]

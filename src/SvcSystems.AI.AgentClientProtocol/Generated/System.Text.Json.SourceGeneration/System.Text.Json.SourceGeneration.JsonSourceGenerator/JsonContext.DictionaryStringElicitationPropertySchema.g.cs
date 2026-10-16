@@ -10,31 +10,31 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>>? _DictionaryStringElicitationPropertySchema;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>>? _DictionaryStringElicitationPropertySchema;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>> DictionaryStringElicitationPropertySchema
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>> DictionaryStringElicitationPropertySchema
         #nullable enable annotations
         {
-            get => _DictionaryStringElicitationPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>));
+            get => _DictionaryStringElicitationPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>> Create_DictionaryStringElicitationPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>> Create_DictionaryStringElicitationPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>> jsonTypeInfo))
             {
-                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>>
+                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>>
                 {
-                    ObjectCreator = () => new global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>(),
+                    ObjectCreator = () => new global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>(),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateDictionaryInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>, string, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationPropertySchema>(options, info);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateDictionaryInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>, string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>(options, info);
                 jsonTypeInfo.NumberHandling = null;
             }
         

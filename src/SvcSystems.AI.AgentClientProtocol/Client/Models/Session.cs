@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
