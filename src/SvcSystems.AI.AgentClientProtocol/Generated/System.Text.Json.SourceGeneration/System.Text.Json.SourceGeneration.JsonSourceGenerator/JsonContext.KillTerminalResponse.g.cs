@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse>? _KillTerminalResponse;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse>? _KillTerminalResponse;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse> KillTerminalResponse
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse> KillTerminalResponse
         #nullable enable annotations
         {
-            get => _KillTerminalResponse ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse));
+            get => _KillTerminalResponse ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse> Create_KillTerminalResponse(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse> Create_KillTerminalResponse(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse>
                 {
-                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse(),
+                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse(),
                     ObjectWithParameterizedConstructorCreator = null,
                     PropertyMetadataInitializer = _ => KillTerminalResponsePropInit(options),
                     ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse)obj).Meta,
-                Setter = static (obj, value) => __set_KillTerminalResponse_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse)obj).Meta,
+                Setter = static (obj, value) => __set_KillTerminalResponse_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info0);
@@ -75,17 +75,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse)obj).ExtensionData,
-                Setter = static (obj, value) => __set_KillTerminalResponse_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse)obj).ExtensionData,
+                Setter = static (obj, value) => __set_KillTerminalResponse_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info1);
@@ -94,8 +94,8 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         }
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_KillTerminalResponse_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_KillTerminalResponse_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_KillTerminalResponse_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.KillTerminalResponse obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_KillTerminalResponse_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.KillTerminalResponse obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

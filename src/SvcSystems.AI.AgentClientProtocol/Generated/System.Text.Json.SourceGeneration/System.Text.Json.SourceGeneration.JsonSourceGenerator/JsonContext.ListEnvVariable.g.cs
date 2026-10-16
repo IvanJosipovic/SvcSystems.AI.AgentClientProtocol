@@ -10,31 +10,31 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>>? _ListEnvVariable;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>>? _ListEnvVariable;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>> ListEnvVariable
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>> ListEnvVariable
         #nullable enable annotations
         {
-            get => _ListEnvVariable ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>));
+            get => _ListEnvVariable ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>> Create_ListEnvVariable(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>> Create_ListEnvVariable(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>> jsonTypeInfo))
             {
-                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>>
+                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>>
                 {
-                    ObjectCreator = () => new global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>(),
+                    ObjectCreator = () => new global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>(),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateListInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.EnvVariable>(options, info);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateListInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>, global::SvcSystems.AI.AgentClientProtocol.Generated.EnvVariable>(options, info);
                 jsonTypeInfo.NumberHandling = null;
             }
         

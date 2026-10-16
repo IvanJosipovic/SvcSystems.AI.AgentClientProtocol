@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest>? _LogoutRequest;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest>? _LogoutRequest;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest> LogoutRequest
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest> LogoutRequest
         #nullable enable annotations
         {
-            get => _LogoutRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest));
+            get => _LogoutRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest> Create_LogoutRequest(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest> Create_LogoutRequest(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest>
                 {
-                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest(),
+                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest(),
                     ObjectWithParameterizedConstructorCreator = null,
                     PropertyMetadataInitializer = _ => LogoutRequestPropInit(options),
                     ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest)obj).Meta,
-                Setter = static (obj, value) => __set_LogoutRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest)obj).Meta,
+                Setter = static (obj, value) => __set_LogoutRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info0);
@@ -75,17 +75,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest)obj).ExtensionData,
-                Setter = static (obj, value) => __set_LogoutRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest)obj).ExtensionData,
+                Setter = static (obj, value) => __set_LogoutRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info1);
@@ -94,8 +94,8 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         }
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_LogoutRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_LogoutRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_LogoutRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.LogoutRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_LogoutRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.LogoutRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

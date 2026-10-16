@@ -10,45 +10,45 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode>? _ElicitationFormMode;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode>? _ElicitationFormMode;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode> ElicitationFormMode
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode> ElicitationFormMode
         #nullable enable annotations
         {
-            get => _ElicitationFormMode ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode));
+            get => _ElicitationFormMode ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode> Create_ElicitationFormMode(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode> Create_ElicitationFormMode(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode> jsonTypeInfo))
             {
-                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationSessionScope)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationRequestScope)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSessionScope)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationRequestScope)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationSessionScope caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationRequestScope caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSessionScope caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationRequestScope caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode(caseValue1),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
-                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode value) =>
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode value) =>
                     {
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationSessionScope caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationSessionScope), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationRequestScope caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationRequestScope), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSessionScope caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSessionScope), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationRequestScope caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationRequestScope), (object?)caseValue1),
                         };
                     },
                     TypeClassifier = null,
                     TypeClassifierFactory = new global::System.Text.Json.Serialization.JsonUnionTypeStructuralClassifier(),
                 };
 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationFormMode>(options, unionInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationFormMode>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

@@ -1,12 +1,15 @@
 namespace SvcSystems.AI.AgentClientProtocol;
 
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 /// <summary>Consumer-facing ACP client operations.</summary>
 public interface IClient : IAsyncDisposable
 {
     /// <summary>Agent identity and capabilities negotiated during initialization.</summary>
     AgentInfo Agent { get; }
+
+    /// <summary>Completes when the underlying connection closes; the result contains the transport failure, if any.</summary>
+    Task<Exception?> Completion { get; }
 
     /// <summary>Creates a new ACP session.</summary>
     Task<Session> CreateSessionAsync(SessionOptions options, CancellationToken cancellationToken = default);

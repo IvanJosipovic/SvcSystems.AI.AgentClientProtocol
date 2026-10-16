@@ -1,10 +1,14 @@
 using System.Text.Json;
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Base type for normalized updates received during an ACP prompt turn.</summary>
-public abstract record SessionEvent;
+public abstract record SessionEvent
+{
+    /// <summary>The complete ACP payload associated with this event, including metadata and unrecognized fields.</summary>
+    public JsonElement? RawPayload { get; init; }
+}
 
 /// <summary>A streamed user, assistant, or thought content block.</summary>
 public sealed record ContentUpdate(string Role, AgentContentBlock Content, string? MessageId) : SessionEvent;
@@ -35,7 +39,11 @@ public sealed record ModeUpdate(string CurrentModeId) : SessionEvent;
 public sealed record SessionMetadataUpdate(string? Title, string? UpdatedAt) : SessionEvent;
 
 /// <summary>The agent reported context usage.</summary>
-public sealed record TokenUsageUpdate(ulong Used, ulong Size, double? CostAmount = null, string? CostCurrency = null) : SessionEvent;
+public sealed record TokenUsageUpdate(ulong Used, ulong Size, double? CostAmount = null, string? CostCurrency = null) : SessionEvent
+{
+    /// <summary>The complete schema-generated cost object, including metadata and extension fields.</summary>
+    public Cost? WireCost { get; init; }
+}
 
 /// <summary>A user-facing, out-of-history notice.</summary>
 public sealed record NoticeUpdate(string Severity, string Title, string? Description) : SessionEvent;
@@ -56,16 +64,27 @@ public sealed record ContextCompactionUpdate(string Id, string Status, IReadOnly
 public sealed record CompactionSummaryUpdate(string Id, AgentContentBlock Content) : SessionEvent;
 
 /// <summary>A protocol update kind not represented by a specialized public update type.</summary>
-public sealed record UnmappedUpdate(string Kind, JsonElement? RawPayload = null) : SessionEvent;
+public sealed record UnmappedUpdate(string Kind) : SessionEvent;
 
 /// <summary>The prompt turn ended and includes the ACP stop reason.</summary>
 public sealed record Completed(string Reason) : SessionEvent;
 
 /// <summary>A command advertised by the agent.</summary>
-public sealed record AgentCommand(string Name, string Description, string? InputHint);
+public sealed record AgentCommand(string Name, string Description, string? InputHint)
+{
+    /// <summary>The complete schema-generated command, including metadata and extension fields.</summary>
+    public AvailableCommand? WireCommand { get; init; }
+}
 
 /// <summary>Base type for content blocks accepted by ACP prompt methods.</summary>
-public abstract record AgentContentBlock;
+public abstract record AgentContentBlock
+{
+    /// <summary>The full schema-generated ACP content block, including annotations, metadata, and extension data.</summary>
+    public ContentBlock? WireContent { get; init; }
+
+    /// <summary>The full schema-generated ACP tool-call content block, when this block came from a tool call.</summary>
+    public ToolCallContent? WireToolCallContent { get; init; }
+}
 
 /// <summary>Text content.</summary>
 public sealed record PromptTextContent(string Text) : AgentContentBlock;

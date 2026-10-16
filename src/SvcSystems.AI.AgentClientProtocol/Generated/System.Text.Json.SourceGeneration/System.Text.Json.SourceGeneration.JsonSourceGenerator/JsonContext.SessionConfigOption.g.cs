@@ -10,23 +10,23 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption>? _SessionConfigOption;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>? _SessionConfigOption;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption> SessionConfigOption
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption> SessionConfigOption
         #nullable enable annotations
         {
-            get => _SessionConfigOption ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption));
+            get => _SessionConfigOption ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption> Create_SessionConfigOption(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption> Create_SessionConfigOption(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>
                 {
                     ObjectCreator = null,
                     ObjectWithParameterizedConstructorCreator = null,
@@ -41,14 +41,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                     UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
                     DerivedTypes =
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOptionVariant0Select), "select"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOptionVariant1Boolean), "boolean"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOptionVariant0Select), "select"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOptionVariant1Boolean), "boolean"),
                     },
                 },
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionConfigOption>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

@@ -10,24 +10,24 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator>? _CreateElicitationResponseDiscriminator;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator>? _CreateElicitationResponseDiscriminator;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator> CreateElicitationResponseDiscriminator
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator> CreateElicitationResponseDiscriminator
         #nullable enable annotations
         {
-            get => _CreateElicitationResponseDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator));
+            get => _CreateElicitationResponseDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator> Create_CreateElicitationResponseDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator> Create_CreateElicitationResponseDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator> jsonTypeInfo))
             {
-                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator>(), options);
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.CreateElicitationResponseDiscriminator> (options, converter);
+                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator>(), options);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.CreateElicitationResponseDiscriminator> (options, converter);
             }
         
             jsonTypeInfo.OriginatingResolver = this;

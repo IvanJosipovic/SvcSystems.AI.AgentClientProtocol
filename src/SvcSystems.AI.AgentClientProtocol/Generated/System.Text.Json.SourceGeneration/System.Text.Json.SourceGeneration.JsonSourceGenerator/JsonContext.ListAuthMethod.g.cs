@@ -10,31 +10,31 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>>? _ListAuthMethod;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>>? _ListAuthMethod;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>> ListAuthMethod
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>> ListAuthMethod
         #nullable enable annotations
         {
-            get => _ListAuthMethod ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>));
+            get => _ListAuthMethod ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>> Create_ListAuthMethod(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>> Create_ListAuthMethod(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>> jsonTypeInfo))
             {
-                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>>
+                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>>
                 {
-                    ObjectCreator = () => new global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>(),
+                    ObjectCreator = () => new global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>(),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateListInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethod>(options, info);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateListInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>, global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethod>(options, info);
                 jsonTypeInfo.NumberHandling = null;
             }
         

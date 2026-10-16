@@ -1,4 +1,5 @@
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using System.Text.Json;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
@@ -7,6 +8,7 @@ public sealed record AgentInfo(
     Implementation Implementation,
     int ProtocolVersion,
     AgentCapabilities Capabilities,
+    JsonElement RawPayload,
     IReadOnlyList<AuthenticationMethod>? AuthenticationMethods = null)
 {
     /// <summary>Agent name, forwarded from the schema-generated agentInfo model.</summary>
@@ -25,6 +27,7 @@ public sealed record AuthenticationMethod(
     string Name,
     string? Description,
     string? Type,
+    JsonElement RawPayload,
     IReadOnlyList<string>? Arguments = null,
     IReadOnlyDictionary<string, string>? Environment = null);
 

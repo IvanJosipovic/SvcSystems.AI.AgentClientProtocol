@@ -10,31 +10,31 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>>? _ListPlanEntry;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>>? _ListPlanEntry;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>> ListPlanEntry
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>> ListPlanEntry
         #nullable enable annotations
         {
-            get => _ListPlanEntry ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>));
+            get => _ListPlanEntry ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>>)Options.GetTypeInfo(typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>> Create_ListPlanEntry(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>> Create_ListPlanEntry(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>> jsonTypeInfo))
             {
-                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>>
+                var info = new global::System.Text.Json.Serialization.Metadata.JsonCollectionInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>>
                 {
-                    ObjectCreator = () => new global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>(),
+                    ObjectCreator = () => new global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>(),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateListInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PlanEntry>(options, info);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateListInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>, global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>(options, info);
                 jsonTypeInfo.NumberHandling = null;
             }
         

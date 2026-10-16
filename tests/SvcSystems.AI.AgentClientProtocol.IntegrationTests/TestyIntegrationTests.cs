@@ -1,5 +1,5 @@
 using SvcSystems.AI.AgentClientProtocol;
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 using System.Text.Json;
 using Xunit;
 
@@ -80,16 +80,18 @@ public sealed class TestyIntegrationTests
                 new ProcessOptions { FileName = testyPath, WorkingDirectory = workingDirectory },
                 cancellationToken: timeout.Token);
             var session = await client.CreateSessionAsync(new SessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
-            var updates = new List<SessionEvent>();
-            var promptTask = Task.Run(async () =>
-            {
-                await foreach (var update in session.PromptAsync("wait_for_cancel", timeout.Token)) updates.Add(update);
-            }, timeout.Token);
-
-            await Task.Delay(TimeSpan.FromMilliseconds(300), timeout.Token);
+            var promptTask = CollectPromptUpdatesAsync(session, "wait_for_cancel", timeout.Token);
             await session.CancelAsync(timeout.Token);
-            await promptTask.WaitAsync(timeout.Token);
+            var updates = await promptTask.WaitAsync(timeout.Token);
             Assert.Contains(updates, update => update is Completed { Reason: "cancelled" });
+
+            var followUpUpdates = await CollectPromptUpdatesAsync(session, "echo after cancellation", timeout.Token);
+            Assert.Contains(followUpUpdates, update => update is ContentUpdate
+            {
+                Role: "agent",
+                Content: PromptTextContent { Text: var text }
+            } && text.Contains("after cancellation", StringComparison.OrdinalIgnoreCase));
+            Assert.Contains(followUpUpdates, update => update is Completed { Reason: "end_turn" });
         }
         finally
         {
@@ -155,13 +157,27 @@ public sealed class TestyIntegrationTests
                 McpServers = [new StdioMcpServerOptions("echo", mcpEchoPath)]
             }, timeout.Token);
 
-            var updates = new List<SessionEvent>();
-            await foreach (var update in session.PromptAsync("{\"command\":\"list_tools\",\"server\":\"echo\"}", timeout.Token)) updates.Add(update);
-            Assert.Contains(updates, update => update is ContentUpdate
+            var listUpdates = await CollectPromptUpdatesAsync(
+                session,
+                "{\"command\":\"list_tools\",\"server\":\"echo\"}",
+                timeout.Token);
+            Assert.Contains(listUpdates, update => update is ContentUpdate
             {
                 Role: "agent",
                 Content: PromptTextContent { Text: var text }
-            } && text.Contains("Available tools", StringComparison.OrdinalIgnoreCase));
+            } && text.Contains("echo", StringComparison.Ordinal));
+            Assert.Contains(listUpdates, update => update is Completed { Reason: "end_turn" });
+
+            var callUpdates = await CollectPromptUpdatesAsync(
+                session,
+                "{\"command\":\"call_tool\",\"server\":\"echo\",\"tool\":\"echo\",\"params\":{\"message\":\"hello from the MCP echo tool\"}}",
+                timeout.Token);
+            Assert.Contains(callUpdates, update => update is ContentUpdate
+            {
+                Role: "agent",
+                Content: PromptTextContent { Text: var text }
+            } && text.Contains("Echo: hello from the MCP echo tool", StringComparison.Ordinal));
+            Assert.Contains(callUpdates, update => update is Completed { Reason: "end_turn" });
         }
         finally
         {
@@ -185,6 +201,8 @@ public sealed class TestyIntegrationTests
         var workingDirectory = Path.Combine(Path.GetTempPath(), "acp-testy-full-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(workingDirectory);
         var fileSystem = new SandboxedFileSystemHandler(workingDirectory);
+        var permissionHandler = new RejectOncePermissionHandler();
+        var terminalHandler = new DeterministicTerminalHandler();
         var elicitationHandler = new DeterministicElicitationHandler();
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
         try
@@ -197,9 +215,9 @@ public sealed class TestyIntegrationTests
                 },
                 new ClientOptions
                 {
-                    PermissionHandler = new RejectOncePermissionHandler(),
+                    PermissionHandler = permissionHandler,
                     FileSystemHandler = fileSystem,
-                    TerminalHandler = new DeterministicTerminalHandler(),
+                    TerminalHandler = terminalHandler,
                     ElicitationHandler = elicitationHandler,
                     ElicitationCompleted = elicitationHandler.OnCompleted
                 },
@@ -214,11 +232,16 @@ public sealed class TestyIntegrationTests
                 AdditionalDirectories = [extraDirectory]
             };
             var session = await client.CreateSessionAsync(sessionOptions, timeout.Token);
-            await client.LoadSessionAsync(session.Id, sessionOptions, timeout.Token);
+            var loadedSession = await client.LoadSessionAsync(session.Id, sessionOptions, timeout.Token);
+            Assert.Equal(session.Id, loadedSession.Id);
             await session.SetModeAsync("plan", timeout.Token);
             await session.SetConfigOptionAsync("verbosity", "verbose", timeout.Token);
             Assert.Contains(await client.ListSessionsAsync(workingDirectory, cancellationToken: timeout.Token), listed => listed.SessionId == session.Id);
-            await client.ResumeSessionAsync(session.Id, new SessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
+            var resumedSession = await client.ResumeSessionAsync(
+                session.Id,
+                new SessionOptions { WorkingDirectory = workingDirectory },
+                timeout.Token);
+            Assert.Equal(session.Id, resumedSession.Id);
             var updates = new List<SessionEvent>();
             await foreach (var update in session.PromptAsync("full", timeout.Token)) updates.Add(update);
 
@@ -229,6 +252,7 @@ public sealed class TestyIntegrationTests
             Assert.Contains("session/request_permission: ok", text, StringComparison.Ordinal);
             Assert.Contains("fs/write_text_file: ok", text, StringComparison.Ordinal);
             Assert.Contains("fs/read_text_file: ok", text, StringComparison.Ordinal);
+            Assert.Contains("content: \"written by testy\\n\"", text, StringComparison.Ordinal);
             Assert.Contains("terminal/create: ok", text, StringComparison.Ordinal);
             Assert.Contains("terminal/output: ok", text, StringComparison.Ordinal);
             Assert.Contains("terminal/wait_for_exit: ok", text, StringComparison.Ordinal);
@@ -237,14 +261,42 @@ public sealed class TestyIntegrationTests
             Assert.Contains("elicitation/form_session_accept: ok", text, StringComparison.Ordinal);
             Assert.Contains("elicitation/url_session_accept: ok", text, StringComparison.Ordinal);
             Assert.Contains("elicitation/complete_session_url: sent", text, StringComparison.Ordinal);
-            Assert.True(elicitationHandler.Completed.Count > 0);
+            Assert.Equal("reject_once", permissionHandler.SelectedOptionId);
+            Assert.Equal("written by testy\n", await File.ReadAllTextAsync(Path.Combine(workingDirectory, "testy-write.txt"), timeout.Token));
+            var terminalRequest = Assert.IsType<CreateTerminalRequest>(terminalHandler.CreateRequest);
+            Assert.Equal(session.Id, terminalRequest.SessionId);
+            Assert.Equal("printf", terminalRequest.Command);
+            Assert.Equal("testy terminal\n", Assert.Single(terminalRequest.Args!));
+            Assert.Equal(workingDirectory, terminalRequest.Cwd);
+            Assert.Equal("testy-terminal-1", Assert.Single(terminalHandler.OutputRequests).TerminalId);
+            Assert.Equal("testy-terminal-1", Assert.Single(terminalHandler.WaitRequests).TerminalId);
+            Assert.Equal("testy-terminal-1", Assert.Single(terminalHandler.KillRequests).TerminalId);
+            Assert.NotEmpty(terminalHandler.ReleaseRequests);
+            Assert.All(terminalHandler.ReleaseRequests, request => Assert.Equal("testy-terminal-1", request.TerminalId));
+
+            Assert.Equal(5, elicitationHandler.Requests.Count);
+            Assert.Equal(new[] { "accept", "decline", "cancel", "accept", "decline" }, elicitationHandler.Responses);
+            Assert.Equal(session.Id, elicitationHandler.Requests[0].SessionId);
+            Assert.False(string.IsNullOrWhiteSpace(elicitationHandler.Requests[0].ToolCallId));
+            Assert.Equal("testy-request-form-cancel", elicitationHandler.Requests[2].RequestId);
+            Assert.Equal("testy-url-session", elicitationHandler.Requests[3].ElicitationId);
+            Assert.Equal("testy-request-url-decline", elicitationHandler.Requests[4].RequestId);
+            Assert.Equal("testy-url-session", Assert.Single(elicitationHandler.Completed));
             Assert.Contains(updates, update => update is AgentToolCallUpdate);
             Assert.Contains(updates, update => update is PlanUpdate);
-            Assert.Contains(updates, update => update is TokenUsageUpdate);
+            Assert.Contains(updates, update => update is TokenUsageUpdate { Used: 128, Size: 4096 });
+            Assert.Contains(updates, update => update is SessionMetadataUpdate { Title: "Testy deterministic session" });
+            Assert.Contains(updates, update => update is AgentCommandsUpdate);
+            Assert.Contains(updates, update => update is ModeUpdate { CurrentModeId: "plan" });
+            Assert.Contains(updates, update => update is ConfigOptionsUpdate);
+            Assert.Contains(updates, update => update is Completed { Reason: "end_turn" });
             await client.CloseSessionAsync(session.Id, timeout.Token);
 
             var deleteSession = await client.CreateSessionAsync(new SessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
             await client.DeleteSessionAsync(deleteSession.Id, timeout.Token);
+            Assert.DoesNotContain(
+                await client.ListSessionsAsync(workingDirectory, cancellationToken: timeout.Token),
+                listed => listed.SessionId == deleteSession.Id);
             await client.LogoutAsync(timeout.Token);
         }
         finally
@@ -255,33 +307,50 @@ public sealed class TestyIntegrationTests
         }
     }
 
+    private static async Task<List<SessionEvent>> CollectPromptUpdatesAsync(
+        Session session,
+        string prompt,
+        CancellationToken cancellationToken)
+    {
+        var updates = new List<SessionEvent>();
+        await foreach (var update in session.PromptAsync(prompt, cancellationToken))
+        {
+            updates.Add(update);
+        }
+        return updates;
+    }
+
     private sealed class RejectOncePermissionHandler : IPermissionHandler
     {
-        public ValueTask<PermissionDecision> RequestPermissionAsync(PermissionRequest request, CancellationToken cancellationToken = default)
+        public string? SelectedOptionId { get; private set; }
+
+        public ValueTask<PermissionDecision> RequestPermissionAsync(RequestPermissionRequest request, CancellationToken cancellationToken = default)
         {
             var reject = request.Options.First(option => option.Kind == "reject_once");
-            return ValueTask.FromResult(PermissionDecision.Select(reject.Id));
+            var selectedOptionId = reject.OptionId;
+            SelectedOptionId = selectedOptionId;
+            return ValueTask.FromResult(PermissionDecision.Select(selectedOptionId));
         }
     }
 
     private sealed class SandboxedFileSystemHandler(string root) : IFileSystemHandler
     {
-        public async ValueTask<string> ReadTextFileAsync(string sessionId, string path, uint? line, uint? limit, CancellationToken cancellationToken = default)
+        public async ValueTask<string> ReadTextFileAsync(ReadTextFileRequest request, CancellationToken cancellationToken = default)
         {
-            var safePath = ValidatePath(path);
+            var safePath = ValidatePath(request.Path);
             var content = await File.ReadAllTextAsync(safePath, cancellationToken);
             var newline = content.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
             var lines = content.Split(["\r\n", "\n"], StringSplitOptions.None);
-            var offset = Math.Max(0, checked((int)(line ?? 1) - 1));
-            var count = limit is null ? int.MaxValue : checked((int)Math.Min(limit.Value, int.MaxValue));
+            var offset = Math.Max(0, checked((int)(request.Line ?? 1) - 1));
+            var count = request.Limit is null ? int.MaxValue : checked((int)Math.Min(request.Limit.Value, int.MaxValue));
             return string.Join(newline, lines.Skip(offset).Take(count));
         }
 
-        public async ValueTask WriteTextFileAsync(string sessionId, string path, string content, CancellationToken cancellationToken = default)
+        public async ValueTask WriteTextFileAsync(WriteTextFileRequest request, CancellationToken cancellationToken = default)
         {
-            var safePath = ValidatePath(path);
+            var safePath = ValidatePath(request.Path);
             Directory.CreateDirectory(Path.GetDirectoryName(safePath)!);
-            await File.WriteAllTextAsync(safePath, content, cancellationToken);
+            await File.WriteAllTextAsync(safePath, request.Content, cancellationToken);
         }
 
         private string ValidatePath(string path)
@@ -296,20 +365,41 @@ public sealed class TestyIntegrationTests
 
     private sealed class DeterministicTerminalHandler : ITerminalHandler
     {
-        private int _nextId;
+        public CreateTerminalRequest? CreateRequest { get; private set; }
+        public List<TerminalOutputRequest> OutputRequests { get; } = [];
+        public List<WaitForTerminalExitRequest> WaitRequests { get; } = [];
+        public List<KillTerminalRequest> KillRequests { get; } = [];
+        public List<ReleaseTerminalRequest> ReleaseRequests { get; } = [];
 
-        public ValueTask<string> CreateAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult("testy-terminal-" + Interlocked.Increment(ref _nextId));
+        public ValueTask<string> CreateAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default)
+        {
+            CreateRequest = request;
+            return ValueTask.FromResult("testy-terminal-1");
+        }
 
-        public ValueTask<TerminalOutputResponse> GetOutputAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult(new TerminalOutputResponse { Output = "testy terminal\n", Truncated = false, ExitStatus = new TerminalExitStatus { ExitCode = 0 } });
+        public ValueTask<TerminalOutputResponse> GetOutputAsync(TerminalOutputRequest request, CancellationToken cancellationToken = default)
+        {
+            OutputRequests.Add(request);
+            return ValueTask.FromResult(new TerminalOutputResponse { Output = "testy terminal\n", Truncated = false, ExitStatus = new TerminalExitStatus { ExitCode = 0 } });
+        }
 
-        public ValueTask<TerminalExitStatus> WaitForExitAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult(new TerminalExitStatus { ExitCode = 0 });
+        public ValueTask<TerminalExitStatus> WaitForExitAsync(WaitForTerminalExitRequest request, CancellationToken cancellationToken = default)
+        {
+            WaitRequests.Add(request);
+            return ValueTask.FromResult(new TerminalExitStatus { ExitCode = 0 });
+        }
 
-        public ValueTask KillAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+        public ValueTask KillAsync(KillTerminalRequest request, CancellationToken cancellationToken = default)
+        {
+            KillRequests.Add(request);
+            return ValueTask.CompletedTask;
+        }
 
-        public ValueTask ReleaseAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+        public ValueTask ReleaseAsync(ReleaseTerminalRequest request, CancellationToken cancellationToken = default)
+        {
+            ReleaseRequests.Add(request);
+            return ValueTask.CompletedTask;
+        }
     }
 
     private sealed class DeterministicElicitationHandler : IElicitationHandler
@@ -317,19 +407,28 @@ public sealed class TestyIntegrationTests
         public bool SupportsForm => true;
         public bool SupportsUrl => true;
         public List<string> Completed { get; } = [];
+        public List<ElicitationRequest> Requests { get; } = [];
+        public List<string> Responses { get; } = [];
 
         public ValueTask<ElicitationResponse> RequestElicitationAsync(ElicitationRequest request, CancellationToken cancellationToken = default)
         {
+            Requests.Add(request);
             if (request.Message.Contains("Decline", StringComparison.OrdinalIgnoreCase))
-                return ValueTask.FromResult(new ElicitationResponse("decline"));
+                return RecordResponse("decline");
             if (request.Message.Contains("Cancel", StringComparison.OrdinalIgnoreCase))
-                return ValueTask.FromResult(new ElicitationResponse("cancel"));
+                return RecordResponse("cancel");
             if (request.Mode == "form" && request.RequestedSchema is { } schema)
-                return ValueTask.FromResult(new ElicitationResponse("accept", CreateFormAnswer(schema)));
-            return ValueTask.FromResult(new ElicitationResponse("accept"));
+                return RecordResponse("accept", CreateFormAnswer(schema));
+            return RecordResponse("accept");
         }
 
         public void OnCompleted(ElicitationCompleted notification) => Completed.Add(notification.ElicitationId);
+
+        private ValueTask<ElicitationResponse> RecordResponse(string action, JsonElement? content = null)
+        {
+            Responses.Add(action);
+            return ValueTask.FromResult(new ElicitationResponse(action, content));
+        }
 
         private static JsonElement CreateFormAnswer(JsonElement schema)
         {

@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities>? _AgentCapabilities;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities>? _AgentCapabilities;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities> AgentCapabilities
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities> AgentCapabilities
         #nullable enable annotations
         {
-            get => _AgentCapabilities ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities));
+            get => _AgentCapabilities ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities> Create_AgentCapabilities(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities> Create_AgentCapabilities(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities>
                 {
-                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities(),
+                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities(),
                     ObjectWithParameterizedConstructorCreator = null,
                     PropertyMetadataInitializer = _ => AgentCapabilitiesPropInit(options),
                     ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,117 +55,117 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj).LoadSession,
-                Setter = static (obj, value) => __set_AgentCapabilities_LoadSession((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj).LoadSession,
+                Setter = static (obj, value) => __set_AgentCapabilities_LoadSession((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "LoadSession",
                 JsonPropertyName = "loadSession",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetProperty("LoadSession", InstanceMemberBindingFlags, null, typeof(bool?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetProperty("LoadSession", InstanceMemberBindingFlags, null, typeof(bool?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<bool?>(options, info0);
 
-            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PromptCapabilities>
+            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.PromptCapabilities>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj).PromptCapabilities,
-                Setter = static (obj, value) => __set_AgentCapabilities_PromptCapabilities((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj).PromptCapabilities,
+                Setter = static (obj, value) => __set_AgentCapabilities_PromptCapabilities((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "PromptCapabilities",
                 JsonPropertyName = "promptCapabilities",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetProperty("PromptCapabilities", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PromptCapabilities), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetProperty("PromptCapabilities", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PromptCapabilities), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PromptCapabilities>(options, info1);
+            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PromptCapabilities>(options, info1);
 
-            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpCapabilities>
+            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.McpCapabilities>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj).McpCapabilities,
-                Setter = static (obj, value) => __set_AgentCapabilities_McpCapabilities((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj).McpCapabilities,
+                Setter = static (obj, value) => __set_AgentCapabilities_McpCapabilities((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "McpCapabilities",
                 JsonPropertyName = "mcpCapabilities",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetProperty("McpCapabilities", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpCapabilities), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetProperty("McpCapabilities", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.McpCapabilities), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpCapabilities>(options, info2);
+            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.McpCapabilities>(options, info2);
 
-            var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionCapabilities>
+            var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionCapabilities>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj).SessionCapabilities,
-                Setter = static (obj, value) => __set_AgentCapabilities_SessionCapabilities((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj).SessionCapabilities,
+                Setter = static (obj, value) => __set_AgentCapabilities_SessionCapabilities((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "SessionCapabilities",
                 JsonPropertyName = "sessionCapabilities",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetProperty("SessionCapabilities", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionCapabilities), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetProperty("SessionCapabilities", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionCapabilities), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionCapabilities>(options, info3);
+            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionCapabilities>(options, info3);
 
-            var info4 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentAuthCapabilities>
+            var info4 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentAuthCapabilities>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj).Auth,
-                Setter = static (obj, value) => __set_AgentCapabilities_Auth((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj).Auth,
+                Setter = static (obj, value) => __set_AgentCapabilities_Auth((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Auth",
                 JsonPropertyName = "auth",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetProperty("Auth", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentAuthCapabilities), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetProperty("Auth", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentAuthCapabilities), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentAuthCapabilities>(options, info4);
+            properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AgentAuthCapabilities>(options, info4);
 
             var info5 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj).Meta,
-                Setter = static (obj, value) => __set_AgentCapabilities_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj).Meta,
+                Setter = static (obj, value) => __set_AgentCapabilities_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info5);
@@ -175,17 +175,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj).ExtensionData,
-                Setter = static (obj, value) => __set_AgentCapabilities_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj).ExtensionData,
+                Setter = static (obj, value) => __set_AgentCapabilities_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[6] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info6);
@@ -194,18 +194,18 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         }
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_LoadSession")]
-        private static extern void __set_AgentCapabilities_LoadSession(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities obj, bool? value);
+        private static extern void __set_AgentCapabilities_LoadSession(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities obj, bool? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_PromptCapabilities")]
-        private static extern void __set_AgentCapabilities_PromptCapabilities(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.PromptCapabilities value);
+        private static extern void __set_AgentCapabilities_PromptCapabilities(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Generated.PromptCapabilities value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_McpCapabilities")]
-        private static extern void __set_AgentCapabilities_McpCapabilities(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.McpCapabilities value);
+        private static extern void __set_AgentCapabilities_McpCapabilities(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Generated.McpCapabilities value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SessionCapabilities")]
-        private static extern void __set_AgentCapabilities_SessionCapabilities(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.SessionCapabilities value);
+        private static extern void __set_AgentCapabilities_SessionCapabilities(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Generated.SessionCapabilities value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Auth")]
-        private static extern void __set_AgentCapabilities_Auth(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentAuthCapabilities value);
+        private static extern void __set_AgentCapabilities_Auth(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities obj, global::SvcSystems.AI.AgentClientProtocol.Generated.AgentAuthCapabilities value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_AgentCapabilities_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_AgentCapabilities_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_AgentCapabilities_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AgentCapabilities obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_AgentCapabilities_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.AgentCapabilities obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

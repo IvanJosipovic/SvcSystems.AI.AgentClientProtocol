@@ -13,6 +13,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     private readonly Dictionary<string, Func<JsonElement, CancellationToken, ValueTask<byte[]>>> _requestHandlers = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Func<JsonElement, ValueTask>> _notificationHandlers = new(StringComparer.Ordinal);
     private readonly Task _receiveTask;
+    private readonly TaskCompletionSource<Exception?> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private Exception? _terminalException;
     private long _nextRequestId;
     private int _disposed;
@@ -22,6 +23,9 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         _transport = transport;
         _receiveTask = ReceiveLoopAsync(_shutdown.Token);
     }
+
+    /// <summary>Completes when the transport closes. The result is the failure, or null for a clean close.</summary>
+    public Task<Exception?> Completion => _completion.Task;
 
     public void RegisterRequestHandler(
         string method,
@@ -118,6 +122,10 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             _terminalException = exception;
             FailPending(exception);
         }
+        finally
+        {
+            _completion.TrySetResult(_terminalException);
+        }
     }
 
     private async Task ProcessMessageAsync(ReadOnlyMemory<byte> frame)
@@ -155,6 +163,10 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 {
                     await DispatchNotificationAsync(handler, parameters).ConfigureAwait(false);
                 }
+                else
+                {
+                    throw new ProtocolException($"Notification '{method}' is not supported.");
+                }
                 return;
             }
 
@@ -172,7 +184,10 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             {
                 var code = error.TryGetProperty("code", out var codeValue) && codeValue.TryGetInt32(out var parsedCode) ? parsedCode : -32603;
                 var errorMessage = error.TryGetProperty("message", out var messageValue) ? messageValue.GetString() ?? "Unknown JSON-RPC error." : "Unknown JSON-RPC error.";
-                pending.TrySetException(new RpcException(code, errorMessage));
+                JsonElement? data = error.ValueKind == JsonValueKind.Object && error.TryGetProperty("data", out var dataValue)
+                    ? dataValue.Clone()
+                    : null;
+                pending.TrySetException(new RpcException(code, errorMessage, data: data));
             }
             else if (message.TryGetProperty("result", out var result))
             {
@@ -200,7 +215,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
         catch (RpcException exception)
         {
-            await SendIncomingErrorAsync(id, exception.Code, exception.Message).ConfigureAwait(false);
+            await SendIncomingErrorAsync(id, exception.Code, exception.Message, exception.ErrorData).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
         {
@@ -212,23 +227,14 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
     }
 
-    private async Task DispatchNotificationAsync(Func<JsonElement, ValueTask> handler, JsonElement parameters)
-    {
-        try
-        {
-            await handler(parameters).ConfigureAwait(false);
-        }
-        catch
-        {
-            // Notifications have no response. Application callback failures do not terminate the reader loop.
-        }
-    }
+    private static Task DispatchNotificationAsync(Func<JsonElement, ValueTask> handler, JsonElement parameters) =>
+        handler(parameters).AsTask();
 
     private ValueTask SendIncomingResultAsync(JsonElement id, ReadOnlyMemory<byte> result) =>
         _transport.SendAsync(WriteResponse(id, result), _shutdown.Token);
 
-    private ValueTask SendIncomingErrorAsync(JsonElement id, int code, string message) =>
-        _transport.SendAsync(WriteError(id, code, message), _shutdown.Token);
+    private ValueTask SendIncomingErrorAsync(JsonElement id, int code, string message, JsonElement? data = null) =>
+        _transport.SendAsync(WriteError(id, code, message, data), _shutdown.Token);
 
     private static JsonElement GetParameters(JsonElement message)
     {
@@ -261,7 +267,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             writer.WriteRawValue(result.Span, skipInputValidation: true);
         });
 
-    private static byte[] WriteError(JsonElement id, int code, string message) =>
+    private static byte[] WriteError(JsonElement id, int code, string message, JsonElement? data) =>
         WriteEnvelope(writer =>
         {
             writer.WritePropertyName("id");
@@ -269,6 +275,11 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             writer.WriteStartObject("error");
             writer.WriteNumber("code", code);
             writer.WriteString("message", message);
+            if (data is { } errorData)
+            {
+                writer.WritePropertyName("data");
+                errorData.WriteTo(writer);
+            }
             writer.WriteEndObject();
         });
 

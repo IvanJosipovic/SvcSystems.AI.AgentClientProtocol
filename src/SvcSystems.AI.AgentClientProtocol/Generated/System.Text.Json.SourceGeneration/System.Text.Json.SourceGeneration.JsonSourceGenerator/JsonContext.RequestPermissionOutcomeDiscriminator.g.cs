@@ -10,24 +10,24 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator>? _RequestPermissionOutcomeDiscriminator;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator>? _RequestPermissionOutcomeDiscriminator;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator> RequestPermissionOutcomeDiscriminator
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator> RequestPermissionOutcomeDiscriminator
         #nullable enable annotations
         {
-            get => _RequestPermissionOutcomeDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator));
+            get => _RequestPermissionOutcomeDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator> Create_RequestPermissionOutcomeDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator> Create_RequestPermissionOutcomeDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator> jsonTypeInfo))
             {
-                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator>(), options);
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.RequestPermissionOutcomeDiscriminator> (options, converter);
+                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator>(), options);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.RequestPermissionOutcomeDiscriminator> (options, converter);
             }
         
             jsonTypeInfo.OriginatingResolver = this;

@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest>? _ReleaseTerminalRequest;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest>? _ReleaseTerminalRequest;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest> ReleaseTerminalRequest
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest> ReleaseTerminalRequest
         #nullable enable annotations
         {
-            get => _ReleaseTerminalRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest));
+            get => _ReleaseTerminalRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest> Create_ReleaseTerminalRequest(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest> Create_ReleaseTerminalRequest(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest(){ SessionId = (string)args[0], TerminalId = (string)args[1] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest(){ SessionId = (string)args[0], TerminalId = (string)args[1] },
                     PropertyMetadataInitializer = _ => ReleaseTerminalRequestPropInit(options),
                     ConstructorParameterMetadataInitializer = ReleaseTerminalRequestCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj).SessionId,
-                Setter = static (obj, value) => __set_ReleaseTerminalRequest_SessionId((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj).SessionId,
+                Setter = static (obj, value) => __set_ReleaseTerminalRequest_SessionId((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "SessionId",
                 JsonPropertyName = "sessionId",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest).GetProperty("SessionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest).GetProperty("SessionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj).TerminalId,
-                Setter = static (obj, value) => __set_ReleaseTerminalRequest_TerminalId((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj).TerminalId,
+                Setter = static (obj, value) => __set_ReleaseTerminalRequest_TerminalId((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "TerminalId",
                 JsonPropertyName = "terminalId",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest).GetProperty("TerminalId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest).GetProperty("TerminalId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -101,17 +101,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj).Meta,
-                Setter = static (obj, value) => __set_ReleaseTerminalRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj).Meta,
+                Setter = static (obj, value) => __set_ReleaseTerminalRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info2);
@@ -121,17 +121,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ReleaseTerminalRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ReleaseTerminalRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
@@ -161,12 +161,12 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SessionId")]
-        private static extern void __set_ReleaseTerminalRequest_SessionId(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest obj, string value);
+        private static extern void __set_ReleaseTerminalRequest_SessionId(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_TerminalId")]
-        private static extern void __set_ReleaseTerminalRequest_TerminalId(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest obj, string value);
+        private static extern void __set_ReleaseTerminalRequest_TerminalId(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ReleaseTerminalRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ReleaseTerminalRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ReleaseTerminalRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ReleaseTerminalRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ReleaseTerminalRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ReleaseTerminalRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

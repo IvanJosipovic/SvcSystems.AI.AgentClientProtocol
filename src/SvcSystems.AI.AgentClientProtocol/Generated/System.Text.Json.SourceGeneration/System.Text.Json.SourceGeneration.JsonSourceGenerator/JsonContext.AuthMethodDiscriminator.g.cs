@@ -10,24 +10,24 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator>? _AuthMethodDiscriminator;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator>? _AuthMethodDiscriminator;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator> AuthMethodDiscriminator
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator> AuthMethodDiscriminator
         #nullable enable annotations
         {
-            get => _AuthMethodDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator));
+            get => _AuthMethodDiscriminator ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator> Create_AuthMethodDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator> Create_AuthMethodDiscriminator(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator> jsonTypeInfo))
             {
-                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator>(), options);
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.AuthMethodDiscriminator> (options, converter);
+                global::System.Text.Json.Serialization.JsonConverter converter = ExpandConverter(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator), new global::System.Text.Json.Serialization.JsonStringEnumConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator>(), options);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateValueInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.AuthMethodDiscriminator> (options, converter);
             }
         
             jsonTypeInfo.OriginatingResolver = this;

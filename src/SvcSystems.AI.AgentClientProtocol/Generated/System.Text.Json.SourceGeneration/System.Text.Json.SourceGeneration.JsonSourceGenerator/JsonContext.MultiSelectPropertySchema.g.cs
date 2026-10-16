@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema>? _MultiSelectPropertySchema;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema>? _MultiSelectPropertySchema;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema> MultiSelectPropertySchema
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema> MultiSelectPropertySchema
         #nullable enable annotations
         {
-            get => _MultiSelectPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema));
+            get => _MultiSelectPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema> Create_MultiSelectPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema> Create_MultiSelectPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema(){ Items = (global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectItems)args[0] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema(){ Items = (global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems)args[0] },
                     PropertyMetadataInitializer = _ => MultiSelectPropertySchemaPropInit(options),
                     ConstructorParameterMetadataInitializer = MultiSelectPropertySchemaCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).Title,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Title((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).Title,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Title((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Title",
                 JsonPropertyName = "title",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -75,17 +75,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).Description,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Description((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).Description,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Description((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Description",
                 JsonPropertyName = "description",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("Description", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("Description", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -95,17 +95,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).MinItems,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_MinItems((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).MinItems,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_MinItems((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "MinItems",
                 JsonPropertyName = "minItems",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("MinItems", InstanceMemberBindingFlags, null, typeof(ulong?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("MinItems", InstanceMemberBindingFlags, null, typeof(ulong?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<ulong?>(options, info2);
@@ -115,40 +115,40 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).MaxItems,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_MaxItems((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).MaxItems,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_MaxItems((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "MaxItems",
                 JsonPropertyName = "maxItems",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("MaxItems", InstanceMemberBindingFlags, null, typeof(ulong?), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("MaxItems", InstanceMemberBindingFlags, null, typeof(ulong?), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<ulong?>(options, info3);
 
-            var info4 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectItems>
+            var info4 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).Items,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Items((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).Items,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Items((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Items",
                 JsonPropertyName = "items",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("Items", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectItems), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("Items", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectItems>(options, info4);
+            properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems>(options, info4);
             properties[4].IsRequired = true;
 
             var info5 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<string>>
@@ -156,17 +156,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).Default,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Default((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).Default,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Default((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Default",
                 JsonPropertyName = "default",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("Default", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("Default", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<string>>(options, info5);
@@ -176,17 +176,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).Meta,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Meta((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).Meta,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[6] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info6);
@@ -196,17 +196,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj).ExtensionData,
-                Setter = static (obj, value) => __set_MultiSelectPropertySchema_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj).ExtensionData,
+                Setter = static (obj, value) => __set_MultiSelectPropertySchema_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[7] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info7);
@@ -219,7 +219,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             new()
             {
                 Name = "Items",
-                ParameterType = typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectItems),
+                ParameterType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems),
                 Position = 0,
                 IsNullable = false,
                 IsMemberInitializer = true,
@@ -227,20 +227,20 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Title")]
-        private static extern void __set_MultiSelectPropertySchema_Title(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, string value);
+        private static extern void __set_MultiSelectPropertySchema_Title(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Description")]
-        private static extern void __set_MultiSelectPropertySchema_Description(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, string value);
+        private static extern void __set_MultiSelectPropertySchema_Description(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_MinItems")]
-        private static extern void __set_MultiSelectPropertySchema_MinItems(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, ulong? value);
+        private static extern void __set_MultiSelectPropertySchema_MinItems(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, ulong? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_MaxItems")]
-        private static extern void __set_MultiSelectPropertySchema_MaxItems(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, ulong? value);
+        private static extern void __set_MultiSelectPropertySchema_MaxItems(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, ulong? value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Items")]
-        private static extern void __set_MultiSelectPropertySchema_Items(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectItems value);
+        private static extern void __set_MultiSelectPropertySchema_Items(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Default")]
-        private static extern void __set_MultiSelectPropertySchema_Default(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, global::System.Collections.Generic.List<string> value);
+        private static extern void __set_MultiSelectPropertySchema_Default(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, global::System.Collections.Generic.List<string> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_MultiSelectPropertySchema_Meta(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_MultiSelectPropertySchema_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_MultiSelectPropertySchema_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.MultiSelectPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_MultiSelectPropertySchema_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

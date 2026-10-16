@@ -10,23 +10,23 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>? _ToolCallContent;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>? _ToolCallContent;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent> ToolCallContent
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent> ToolCallContent
         #nullable enable annotations
         {
-            get => _ToolCallContent ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent));
+            get => _ToolCallContent ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent> Create_ToolCallContent(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent> Create_ToolCallContent(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>
                 {
                     ObjectCreator = null,
                     ObjectWithParameterizedConstructorCreator = null,
@@ -41,15 +41,15 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                     UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
                     DerivedTypes =
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant0Content), "content"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant1Diff), "diff"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContentVariant2Terminal), "terminal"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant0Content), "content"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff), "diff"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant2Terminal), "terminal"),
                     },
                 },
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ToolCallContent>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

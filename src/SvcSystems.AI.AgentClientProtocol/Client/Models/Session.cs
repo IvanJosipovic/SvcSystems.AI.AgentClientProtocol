@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading.Channels;
-using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
@@ -32,6 +33,9 @@ public sealed class Session
     /// <summary>Agent-provided session id.</summary>
     public string Id { get; }
 
+    /// <summary>The complete most recent session creation, load, or resume response.</summary>
+    public JsonElement? RawPayload { get; private set; }
+
     /// <summary>The agent's initial or most recently reported mode state.</summary>
     public SessionModeState? ModeState { get; private set; }
 
@@ -52,7 +56,7 @@ public sealed class Session
     {
         ArgumentNullException.ThrowIfNull(content);
         await _promptLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-        Task<string>? promptTask = null;
+        Task<(string StopReason, JsonElement RawPayload)>? promptTask = null;
         using var promptRequestCancellation = new CancellationTokenSource();
         var completed = false;
         try
@@ -73,11 +77,11 @@ public sealed class Session
                     continue;
                 }
 
-                var stopReason = await promptTask.ConfigureAwait(false);
+                var promptResult = await promptTask.ConfigureAwait(false);
                 while (_updates.Reader.TryRead(out var update)) yield return update;
                 ThrowIfUpdateBufferFailed();
                 completed = true;
-                yield return new Completed(stopReason);
+                yield return new Completed(promptResult.StopReason) { RawPayload = promptResult.RawPayload };
                 break;
             }
         }
@@ -167,9 +171,10 @@ public sealed class Session
         }
     }
 
-    internal void SetInitialState(SessionModeState? modeState, IReadOnlyList<SessionConfigOption>? configOptions)
+    internal void SetInitialState(SessionModeState? modeState, IReadOnlyList<SessionConfigOption>? configOptions, JsonElement rawPayload)
     {
         if (modeState is not null) ModeState = modeState;
         if (configOptions is not null) ConfigOptions = configOptions;
+        RawPayload = rawPayload.Clone();
     }
 }

@@ -4,7 +4,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Generator;
 
 internal static class WireJsonRenderer
 {
-    private const string GeneratedNamespace = "SvcSystems.AI.AgentClientProtocol.Protocol.Generated";
+    private const string GeneratedNamespace = "SvcSystems.AI.AgentClientProtocol.Generated";
     private const string SerializationNamespace = "SvcSystems.AI.AgentClientProtocol.Serialization";
 
     internal static bool IsSystemTextJsonSafe(SchemaModel model, string typeName) =>
