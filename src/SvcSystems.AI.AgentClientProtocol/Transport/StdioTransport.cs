@@ -1,0 +1,278 @@
+using System.Buffers;
+using System.Diagnostics;
+using System.Text;
+
+namespace SvcSystems.AI.AgentClientProtocol.Transport;
+
+internal sealed class StdioTransport : ITransport
+{
+    private const int MaximumStandardErrorLineCharacters = 16 * 1024;
+    private readonly Process _process;
+    private readonly Stream _standardOutput;
+    private readonly StreamWriter _standardInput;
+    private readonly Action<string>? _standardErrorReceived;
+    private readonly int _maximumMessageBytes;
+    private readonly TimeSpan _shutdownTimeout;
+    private readonly SemaphoreSlim _writeLock = new(1, 1);
+    private readonly Task _standardErrorTask;
+    private int _disposed;
+
+    private StdioTransport(Process process, ProcessOptions options)
+    {
+        _process = process;
+        _standardOutput = process.StandardOutput.BaseStream;
+        _standardInput = process.StandardInput;
+        _standardErrorReceived = options.StandardErrorReceived;
+        _maximumMessageBytes = options.MaximumMessageBytes;
+        _shutdownTimeout = options.ShutdownTimeout;
+        _standardErrorTask = DrainStandardErrorAsync();
+    }
+
+    public static ValueTask<StdioTransport> StartAsync(
+        ProcessOptions options,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (string.IsNullOrWhiteSpace(options.FileName))
+        {
+            throw new ArgumentException("An agent executable must be specified.", nameof(options));
+        }
+        if (options.MaximumMessageBytes <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "The maximum frame size must be positive.");
+        }
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = options.FileName,
+            WorkingDirectory = options.WorkingDirectory ?? Environment.CurrentDirectory,
+            UseShellExecute = false,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardInputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+            StandardOutputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true),
+            StandardErrorEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+        };
+
+        foreach (var argument in options.Arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+        foreach (var variable in options.Environment)
+        {
+            startInfo.Environment[variable.Key] = variable.Value;
+        }
+
+        var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
+        try
+        {
+            if (!process.Start())
+            {
+                process.Dispose();
+                throw new ProcessException($"Failed to start ACP agent '{options.FileName}'.");
+            }
+            return ValueTask.FromResult(new StdioTransport(process, options));
+        }
+        catch (ProcessException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            process.Dispose();
+            throw new ProcessException($"Failed to start ACP agent '{options.FileName}'.", exception);
+        }
+    }
+
+    public async ValueTask SendAsync(ReadOnlyMemory<byte> message, CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
+        await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await _standardInput.BaseStream.WriteAsync(message, cancellationToken).ConfigureAwait(false);
+            await _standardInput.BaseStream.WriteAsync(new byte[] { (byte)'\n' }, cancellationToken).ConfigureAwait(false);
+            await _standardInput.BaseStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or ObjectDisposedException or InvalidOperationException)
+        {
+            throw new ProcessException("The ACP agent process stdin is no longer available.", exception);
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
+    }
+
+    public async IAsyncEnumerable<ReadOnlyMemory<byte>> ReceiveAsync(
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var frame in ReadFramesAsync(_standardOutput, _maximumMessageBytes, cancellationToken).ConfigureAwait(false))
+        {
+            yield return frame;
+        }
+
+        if (_process.HasExited)
+        {
+            throw new ProcessException($"ACP agent process exited with code {_process.ExitCode}.");
+        }
+    }
+
+    internal static async IAsyncEnumerable<ReadOnlyMemory<byte>> ReadFramesAsync(
+        Stream stream,
+        int maximumFrameBytes,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var input = new byte[4096];
+        var frame = new ArrayBufferWriter<byte>();
+        while (true)
+        {
+            int read;
+            try
+            {
+                read = await stream.ReadAsync(input.AsMemory(), cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception) when (exception is IOException or ObjectDisposedException)
+            {
+                throw new ProcessException("Reading ACP agent stdout failed.", exception);
+            }
+
+            if (read == 0)
+            {
+                if (frame.WrittenCount > 0)
+                {
+                    var length = GetFrameLength(frame.WrittenSpan);
+                    yield return frame.WrittenMemory[..length].ToArray();
+                }
+                yield break;
+            }
+
+            var segmentStart = 0;
+            for (var index = 0; index < read; index++)
+            {
+                if (input[index] != (byte)'\n') continue;
+                AppendFrame(frame, input.AsSpan(segmentStart, index - segmentStart), maximumFrameBytes);
+                var length = GetFrameLength(frame.WrittenSpan);
+                yield return frame.WrittenMemory[..length].ToArray();
+                frame = new ArrayBufferWriter<byte>();
+                segmentStart = index + 1;
+            }
+
+            AppendFrame(frame, input.AsSpan(segmentStart, read - segmentStart), maximumFrameBytes);
+        }
+    }
+
+    private static void AppendFrame(ArrayBufferWriter<byte> frame, ReadOnlySpan<byte> bytes, int maximumFrameBytes)
+    {
+        var newLength = frame.WrittenCount + bytes.Length;
+        // A trailing CR is part of CRLF framing, so allow one byte beyond the
+        // payload limit only when it is the final byte currently accumulated.
+        var hasTrailingCarriageReturn = bytes.Length > 0
+            ? bytes[^1] == (byte)'\r'
+            : frame.WrittenCount > 0 && frame.WrittenSpan[^1] == (byte)'\r';
+        if (newLength > maximumFrameBytes &&
+            !(newLength == maximumFrameBytes + 1 && hasTrailingCarriageReturn))
+        {
+            throw new ProtocolException($"ACP stdio frame exceeded the configured {maximumFrameBytes} byte limit.");
+        }
+
+        bytes.CopyTo(frame.GetSpan(bytes.Length));
+        frame.Advance(bytes.Length);
+    }
+
+    private static int GetFrameLength(ReadOnlySpan<byte> frame) =>
+        frame.Length > 0 && frame[^1] == (byte)'\r' ? frame.Length - 1 : frame.Length;
+
+    private async Task DrainStandardErrorAsync()
+    {
+        var buffer = new char[2048];
+        var line = new StringBuilder();
+        var truncated = false;
+        try
+        {
+            while (true)
+            {
+                var read = await _process.StandardError.ReadAsync(buffer.AsMemory()).ConfigureAwait(false);
+                if (read == 0) break;
+                for (var index = 0; index < read; index++)
+                {
+                    var character = buffer[index];
+                    if (character == '\r') continue;
+                    if (character == '\n')
+                    {
+                        ReportStandardErrorLine(line, truncated);
+                        line.Clear();
+                        truncated = false;
+                        continue;
+                    }
+
+                    if (line.Length < MaximumStandardErrorLineCharacters) line.Append(character);
+                    else truncated = true;
+                }
+            }
+
+            if (line.Length > 0 || truncated) ReportStandardErrorLine(line, truncated);
+        }
+        catch (Exception exception) when (exception is IOException or ObjectDisposedException)
+        {
+            // Process shutdown can close stderr while it is being drained.
+        }
+    }
+
+    private void ReportStandardErrorLine(StringBuilder line, bool truncated)
+    {
+        try
+        {
+            _standardErrorReceived?.Invoke(truncated ? line.ToString() + " [truncated]" : line.ToString());
+        }
+        catch
+        {
+            // A host diagnostic callback must not stop stderr draining and deadlock the child.
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+
+        try
+        {
+            _standardInput.Close();
+            using var timeout = new CancellationTokenSource(_shutdownTimeout);
+            await _process.WaitForExitAsync(timeout.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            try
+            {
+                if (!_process.HasExited) _process.Kill(entireProcessTree: true);
+            }
+            catch (Exception exception) when (exception is InvalidOperationException or System.ComponentModel.Win32Exception or IOException)
+            {
+                // The process exited between checking HasExited and Kill.
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // The process has already exited.
+        }
+        catch (IOException)
+        {
+            // Closing stdin can fail if the child exited at the same time.
+        }
+        finally
+        {
+            try { await _standardErrorTask.ConfigureAwait(false); }
+            catch { /* stderr drain errors do not prevent deterministic cleanup */ }
+            _process.Dispose();
+            _writeLock.Dispose();
+        }
+    }
+}

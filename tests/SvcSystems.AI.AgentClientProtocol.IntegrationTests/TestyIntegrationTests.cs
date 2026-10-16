@@ -1,4 +1,5 @@
 using SvcSystems.AI.AgentClientProtocol;
+using SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
 using System.Text.Json;
 using Xunit;
 
@@ -22,8 +23,8 @@ public sealed class TestyIntegrationTests
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            await using var client = await AcpClient.StartAsync(
-                new AcpProcessOptions
+            await using var client = await Client.StartAsync(
+                new ProcessOptions
                 {
                     FileName = testyPath,
                     WorkingDirectory = workingDirectory,
@@ -35,21 +36,21 @@ public sealed class TestyIntegrationTests
             Assert.Equal(1, client.Agent.ProtocolVersion);
 
             var session = await client.CreateSessionAsync(
-                new AcpSessionOptions { WorkingDirectory = workingDirectory },
+                new SessionOptions { WorkingDirectory = workingDirectory },
                 timeout.Token);
 
-            var updates = new List<AcpSessionUpdate>();
+            var updates = new List<SessionEvent>();
             await foreach (var update in session.PromptAsync("echo hello from acp client", timeout.Token))
             {
                 updates.Add(update);
             }
 
-            Assert.Contains(updates, update => update is AcpContentUpdate
+            Assert.Contains(updates, update => update is ContentUpdate
             {
                 Role: "agent",
-                Content: AcpTextContent { Text: var text }
+                Content: PromptTextContent { Text: var text }
             } && text.Contains("hello from acp client", StringComparison.OrdinalIgnoreCase));
-            Assert.Contains(updates, update => update is AcpCompleted { Reason: "end_turn" });
+            Assert.Contains(updates, update => update is Completed { Reason: "end_turn" });
         }
         finally
         {
@@ -75,11 +76,11 @@ public sealed class TestyIntegrationTests
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            await using var client = await AcpClient.StartAsync(
-                new AcpProcessOptions { FileName = testyPath, WorkingDirectory = workingDirectory },
+            await using var client = await Client.StartAsync(
+                new ProcessOptions { FileName = testyPath, WorkingDirectory = workingDirectory },
                 cancellationToken: timeout.Token);
-            var session = await client.CreateSessionAsync(new AcpSessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
-            var updates = new List<AcpSessionUpdate>();
+            var session = await client.CreateSessionAsync(new SessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
+            var updates = new List<SessionEvent>();
             var promptTask = Task.Run(async () =>
             {
                 await foreach (var update in session.PromptAsync("wait_for_cancel", timeout.Token)) updates.Add(update);
@@ -88,7 +89,7 @@ public sealed class TestyIntegrationTests
             await Task.Delay(TimeSpan.FromMilliseconds(300), timeout.Token);
             await session.CancelAsync(timeout.Token);
             await promptTask.WaitAsync(timeout.Token);
-            Assert.Contains(updates, update => update is AcpCompleted { Reason: "cancelled" });
+            Assert.Contains(updates, update => update is Completed { Reason: "cancelled" });
         }
         finally
         {
@@ -100,7 +101,7 @@ public sealed class TestyIntegrationTests
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task OpenCodeAcpHandshakeWorksWhenConfigured()
+    public async Task OpenCodeHandshakeWorksWhenConfigured()
     {
         var openCodePath = Environment.GetEnvironmentVariable("ACP_OPENCODE_BIN");
         if (string.IsNullOrWhiteSpace(openCodePath) || !File.Exists(openCodePath))
@@ -113,8 +114,8 @@ public sealed class TestyIntegrationTests
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            await using var client = await AcpClient.StartAsync(
-                new AcpProcessOptions { FileName = openCodePath, Arguments = ["acp"], WorkingDirectory = workingDirectory },
+            await using var client = await Client.StartAsync(
+                new ProcessOptions { FileName = openCodePath, Arguments = ["acp"], WorkingDirectory = workingDirectory },
                 cancellationToken: timeout.Token);
 
             Assert.Equal(1, client.Agent.ProtocolVersion);
@@ -145,21 +146,21 @@ public sealed class TestyIntegrationTests
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-            await using var client = await AcpClient.StartAsync(
-                new AcpProcessOptions { FileName = testyPath, WorkingDirectory = workingDirectory },
+            await using var client = await Client.StartAsync(
+                new ProcessOptions { FileName = testyPath, WorkingDirectory = workingDirectory },
                 cancellationToken: timeout.Token);
-            var session = await client.CreateSessionAsync(new AcpSessionOptions
+            var session = await client.CreateSessionAsync(new SessionOptions
             {
                 WorkingDirectory = workingDirectory,
-                McpServers = [new AcpStdioMcpServerOptions("echo", mcpEchoPath)]
+                McpServers = [new StdioMcpServerOptions("echo", mcpEchoPath)]
             }, timeout.Token);
 
-            var updates = new List<AcpSessionUpdate>();
+            var updates = new List<SessionEvent>();
             await foreach (var update in session.PromptAsync("{\"command\":\"list_tools\",\"server\":\"echo\"}", timeout.Token)) updates.Add(update);
-            Assert.Contains(updates, update => update is AcpContentUpdate
+            Assert.Contains(updates, update => update is ContentUpdate
             {
                 Role: "agent",
-                Content: AcpTextContent { Text: var text }
+                Content: PromptTextContent { Text: var text }
             } && text.Contains("Available tools", StringComparison.OrdinalIgnoreCase));
         }
         finally
@@ -188,13 +189,13 @@ public sealed class TestyIntegrationTests
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
         try
         {
-            await using var client = await AcpClient.StartAsync(
-                new AcpProcessOptions
+            await using var client = await Client.StartAsync(
+                new ProcessOptions
                 {
                     FileName = testyPath,
                     WorkingDirectory = workingDirectory
                 },
-                new AcpClientOptions
+                new ClientOptions
                 {
                     PermissionHandler = new RejectOncePermissionHandler(),
                     FileSystemHandler = fileSystem,
@@ -207,7 +208,7 @@ public sealed class TestyIntegrationTests
             await client.AuthenticateAsync("testy-agent-auth", timeout.Token);
             var extraDirectory = Path.Combine(workingDirectory, "extra");
             Directory.CreateDirectory(extraDirectory);
-            var sessionOptions = new AcpSessionOptions
+            var sessionOptions = new SessionOptions
             {
                 WorkingDirectory = workingDirectory,
                 AdditionalDirectories = [extraDirectory]
@@ -216,15 +217,15 @@ public sealed class TestyIntegrationTests
             await client.LoadSessionAsync(session.Id, sessionOptions, timeout.Token);
             await session.SetModeAsync("plan", timeout.Token);
             await session.SetConfigOptionAsync("verbosity", "verbose", timeout.Token);
-            Assert.Contains(await client.ListSessionsAsync(workingDirectory, cancellationToken: timeout.Token), listed => listed.Id == session.Id);
-            await client.ResumeSessionAsync(session.Id, new AcpSessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
-            var updates = new List<AcpSessionUpdate>();
+            Assert.Contains(await client.ListSessionsAsync(workingDirectory, cancellationToken: timeout.Token), listed => listed.SessionId == session.Id);
+            await client.ResumeSessionAsync(session.Id, new SessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
+            var updates = new List<SessionEvent>();
             await foreach (var update in session.PromptAsync("full", timeout.Token)) updates.Add(update);
 
-            var report = updates.OfType<AcpContentUpdate>().FirstOrDefault(update =>
-                update.Role == "agent" && update.Content is AcpTextContent text && text.Text.Contains("scenario: full", StringComparison.Ordinal));
+            var report = updates.OfType<ContentUpdate>().FirstOrDefault(update =>
+                update.Role == "agent" && update.Content is PromptTextContent text && text.Text.Contains("scenario: full", StringComparison.Ordinal));
             Assert.NotNull(report);
-            var text = ((AcpTextContent)report.Content).Text;
+            var text = ((PromptTextContent)report.Content).Text;
             Assert.Contains("session/request_permission: ok", text, StringComparison.Ordinal);
             Assert.Contains("fs/write_text_file: ok", text, StringComparison.Ordinal);
             Assert.Contains("fs/read_text_file: ok", text, StringComparison.Ordinal);
@@ -237,12 +238,12 @@ public sealed class TestyIntegrationTests
             Assert.Contains("elicitation/url_session_accept: ok", text, StringComparison.Ordinal);
             Assert.Contains("elicitation/complete_session_url: sent", text, StringComparison.Ordinal);
             Assert.True(elicitationHandler.Completed.Count > 0);
-            Assert.Contains(updates, update => update is AcpToolCallUpdate);
-            Assert.Contains(updates, update => update is AcpPlanUpdate);
-            Assert.Contains(updates, update => update is AcpUsageUpdate);
+            Assert.Contains(updates, update => update is AgentToolCallUpdate);
+            Assert.Contains(updates, update => update is PlanUpdate);
+            Assert.Contains(updates, update => update is TokenUsageUpdate);
             await client.CloseSessionAsync(session.Id, timeout.Token);
 
-            var deleteSession = await client.CreateSessionAsync(new AcpSessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
+            var deleteSession = await client.CreateSessionAsync(new SessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
             await client.DeleteSessionAsync(deleteSession.Id, timeout.Token);
             await client.LogoutAsync(timeout.Token);
         }
@@ -254,16 +255,16 @@ public sealed class TestyIntegrationTests
         }
     }
 
-    private sealed class RejectOncePermissionHandler : IAcpPermissionHandler
+    private sealed class RejectOncePermissionHandler : IPermissionHandler
     {
-        public ValueTask<AcpPermissionDecision> RequestPermissionAsync(AcpPermissionRequest request, CancellationToken cancellationToken = default)
+        public ValueTask<PermissionDecision> RequestPermissionAsync(PermissionRequest request, CancellationToken cancellationToken = default)
         {
             var reject = request.Options.First(option => option.Kind == "reject_once");
-            return ValueTask.FromResult(AcpPermissionDecision.Select(reject.Id));
+            return ValueTask.FromResult(PermissionDecision.Select(reject.Id));
         }
     }
 
-    private sealed class SandboxedFileSystemHandler(string root) : IAcpFileSystemHandler
+    private sealed class SandboxedFileSystemHandler(string root) : IFileSystemHandler
     {
         public async ValueTask<string> ReadTextFileAsync(string sessionId, string path, uint? line, uint? limit, CancellationToken cancellationToken = default)
         {
@@ -293,42 +294,42 @@ public sealed class TestyIntegrationTests
         }
     }
 
-    private sealed class DeterministicTerminalHandler : IAcpTerminalHandler
+    private sealed class DeterministicTerminalHandler : ITerminalHandler
     {
         private int _nextId;
 
-        public ValueTask<string> CreateAsync(AcpTerminalCreateRequest request, CancellationToken cancellationToken = default) =>
+        public ValueTask<string> CreateAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default) =>
             ValueTask.FromResult("testy-terminal-" + Interlocked.Increment(ref _nextId));
 
-        public ValueTask<AcpTerminalOutput> GetOutputAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult(new AcpTerminalOutput("testy terminal\n", false, new AcpTerminalExitStatus(0)));
+        public ValueTask<TerminalOutputResponse> GetOutputAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(new TerminalOutputResponse { Output = "testy terminal\n", Truncated = false, ExitStatus = new TerminalExitStatus { ExitCode = 0 } });
 
-        public ValueTask<AcpTerminalExitStatus> WaitForExitAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult(new AcpTerminalExitStatus(0));
+        public ValueTask<TerminalExitStatus> WaitForExitAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(new TerminalExitStatus { ExitCode = 0 });
 
         public ValueTask KillAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
 
         public ValueTask ReleaseAsync(string sessionId, string terminalId, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
     }
 
-    private sealed class DeterministicElicitationHandler : IAcpElicitationHandler
+    private sealed class DeterministicElicitationHandler : IElicitationHandler
     {
         public bool SupportsForm => true;
         public bool SupportsUrl => true;
         public List<string> Completed { get; } = [];
 
-        public ValueTask<AcpElicitationResponse> RequestElicitationAsync(AcpElicitationRequest request, CancellationToken cancellationToken = default)
+        public ValueTask<ElicitationResponse> RequestElicitationAsync(ElicitationRequest request, CancellationToken cancellationToken = default)
         {
             if (request.Message.Contains("Decline", StringComparison.OrdinalIgnoreCase))
-                return ValueTask.FromResult(new AcpElicitationResponse("decline"));
+                return ValueTask.FromResult(new ElicitationResponse("decline"));
             if (request.Message.Contains("Cancel", StringComparison.OrdinalIgnoreCase))
-                return ValueTask.FromResult(new AcpElicitationResponse("cancel"));
+                return ValueTask.FromResult(new ElicitationResponse("cancel"));
             if (request.Mode == "form" && request.RequestedSchema is { } schema)
-                return ValueTask.FromResult(new AcpElicitationResponse("accept", CreateFormAnswer(schema)));
-            return ValueTask.FromResult(new AcpElicitationResponse("accept"));
+                return ValueTask.FromResult(new ElicitationResponse("accept", CreateFormAnswer(schema)));
+            return ValueTask.FromResult(new ElicitationResponse("accept"));
         }
 
-        public void OnCompleted(AcpElicitationCompleted notification) => Completed.Add(notification.ElicitationId);
+        public void OnCompleted(ElicitationCompleted notification) => Completed.Add(notification.ElicitationId);
 
         private static JsonElement CreateFormAnswer(JsonElement schema)
         {

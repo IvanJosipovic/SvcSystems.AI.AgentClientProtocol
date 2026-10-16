@@ -12,8 +12,8 @@ var agentArguments = args.Length > 1 ? args.Skip(1).ToArray() : ["acp"];
 var prompt = Environment.GetEnvironmentVariable("ACP_PROMPT") ??
     "Explain the repository in a short, actionable summary.";
 
-await using var client = await AcpClient.StartAsync(
-    new AcpProcessOptions
+await using var client = await Client.StartAsync(
+    new ProcessOptions
     {
         FileName = executable,
         Arguments = agentArguments,
@@ -22,7 +22,7 @@ await using var client = await AcpClient.StartAsync(
     });
 
 Console.WriteLine($"Connected to {client.Agent.Name} {client.Agent.Version} (ACP v{client.Agent.ProtocolVersion}).");
-var session = await client.CreateSessionAsync(new AcpSessionOptions
+var session = await client.CreateSessionAsync(new SessionOptions
 {
     WorkingDirectory = Directory.GetCurrentDirectory()
 });

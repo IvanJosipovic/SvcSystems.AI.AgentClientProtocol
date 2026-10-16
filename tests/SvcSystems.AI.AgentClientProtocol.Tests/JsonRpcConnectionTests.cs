@@ -47,7 +47,7 @@ public sealed class JsonRpcConnectionTests
     }
 
     [Fact]
-    public async Task RpcErrorResponseBecomesAcpRpcException()
+    public async Task RpcErrorResponseBecomesRpcException()
     {
         await using var transport = new FakeTransport();
         await using var connection = new JsonRpcConnection(transport);
@@ -57,7 +57,7 @@ public sealed class JsonRpcConnectionTests
 
         transport.Receive(Json($"{{\"jsonrpc\":\"2.0\",\"id\":{requestId},\"error\":{{\"code\":-32601,\"message\":\"missing\"}}}}"));
 
-        var exception = await Assert.ThrowsAsync<AcpRpcException>(() => requestTask);
+        var exception = await Assert.ThrowsAsync<RpcException>(() => requestTask);
         Assert.Equal(-32601, exception.Code);
         Assert.Contains("missing", exception.Message, StringComparison.Ordinal);
     }
@@ -82,7 +82,7 @@ public sealed class JsonRpcConnectionTests
         return JsonDocument.Parse(message);
     }
 
-    private sealed class FakeTransport : IAcpTransport
+    private sealed class FakeTransport : ITransport
     {
         private readonly Channel<ReadOnlyMemory<byte>> _received = Channel.CreateUnbounded<ReadOnlyMemory<byte>>();
         private readonly Channel<ReadOnlyMemory<byte>> _sent = Channel.CreateUnbounded<ReadOnlyMemory<byte>>();

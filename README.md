@@ -9,19 +9,19 @@ Targets `net11.0` (currently using .NET 11 RC2). The library is trim-analyzed an
 ## Quick start
 
 ```csharp
-await using var client = await AcpClient.StartAsync(
-    new AcpProcessOptions
+await using var client = await Client.StartAsync(
+    new ProcessOptions
     {
         FileName = "opencode",
         Arguments = ["acp"],
         WorkingDirectory = @"C:\repos\MyProject"
     },
-    new AcpClientOptions
+    new ClientOptions
     {
         PermissionHandler = new ConsolePermissionHandler()
     });
 
-var session = await client.CreateSessionAsync(new AcpSessionOptions
+var session = await client.CreateSessionAsync(new SessionOptions
 {
     WorkingDirectory = @"C:\repos\MyProject"
 });
@@ -32,14 +32,14 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 }
 ```
 
-`AcpClient.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
+`Client.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
 
 ## Host capabilities
 
 ACP callbacks are enabled only when the host provides a handler. The client can host filesystem, terminal, permission, and elicitation operations. Do not configure filesystem or terminal handlers unless the application has an appropriate workspace/command security policy.
 
 ```csharp
-var clientOptions = new AcpClientOptions
+var clientOptions = new ClientOptions
 {
     PermissionHandler = permissionHandler,
     FileSystemHandler = workspaceFileSystem,
@@ -48,13 +48,13 @@ var clientOptions = new AcpClientOptions
 };
 ```
 
-The client advertises only the capabilities supported by these configured handlers. `AcpSession` exposes prompt streaming, cancellation, mode changes, and session configuration. `IAcpClient` exposes create/load/list/resume/delete/close, authentication, and logout operations, with optional operations gated by the agent's negotiated capabilities.
+The client advertises only the capabilities supported by these configured handlers. `Session` exposes prompt streaming, cancellation, mode changes, and session configuration. `IClient` exposes create/load/list/resume/delete/close, authentication, and logout operations, with optional operations gated by the agent's negotiated capabilities.
 
 ## Schema-generated wire models
 
 The internal wire model generator is an **incremental Roslyn source generator**. It accepts JSON Schema `AdditionalFiles`, parses them with Microsoft's `Microsoft.OpenApi` JSON Schema reader, and emits C# models into the current compilation. It does not depend on an ACP schema version or a `schema/v1` path. The checked-in ACP v1 schema is simply the first input file used by this library.
 
-The generator emits typed object models, tagged hierarchies, C# union types, and trim-safe JSON writers from the schema. Primitive aliases remain CLR primitives, and genuinely open JSON payloads such as `_meta` remain `JsonElement`-based. The wire models are internal; consumer-facing `Acp*` records are a deliberately smaller, stable API.
+The generator emits typed object models, tagged hierarchies, C# union types, and trim-safe JSON writers from the schema. Primitive aliases remain CLR primitives, and genuinely open JSON payloads such as `_meta` remain `JsonElement`-based. Protocol wire models are internal except for schema types that are part of the public API, such as `Implementation`.
 
 The library uses `Utf8JsonWriter`, `Utf8JsonReader`, and `JsonDocument` for ACP framing and typed protocol mapping. It does not use reflection-based `JsonSerializer` overloads.
 

@@ -69,6 +69,49 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void EmitsSerializerContextInPreCompilationWhenOptedIn()
+    {
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            generators: [new SchemaGenerator().AsSourceGenerator()],
+            additionalTexts: [new TestAdditionalText("protocol.schema.json", MinimalSchema)],
+            parseOptions: new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: ["ACP_STJ_SOURCE_GEN"]));
+
+        driver = driver.RunGenerators(CreateCompilation(), TestContext.Current.CancellationToken);
+        var sources = driver.GetRunResult().Results
+            .SelectMany(result => result.GeneratedSources)
+            .Select(result => result.SourceText.ToString())
+            .ToArray();
+
+        Assert.Contains(sources, source => source.Contains("internal partial class JsonContext : JsonSerializerContext", StringComparison.Ordinal));
+        Assert.Contains(sources, source => source.Contains("JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.Thing))", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void RoutesSafeModelGraphsThroughGeneratedSerializerContext()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Thing": { "type": "object", "properties": { "name": { "type": "string" } } },
+                "Choice": { "anyOf": [{ "type": "string" }, { "type": "integer", "format": "int32" }] },
+                "Container": { "type": "object", "properties": { "choice": { "$ref": "#/$defs/Choice" } } }
+              }
+            }
+            """;
+
+        var driver = CreateDriver([new TestAdditionalText("stj-routing.schema.json", schema)], useSystemTextJsonContext: true);
+        var result = driver.RunGenerators(CreateCompilation(), TestContext.Current.CancellationToken);
+        var generatedSources = result.GetRunResult().Results.SelectMany(generator => generator.GeneratedSources).Select(source => source.SourceText.ToString()).ToArray();
+        var jsonRenderer = Assert.Single(generatedSources, source => source.Contains("internal static class GeneratedJson", StringComparison.Ordinal));
+
+        Assert.Contains("Serialize(Thing value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Thing)", jsonRenderer, StringComparison.Ordinal);
+        Assert.Contains("Serialize(Container value) => Serialize(writer => WriteContainer(writer, value))", jsonRenderer, StringComparison.Ordinal);
+        Assert.Contains("DeserializeThing(JsonElement value)", jsonRenderer, StringComparison.Ordinal);
+        Assert.Contains("value.Deserialize(JsonContext.Default.Thing)", jsonRenderer, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RejectsMultipleSchemaAdditionalFilesWithDiagnostic()
     {
         var compilation = CreateCompilation();
@@ -145,7 +188,7 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains("InProgress", enumSource, StringComparison.Ordinal);
         Assert.Contains("JsonStringEnumMemberName(\"in-progress\")", enumSource, StringComparison.Ordinal);
         Assert.Contains("JsonStringEnumMemberName(\"awaiting_input\")", enumSource, StringComparison.Ordinal);
-        var jsonRenderer = Assert.Single(result.GeneratedSources.Where(source => source.Contains("internal static class AcpGeneratedJson", StringComparison.Ordinal)));
+        var jsonRenderer = Assert.Single(result.GeneratedSources.Where(source => source.Contains("internal static class GeneratedJson", StringComparison.Ordinal)));
         Assert.Contains("WriteTaskState", jsonRenderer, StringComparison.Ordinal);
     }
 
@@ -190,17 +233,27 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
-    public void PinnedAcpSchemaGeneratesTheCompleteWireModelSet()
+    public void PinnedSchemaGeneratesTheCompleteWireModelSet()
     {
         var schemaPath = Path.Combine(AppContext.BaseDirectory, "acp-v1.schema.json");
         var schema = File.ReadAllText(schemaPath);
-        var result = RunGenerator(schema, "any/path/any-version.json");
+        var result = RunGenerator(schema, "any/path/any-version.json", """
+            namespace SvcSystems.AI.AgentClientProtocol.Serialization
+            {
+                internal sealed class UnknownWireContent(System.Text.Json.JsonElement rawPayload)
+                    : SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock
+                {
+                    public System.Text.Json.JsonElement RawPayload { get; } = rawPayload;
+                }
+            }
+            """);
 
         Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
         Assert.Contains(result.GeneratedSources, source => ContainsType(source, "InitializeRequest"));
+        Assert.Contains(result.GeneratedSources, source => source.Contains("public sealed partial class Implementation", StringComparison.Ordinal));
         Assert.Contains(result.GeneratedSources, source => ContainsType(source, "SessionNotification"));
         Assert.Contains(result.GeneratedSources, source => ContainsType(source, "SessionUpdate"));
-        var jsonRenderer = Assert.Single(result.GeneratedSources.Where(source => source.Contains("internal static class AcpGeneratedJson", StringComparison.Ordinal)));
+        var jsonRenderer = Assert.Single(result.GeneratedSources.Where(source => source.Contains("internal static class GeneratedJson", StringComparison.Ordinal)));
         Assert.Contains("Serialize(InitializeRequest value)", jsonRenderer, StringComparison.Ordinal);
         Assert.Contains("Serialize(PromptRequest value)", jsonRenderer, StringComparison.Ordinal);
         Assert.Contains("WriteContentBlock", jsonRenderer, StringComparison.Ordinal);
@@ -220,10 +273,10 @@ public sealed class JsonSchemaSourceGeneratorTests
         }
     }
 
-    private static (ImmutableArray<string> GeneratedSources, ImmutableArray<Diagnostic> Diagnostics) RunGenerator(string schema, string path)
+    private static (ImmutableArray<string> GeneratedSources, ImmutableArray<Diagnostic> Diagnostics) RunGenerator(string schema, string path, string? supportSource = null)
     {
         var driver = CreateDriver([new TestAdditionalText(path, schema)]);
-        driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(), out var outputCompilation, out var diagnostics, TestContext.Current.CancellationToken);
+        driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(supportSource), out var outputCompilation, out var diagnostics, TestContext.Current.CancellationToken);
         var sources = driver.GetRunResult().Results
             .SelectMany(result => result.GeneratedSources)
             .Select(result => result.SourceText.ToString())
@@ -236,22 +289,25 @@ public sealed class JsonSchemaSourceGeneratorTests
         source.Contains("union " + name + "(", StringComparison.Ordinal) ||
         source.Contains("enum " + name, StringComparison.Ordinal);
 
-    private static GeneratorDriver CreateDriver(ImmutableArray<AdditionalText> additionalTexts) =>
+    private static GeneratorDriver CreateDriver(ImmutableArray<AdditionalText> additionalTexts, bool useSystemTextJsonContext = false) =>
         CSharpGeneratorDriver.Create(
-            generators: [new AcpSchemaGenerator().AsSourceGenerator()],
+            generators: [new SchemaGenerator().AsSourceGenerator()],
             additionalTexts: additionalTexts,
-            parseOptions: new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: ["NET11_0_OR_GREATER"]));
+            parseOptions: new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: useSystemTextJsonContext ? ["ACP_STJ_SOURCE_GEN"] : []));
 
-    private static CSharpCompilation CreateCompilation()
+    private static CSharpCompilation CreateCompilation(string? supportSource = null)
     {
         var platformAssemblies = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
             .Split(Path.PathSeparator)
             .Select(path => MetadataReference.CreateFromFile(path));
-        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview, preprocessorSymbols: ["NET11_0_OR_GREATER"]);
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var source = CSharpSyntaxTree.ParseText("global using System.Collections.Generic;", parseOptions);
+        var syntaxTrees = supportSource is null
+            ? new[] { source }
+            : new[] { source, CSharpSyntaxTree.ParseText(supportSource, parseOptions) };
         return CSharpCompilation.Create(
             assemblyName: "GeneratedProtocolModels.Tests",
-            syntaxTrees: [source],
+            syntaxTrees: syntaxTrees,
             references: platformAssemblies,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
     }

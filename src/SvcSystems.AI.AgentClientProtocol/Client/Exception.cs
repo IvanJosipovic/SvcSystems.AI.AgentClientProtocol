@@ -1,0 +1,47 @@
+namespace SvcSystems.AI.AgentClientProtocol;
+
+/// <summary>Base exception for ACP client failures.</summary>
+public class AgentException : Exception
+{
+    /// <summary>Initializes an exception with a message.</summary>
+    public AgentException(string message) : base(message) { }
+
+    /// <summary>Initializes an exception with a message and inner exception.</summary>
+    public AgentException(string message, Exception? innerException) : base(message, innerException) { }
+}
+
+/// <summary>The ACP agent process could not be started or terminated unexpectedly.</summary>
+public sealed class ProcessException : AgentException
+{
+    /// <summary>Initializes a process exception.</summary>
+    public ProcessException(string message, Exception? innerException = null)
+        : base(message, innerException) { }
+}
+
+/// <summary>The ACP peer sent a malformed or unsupported protocol message.</summary>
+public sealed class ProtocolException : AgentException
+{
+    /// <summary>Initializes a protocol exception.</summary>
+    public ProtocolException(string message) : base(message) { }
+
+    /// <summary>Initializes a protocol exception with an inner exception.</summary>
+    public ProtocolException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+/// <summary>An ACP JSON-RPC request failed.</summary>
+public sealed class RpcException : AgentException
+{
+    /// <summary>Initializes an RPC exception.</summary>
+    public RpcException(int code, string message, string? method = null)
+        : base(method is null ? message : $"ACP method '{method}' failed ({code}): {message}")
+    {
+        Code = code;
+        Method = method;
+    }
+
+    /// <summary>JSON-RPC error code.</summary>
+    public int Code { get; }
+
+    /// <summary>Method that returned the error, if known.</summary>
+    public string? Method { get; }
+}

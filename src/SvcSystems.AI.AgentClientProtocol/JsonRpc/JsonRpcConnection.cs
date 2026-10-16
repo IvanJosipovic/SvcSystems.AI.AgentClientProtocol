@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Transport;
@@ -7,7 +7,7 @@ namespace SvcSystems.AI.AgentClientProtocol.JsonRpc;
 
 internal sealed class JsonRpcConnection : IAsyncDisposable
 {
-    private readonly IAcpTransport _transport;
+    private readonly ITransport _transport;
     private readonly CancellationTokenSource _shutdown = new();
     private readonly ConcurrentDictionary<long, TaskCompletionSource<JsonElement>> _pendingRequests = new();
     private readonly Dictionary<string, Func<JsonElement, CancellationToken, ValueTask<byte[]>>> _requestHandlers = new(StringComparer.Ordinal);
@@ -17,7 +17,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     private long _nextRequestId;
     private int _disposed;
 
-    public JsonRpcConnection(IAcpTransport transport)
+    public JsonRpcConnection(ITransport transport)
     {
         _transport = transport;
         _receiveTask = ReceiveLoopAsync(_shutdown.Token);
@@ -107,7 +107,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
 
             if (!cancellationToken.IsCancellationRequested)
             {
-                throw new AcpProcessException("The ACP agent closed stdout while the connection was active.");
+                throw new ProcessException("The ACP agent closed stdout while the connection was active.");
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -129,7 +129,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
         catch (JsonException exception)
         {
-            throw new AcpProtocolException("ACP agent stdout contained invalid JSON.", exception);
+            throw new ProtocolException("ACP agent stdout contained invalid JSON.", exception);
         }
 
         using (document)
@@ -139,13 +139,13 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 !message.TryGetProperty("jsonrpc", out var jsonRpc) ||
                 jsonRpc.GetString() != "2.0")
             {
-                throw new AcpProtocolException("ACP message must be a JSON object with jsonrpc = '2.0'.");
+                throw new ProtocolException("ACP message must be a JSON object with jsonrpc = '2.0'.");
             }
 
             if (message.TryGetProperty("method", out var methodValue))
             {
                 var method = methodValue.GetString();
-                if (string.IsNullOrWhiteSpace(method)) throw new AcpProtocolException("ACP method name must be a non-empty string.");
+                if (string.IsNullOrWhiteSpace(method)) throw new ProtocolException("ACP method name must be a non-empty string.");
                 var parameters = GetParameters(message);
                 if (message.TryGetProperty("id", out var id))
                 {
@@ -160,7 +160,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
 
             if (!message.TryGetProperty("id", out var responseId) || responseId.ValueKind != JsonValueKind.Number || !responseId.TryGetInt64(out var idValue))
             {
-                throw new AcpProtocolException("ACP JSON-RPC response must include an integer request id.");
+                throw new ProtocolException("ACP JSON-RPC response must include an integer request id.");
             }
 
             if (!_pendingRequests.TryRemove(idValue, out var pending))
@@ -172,7 +172,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             {
                 var code = error.TryGetProperty("code", out var codeValue) && codeValue.TryGetInt32(out var parsedCode) ? parsedCode : -32603;
                 var errorMessage = error.TryGetProperty("message", out var messageValue) ? messageValue.GetString() ?? "Unknown JSON-RPC error." : "Unknown JSON-RPC error.";
-                pending.TrySetException(new AcpRpcException(code, errorMessage));
+                pending.TrySetException(new RpcException(code, errorMessage));
             }
             else if (message.TryGetProperty("result", out var result))
             {
@@ -180,7 +180,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             }
             else
             {
-                pending.TrySetException(new AcpProtocolException("JSON-RPC response must contain result or error."));
+                pending.TrySetException(new ProtocolException("JSON-RPC response must contain result or error."));
             }
         }
     }
@@ -198,7 +198,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             var result = await handler(parameters, _shutdown.Token).ConfigureAwait(false);
             await SendIncomingResultAsync(id, result).ConfigureAwait(false);
         }
-        catch (AcpRpcException exception)
+        catch (RpcException exception)
         {
             await SendIncomingErrorAsync(id, exception.Code, exception.Message).ConfigureAwait(false);
         }
@@ -295,7 +295,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     private void ThrowIfUnavailable()
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
-        if (_terminalException is { } exception) throw new AcpProcessException("The ACP connection has terminated.", exception);
+        if (_terminalException is { } exception) throw new ProcessException("The ACP connection has terminated.", exception);
     }
 
     private void FailPending(Exception exception)

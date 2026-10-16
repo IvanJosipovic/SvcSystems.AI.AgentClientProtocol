@@ -56,7 +56,7 @@ internal static class TestyBinaryProvider
             var cacheRoot = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "SvcSystems",
-                "AcpTesty",
+                "Testy",
                 RustSdkCommit,
                 RuntimeInformation.RuntimeIdentifier);
             var sourceRoot = Path.Combine(cacheRoot, "rust-sdk");
