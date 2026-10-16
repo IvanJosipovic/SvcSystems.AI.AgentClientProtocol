@@ -163,10 +163,6 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 {
                     await DispatchNotificationAsync(handler, parameters).ConfigureAwait(false);
                 }
-                else
-                {
-                    throw new ProtocolException($"Notification '{method}' is not supported.");
-                }
                 return;
             }
 

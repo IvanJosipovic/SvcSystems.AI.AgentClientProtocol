@@ -34,6 +34,8 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 
 `Client.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
 
+Unrecognized JSON-RPC notifications, including agent-specific extensions such as `_auth/status_update`, are ignored without closing the connection. Unsupported requests still receive a JSON-RPC "Method not found" error.
+
 ## Host capabilities
 
 ACP callbacks are enabled only when the host provides a handler. The client can host filesystem, terminal, permission, and elicitation operations. Do not configure filesystem or terminal handlers unless the application has an appropriate workspace/command security policy.
