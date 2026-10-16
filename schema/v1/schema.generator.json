@@ -1,0 +1,9 @@
+{
+  "allowUnknownDiscriminators": ["ContentBlock"],
+  "reuseAllOfVariants": ["McpServer"],
+  "defaultDiscriminatorValues": {
+    "McpServer": {
+      "stdio": "stdio"
+    }
+  }
+}

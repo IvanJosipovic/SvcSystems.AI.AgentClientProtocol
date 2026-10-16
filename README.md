@@ -1,10 +1,10 @@
-# SvcSystems.AI.AgentClientProtocol
+﻿# SvcSystems.AI.AgentClientProtocol
 
 [![NuGet](https://img.shields.io/nuget/v/SvcSystems.AI.AgentClientProtocol)](https://www.nuget.org/packages/SvcSystems.AI.AgentClientProtocol)
 
 A small .NET client library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/). It launches an ACP agent over stdio and gives applications a session-oriented API rather than exposing JSON-RPC or process plumbing.
 
-Targets `net11.0` (currently using .NET 11 RC2). The library is trim-analyzed and NativeAOT compatible. Reflection-based `System.Text.Json` serialization is disabled in the project.
+Targets `net11.0`. The library is trim-analyzed and NativeAOT compatible. Reflection-based `System.Text.Json` serialization is disabled in the project.
 
 ## Quick start
 

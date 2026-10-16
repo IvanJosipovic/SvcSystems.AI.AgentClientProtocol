@@ -680,7 +680,6 @@
           ]
         }
       ],
-      "x-allow-unknown-discriminator": true,
       "discriminator": {
         "propertyName": "type"
       }
@@ -5049,22 +5048,13 @@
         {
           "title": "stdio",
           "description": "Stdio transport configuration\n\nAll Agents MUST support this transport.",
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "const": "stdio"
-            }
-          },
-          "required": ["type"],
           "allOf": [
             {
               "$ref": "#/$defs/McpServerStdio"
             }
           ]
         }
-      ],
-      "x-reuse-allof-variants": true
+      ]
     },
     "HttpHeader": {
       "description": "An HTTP header to set when making requests to the MCP server.",

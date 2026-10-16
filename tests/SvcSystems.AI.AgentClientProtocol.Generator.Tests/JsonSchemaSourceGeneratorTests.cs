@@ -238,8 +238,10 @@ public sealed class JsonSchemaSourceGeneratorTests
     public void PinnedSchemaGeneratesTheCompleteWireModelSet()
     {
         var schemaPath = Path.Combine(AppContext.BaseDirectory, "acp-v1.schema.json");
+        var optionsPath = Path.Combine(AppContext.BaseDirectory, "acp-v1.generator.json");
         var schema = File.ReadAllText(schemaPath);
-        var result = RunGenerator(schema, "any/path/any-version.json");
+        var generatorOptions = File.ReadAllText(optionsPath);
+        var result = RunGenerator(schema, "any/path/any-version.json", generatorOptionsJson: generatorOptions);
 
         Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
         Assert.Contains(result.GeneratedSources, source => ContainsType(source, "InitializeRequest"));
@@ -266,9 +268,17 @@ public sealed class JsonSchemaSourceGeneratorTests
         }
     }
 
-    private static (ImmutableArray<string> GeneratedSources, ImmutableArray<Diagnostic> Diagnostics) RunGenerator(string schema, string path, string? supportSource = null)
+    private static (ImmutableArray<string> GeneratedSources, ImmutableArray<Diagnostic> Diagnostics) RunGenerator(
+        string schema,
+        string path,
+        string? supportSource = null,
+        string? generatorOptionsJson = null)
     {
-        var driver = CreateDriver([new TestAdditionalText(path, schema)]);
+        var additionalTexts = ImmutableArray.CreateBuilder<AdditionalText>();
+        additionalTexts.Add(new TestAdditionalText(path, schema));
+        if (generatorOptionsJson is not null)
+            additionalTexts.Add(new TestAdditionalText("fixtures/acp.generator.json", generatorOptionsJson));
+        var driver = CreateDriver(additionalTexts.ToImmutable());
         driver = driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(supportSource), out var outputCompilation, out var diagnostics, TestContext.Current.CancellationToken);
         var sources = driver.GetRunResult().Results
             .SelectMany(result => result.GeneratedSources)

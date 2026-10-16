@@ -5,8 +5,12 @@ using System.Text.Json.Nodes;
 
 namespace SvcSystems.AI.AgentClientProtocol.Generator;
 
-internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, DiagnosticDescriptor unsupportedSchema)
+internal sealed class SchemaModelBuilder(
+    Action<Diagnostic>? reportDiagnostic,
+    DiagnosticDescriptor unsupportedSchema,
+    SchemaGeneratorOptions? options = null)
 {
+    private readonly SchemaGeneratorOptions _options = options ?? SchemaGeneratorOptions.Empty;
     private readonly Dictionary<string, IOpenApiSchema> _definitions = new(StringComparer.Ordinal);
     private readonly SchemaModel _model = new();
     private readonly HashSet<string> _emitted = new(StringComparer.Ordinal);
@@ -87,7 +91,7 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
 
     private void AddUnion(string name, OpenApiSchema schema)
     {
-        var discriminatorName = GetDiscriminatorName(schema);
+        var discriminatorName = GetDiscriminatorName(name, schema);
         if (discriminatorName is not null)
         {
             AddTaggedUnion(name, schema, discriminatorName);
@@ -150,22 +154,24 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
             }
 
             var properties = GetProperties(branchSchema, new HashSet<string>(StringComparer.Ordinal));
-            if (!properties.TryGetValue(discriminatorName, out var discriminatorProperty) || string.IsNullOrEmpty(Resolve(discriminatorProperty.Schema)?.Const))
+            var discriminatorValue = properties.TryGetValue(discriminatorName, out var discriminatorProperty)
+                ? Resolve(discriminatorProperty.Schema)?.Const
+                : null;
+            discriminatorValue ??= _options.GetDefaultDiscriminatorValue(name, branchSchema.Title);
+            if (string.IsNullOrEmpty(discriminatorValue))
             {
                 index++;
                 continue;
             }
-
-            var discriminatorValue = Resolve(discriminatorProperty.Schema)!.Const!;
             var caseDefinition = GetReferenceDefinitionName(branch) ?? branchSchema.Title ?? "Variant" + index;
-            var referencedVariantName = ReuseAllOfVariantDefinitions(schema)
+            var referencedVariantName = _options.ReusesAllOfVariants(name)
                 ? GetSingleAllOfReferenceName(branchSchema)
                 : null;
             if (referencedVariantName is not null && _definitions.TryGetValue(referencedVariantName, out var referencedDefinition))
             {
                 AddDefinition(referencedVariantName, referencedDefinition);
             }
-            var variantName = referencedVariantName ?? Identifier(name + Pascal(caseDefinition) + Pascal(discriminatorValue));
+            var variantName = referencedVariantName ?? Identifier(name + Pascal(caseDefinition) + Pascal(discriminatorValue!));
             var variantProperties = commonProperties
                 .Concat(BuildProperties(variantName, branchSchema, excludedProperties: [discriminatorName]))
                 .GroupBy(property => property.WireName, StringComparer.Ordinal)
@@ -180,11 +186,11 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
                 hasExtensionData: existing?.HasExtensionData ?? (branchSchema.AdditionalPropertiesAllowed && branchSchema.AdditionalProperties is null));
             if (existingIndex >= 0) _model.Types[existingIndex] = variant;
             else variants.Add(variant);
-            cases.Add(new DiscriminatorCase(variantName, discriminatorValue));
+            cases.Add(new DiscriminatorCase(variantName, discriminatorValue!));
             index++;
         }
 
-        var allowsUnknown = AllowsUnknownDiscriminator(schema);
+        var allowsUnknown = _options.AllowsUnknownDiscriminators(name);
         _model.Types.Add(new ClassModel(name, [], discriminatorName: discriminatorName, discriminatorCases: cases, allowUnknownDiscriminator: allowsUnknown));
         _model.Types.AddRange(variants);
         if (allowsUnknown)
@@ -382,13 +388,12 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
         return null;
     }
 
-    private string? GetDiscriminatorName(OpenApiSchema schema)
+    private string? GetDiscriminatorName(string unionName, OpenApiSchema schema)
     {
         var explicitDiscriminator = schema.Discriminator?.PropertyName;
         if (!string.IsNullOrWhiteSpace(explicitDiscriminator)) return explicitDiscriminator;
 
         string? commonProperty = null;
-        string? commonValue = null;
         foreach (var branch in schema.OneOf ?? schema.AnyOf ?? [])
         {
             var properties = GetProperties(Resolve(branch) ?? new OpenApiSchema(), new HashSet<string>(StringComparer.Ordinal));
@@ -396,12 +401,12 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
                 .Where(property => Resolve(property.Value.Schema)?.Const is not null)
                 .Select(property => (property.Key, Value: Resolve(property.Value.Schema)!.Const!))
                 .ToArray();
+            if (constants.Length == 0 && _options.GetDefaultDiscriminatorValue(unionName, Resolve(branch)?.Title) is not null) continue;
             if (constants.Length != 1) return null;
             if (commonProperty is not null && !string.Equals(commonProperty, constants[0].Key, StringComparison.Ordinal)) return null;
             commonProperty = constants[0].Key;
-            commonValue = constants[0].Value;
         }
-        return commonValue is null ? null : commonProperty;
+        return commonProperty;
     }
 
     private string? GetSingleAllOfReferenceName(OpenApiSchema schema)
@@ -410,14 +415,6 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
         var name = GetReferenceDefinitionName(reference);
         return name is not null && _definitions.ContainsKey(name) ? name : null;
     }
-
-    private static bool AllowsUnknownDiscriminator(OpenApiSchema schema) =>
-        schema.Extensions is { } extensions && extensions.TryGetValue("x-allow-unknown-discriminator", out var extension) &&
-        extension is JsonNodeExtension node && node.Node.GetValueKind() == JsonValueKind.True;
-
-    private static bool ReuseAllOfVariantDefinitions(OpenApiSchema schema) =>
-        schema.Extensions is { } extensions && extensions.TryGetValue("x-reuse-allof-variants", out var extension) &&
-        extension is JsonNodeExtension node && node.Node.GetValueKind() == JsonValueKind.True;
 
     private string? GetReferenceDefinitionName(IOpenApiSchema schema)
     {

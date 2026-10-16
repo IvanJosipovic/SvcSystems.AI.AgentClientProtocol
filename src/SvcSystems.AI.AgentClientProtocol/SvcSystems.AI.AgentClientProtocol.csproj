@@ -8,7 +8,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>ACP;Agent Client Protocol;AI;stdio</PackageTags>
-    <RepositoryUrl>https://github.com/SVCSystems/AI.AgentClientProtocol</RepositoryUrl>
+    <RepositoryUrl>https://github.com/IvanJosipovic/SVCSystems.AI.AgentClientProtocol</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
@@ -32,6 +32,7 @@
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <InternalsVisibleTo Include="SvcSystems.AI.AgentClientProtocol.Tests" />
     <AdditionalFiles Include="..\..\schema\v1\schema.json" />
+    <AdditionalFiles Include="..\..\schema\v1\schema.generator.json" />
     <ProjectReference Include="..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\SvcSystems.AI.AgentClientProtocol.Generator.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"
