@@ -59,7 +59,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 Converter = null,
                 Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationRequestScope)obj).RequestId,
                 Setter = static (obj, value) => __set_ElicitationRequestScope_RequestId((global::SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ElicitationRequestScope)obj, value!),
-                IgnoreCondition = null,
+                IgnoreCondition = global::System.Text.Json.Serialization.JsonIgnoreCondition.Never,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,

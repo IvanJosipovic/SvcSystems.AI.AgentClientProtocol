@@ -87,6 +87,8 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
 
     private void AddUnion(string name, OpenApiSchema schema)
     {
+        if (name == "McpServer" && TryAddMcpServerHierarchy(schema)) return;
+
         var discriminatorName = GetDiscriminatorName(schema);
         if (discriminatorName is not null)
         {
@@ -109,6 +111,38 @@ internal sealed class SchemaModelBuilder(Action<Diagnostic>? reportDiagnostic, D
         var structuralClassifier = caseNames.All(caseName => _model.Types.OfType<ClassModel>().Any(type => type.Name == caseName));
         _model.Types.Add(new UnionModel(name, caseNames, structuralClassifier));
         AddConstUnionDiscriminator(name, branches.ToArray());
+    }
+
+    private bool TryAddMcpServerHierarchy(OpenApiSchema schema)
+    {
+        var branches = schema.AnyOf;
+        if (branches is not { Count: 3 }) return false;
+
+        var cases = new List<DiscriminatorCase>(branches.Count);
+        var variants = new List<(int ModelIndex, ClassModel Model)>();
+        foreach (var branch in branches)
+        {
+            var branchSchema = Resolve(branch);
+            if (branchSchema is null) return false;
+            var typeProperty = branchSchema.Properties?.FirstOrDefault(property => property.Key == "type").Value;
+            var typeValue = typeProperty is not null ? Resolve(typeProperty)?.Const : null;
+            typeValue ??= branchSchema.Title == "stdio" ? "stdio" : null;
+            if (typeValue is null) return false;
+
+            var caseName = GetTypeName("McpServer", "Variant", branch, nullable: false);
+            var modelIndex = _model.Types.FindIndex(type => type is ClassModel classModel && classModel.Name == caseName);
+            if (modelIndex < 0 || _model.Types[modelIndex] is not ClassModel model) return false;
+            variants.Add((modelIndex, model));
+            cases.Add(new DiscriminatorCase(caseName, typeValue));
+        }
+
+        foreach (var (modelIndex, model) in variants)
+        {
+            _model.Types[modelIndex] = new ClassModel(model.Name, model.Properties, baseType: "McpServer", hasExtensionData: model.HasExtensionData);
+        }
+        _model.Types.Add(new ClassModel("McpServer", [], discriminatorName: "type", discriminatorCases: cases));
+        AddConstUnionDiscriminator("McpServer", branches.ToArray());
+        return true;
     }
 
     private void AddConstUnionDiscriminator(string name, IReadOnlyList<IOpenApiSchema> branches)

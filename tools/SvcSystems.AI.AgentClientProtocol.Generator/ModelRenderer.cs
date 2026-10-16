@@ -45,7 +45,11 @@ internal static class ModelRenderer
         if (useSystemTextJsonContext)
         {
             sources.Add(new GeneratedSource("CallbackRoutes.g.cs", RenderCallbackRoutes(model)));
-            sources.Add(new GeneratedSource("ClientAdapters.g.cs", ClientAdapterRenderer.Render(model)));
+            if (new[] { "ContentBlock", "ToolCallContent", "McpServer", "McpServerStdio", "McpServerHttp", "McpServerSse" }
+                .All(name => model.Types.Any(type => type.Name == name)))
+            {
+                sources.Add(new GeneratedSource("ClientAdapters.g.cs", ClientAdapterRenderer.Render(model)));
+            }
         }
         return sources;
     }
@@ -58,7 +62,7 @@ internal static class ModelRenderer
             .Append("namespace ").Append(SerializationNamespace).AppendLine(";")
             .AppendLine()
             .AppendLine("[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]");
-        foreach (var type in model.Types.Where(type => type is not UnionModel))
+        foreach (var type in model.Types.Where(type => WireJsonRenderer.IsSystemTextJsonSafe(model, type.Name)))
         {
             code.Append("[JsonSerializable(typeof(global::").Append(GeneratedNamespace).Append('.').Append(type.Name).AppendLine("))]");
         }
@@ -232,6 +236,12 @@ internal static class ModelRenderer
         if (model.IsRequired)
         {
             property = property.AddModifiers(SyntaxFactory.Token(SyntaxKind.RequiredKeyword));
+        }
+        if (model.IsRequired && model.TypeName.EndsWith("?", StringComparison.Ordinal))
+        {
+            property = property.AddAttributeLists(AttributeList(
+                "JsonIgnore",
+                NameArgument("Condition", SyntaxFactory.ParseExpression("JsonIgnoreCondition.Never"))));
         }
         return property;
     }

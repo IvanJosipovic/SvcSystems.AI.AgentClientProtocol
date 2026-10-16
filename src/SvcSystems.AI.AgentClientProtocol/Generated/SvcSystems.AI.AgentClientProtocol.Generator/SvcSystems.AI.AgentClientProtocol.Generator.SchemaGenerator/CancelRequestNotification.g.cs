@@ -8,6 +8,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
 public sealed partial class CancelRequestNotification
 {
     [JsonPropertyName("requestId")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required RequestId? RequestId { get; init; }
 
     [JsonPropertyName("_meta")]

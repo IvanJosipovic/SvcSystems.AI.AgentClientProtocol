@@ -33,7 +33,7 @@ internal static class GeneratedJson
     internal static byte[] Serialize(ImageContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ImageContent);
     internal static byte[] Serialize(AudioContent value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.AudioContent);
     internal static byte[] Serialize(ResourceLink value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ResourceLink);
-    internal static byte[] Serialize(EmbeddedResource value) => Serialize(writer => WriteEmbeddedResource(writer, value));
+    internal static byte[] Serialize(EmbeddedResource value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.EmbeddedResource);
     internal static byte[] Serialize(Content value) => Serialize(writer => WriteContent(writer, value));
     internal static byte[] Serialize(Diff value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Diff);
     internal static byte[] Serialize(Terminal value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Terminal);
@@ -44,7 +44,7 @@ internal static class GeneratedJson
     internal static byte[] Serialize(WaitForTerminalExitRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.WaitForTerminalExitRequest);
     internal static byte[] Serialize(KillTerminalRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.KillTerminalRequest);
     internal static byte[] Serialize(ElicitationSessionScope value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationSessionScope);
-    internal static byte[] Serialize(ElicitationRequestScope value) => Serialize(writer => WriteElicitationRequestScope(writer, value));
+    internal static byte[] Serialize(ElicitationRequestScope value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationRequestScope);
     internal static byte[] Serialize(EnumOption value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.EnumOption);
     internal static byte[] Serialize(StringPropertySchema value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.StringPropertySchema);
     internal static byte[] Serialize(NumberPropertySchema value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.NumberPropertySchema);
@@ -53,7 +53,7 @@ internal static class GeneratedJson
     internal static byte[] Serialize(StringMultiSelectItems value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.StringMultiSelectItems);
     internal static byte[] Serialize(MultiSelectItemsCase1 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.MultiSelectItemsCase1);
     internal static byte[] Serialize(TitledMultiSelectItems value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.TitledMultiSelectItems);
-    internal static byte[] Serialize(MultiSelectPropertySchema value) => Serialize(writer => WriteMultiSelectPropertySchema(writer, value));
+    internal static byte[] Serialize(MultiSelectPropertySchema value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.MultiSelectPropertySchema);
     internal static byte[] Serialize(ElicitationPropertySchemaCase5 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationPropertySchemaCase5);
     internal static byte[] Serialize(ElicitationSchema value) => Serialize(writer => WriteElicitationSchema(writer, value));
     internal static byte[] Serialize(PromptCapabilities value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.PromptCapabilities);
@@ -124,14 +124,12 @@ internal static class GeneratedJson
     internal static byte[] Serialize(AuthenticateRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.AuthenticateRequest);
     internal static byte[] Serialize(LogoutRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.LogoutRequest);
     internal static byte[] Serialize(HttpHeader value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.HttpHeader);
-    internal static byte[] Serialize(McpServerHttp value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.McpServerHttp);
-    internal static byte[] Serialize(McpServerSse value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.McpServerSse);
-    internal static byte[] Serialize(McpServerStdio value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.McpServerStdio);
-    internal static byte[] Serialize(NewSessionRequest value) => Serialize(writer => WriteNewSessionRequest(writer, value));
-    internal static byte[] Serialize(LoadSessionRequest value) => Serialize(writer => WriteLoadSessionRequest(writer, value));
+    internal static byte[] Serialize(McpServer value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.McpServer);
+    internal static byte[] Serialize(NewSessionRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.NewSessionRequest);
+    internal static byte[] Serialize(LoadSessionRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.LoadSessionRequest);
     internal static byte[] Serialize(ListSessionsRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ListSessionsRequest);
     internal static byte[] Serialize(DeleteSessionRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.DeleteSessionRequest);
-    internal static byte[] Serialize(ResumeSessionRequest value) => Serialize(writer => WriteResumeSessionRequest(writer, value));
+    internal static byte[] Serialize(ResumeSessionRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ResumeSessionRequest);
     internal static byte[] Serialize(CloseSessionRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CloseSessionRequest);
     internal static byte[] Serialize(SetSessionModeRequest value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SetSessionModeRequest);
     internal static byte[] Serialize(SetSessionConfigOptionRequestCase0 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SetSessionConfigOptionRequestCase0);
@@ -153,7 +151,7 @@ internal static class GeneratedJson
     internal static byte[] Serialize(CreateElicitationResponseCase2 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationResponseCase2);
     internal static byte[] Serialize(CreateElicitationResponseCase3 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationResponseCase3);
     internal static byte[] Serialize(CancelNotification value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CancelNotification);
-    internal static byte[] Serialize(CancelRequestNotification value) => Serialize(writer => WriteCancelRequestNotification(writer, value));
+    internal static byte[] Serialize(CancelRequestNotification value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CancelRequestNotification);
     internal static byte[] Serialize(ContentBlockDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ContentBlockDiscriminator);
     internal static byte[] Serialize(ToolCallContentDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ToolCallContentDiscriminator);
     internal static byte[] Serialize(CreateElicitationRequestDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationRequestDiscriminator);
@@ -167,17 +165,16 @@ internal static class GeneratedJson
     internal static byte[] Serialize(SetSessionConfigOptionRequestDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.SetSessionConfigOptionRequestDiscriminator);
     internal static byte[] Serialize(RequestPermissionOutcomeDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.RequestPermissionOutcomeDiscriminator);
     internal static byte[] Serialize(CreateElicitationResponseDiscriminator value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationResponseDiscriminator);
-    internal static byte[] Serialize(RequestId value) => Serialize(writer => WriteRequestId(writer, value));
-    internal static byte[] Serialize(EmbeddedResourceResource value) => Serialize(writer => WriteEmbeddedResourceResource(writer, value));
-    internal static byte[] Serialize(ElicitationFormMode value) => Serialize(writer => WriteElicitationFormMode(writer, value));
-    internal static byte[] Serialize(ElicitationUrlMode value) => Serialize(writer => WriteElicitationUrlMode(writer, value));
-    internal static byte[] Serialize(CreateElicitationRequestCase2 value) => Serialize(writer => WriteCreateElicitationRequestCase2(writer, value));
+    internal static byte[] Serialize(RequestId value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.RequestId);
+    internal static byte[] Serialize(EmbeddedResourceResource value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.EmbeddedResourceResource);
+    internal static byte[] Serialize(ElicitationFormMode value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationFormMode);
+    internal static byte[] Serialize(ElicitationUrlMode value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ElicitationUrlMode);
+    internal static byte[] Serialize(CreateElicitationRequestCase2 value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.CreateElicitationRequestCase2);
     internal static byte[] Serialize(CreateElicitationRequest value) => Serialize(writer => WriteCreateElicitationRequest(writer, value));
-    internal static byte[] Serialize(MultiSelectItems value) => Serialize(writer => WriteMultiSelectItems(writer, value));
+    internal static byte[] Serialize(MultiSelectItems value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.MultiSelectItems);
     internal static byte[] Serialize(ElicitationPropertySchema value) => Serialize(writer => WriteElicitationPropertySchema(writer, value));
     internal static byte[] Serialize(AuthMethod value) => Serialize(writer => WriteAuthMethod(writer, value));
     internal static byte[] Serialize(SessionConfigSelectOptions value) => Serialize(writer => WriteSessionConfigSelectOptions(writer, value));
-    internal static byte[] Serialize(McpServer value) => Serialize(writer => WriteMcpServer(writer, value));
     internal static byte[] Serialize(SetSessionConfigOptionRequest value) => Serialize(writer => WriteSetSessionConfigOptionRequest(writer, value));
     internal static byte[] Serialize(ElicitationContentValue value) => Serialize(writer => WriteElicitationContentValue(writer, value));
     internal static byte[] Serialize(CreateElicitationResponse value) => Serialize(writer => WriteCreateElicitationResponse(writer, value));
@@ -5558,6 +5555,122 @@ internal static class GeneratedJson
         writer.WriteEndObject();
     }
 
+    private static void WriteMcpServer(Utf8JsonWriter writer, McpServer value)
+    {
+        writer.WriteStartObject();
+        switch (value)
+        {
+            case McpServerHttp derived:
+                writer.WriteString("type", "http");
+                writer.WritePropertyName("name");
+                writer.WriteStringValue(derived.Name);
+                writer.WritePropertyName("url");
+                writer.WriteStringValue(derived.Url);
+                writer.WritePropertyName("headers");
+                writer.WriteStartArray();
+                foreach (var item in derived.Headers)
+                {
+                    WriteHttpHeader(writer, item);
+                }
+                writer.WriteEndArray();
+                if (derived.Meta is not null)
+                {
+                    writer.WritePropertyName("_meta");
+                    writer.WriteStartObject();
+                    foreach (var item in derived.Meta!)
+                    {
+                        writer.WritePropertyName(item.Key);
+                        item.Value.WriteTo(writer);
+                    }
+                    writer.WriteEndObject();
+                }
+                if (derived.ExtensionData is not null)
+                {
+                    foreach (var item in derived.ExtensionData)
+                    {
+                        writer.WritePropertyName(item.Key);
+                        item.Value.WriteTo(writer);
+                    }
+                }
+                break;
+            case McpServerSse derived:
+                writer.WriteString("type", "sse");
+                writer.WritePropertyName("name");
+                writer.WriteStringValue(derived.Name);
+                writer.WritePropertyName("url");
+                writer.WriteStringValue(derived.Url);
+                writer.WritePropertyName("headers");
+                writer.WriteStartArray();
+                foreach (var item in derived.Headers)
+                {
+                    WriteHttpHeader(writer, item);
+                }
+                writer.WriteEndArray();
+                if (derived.Meta is not null)
+                {
+                    writer.WritePropertyName("_meta");
+                    writer.WriteStartObject();
+                    foreach (var item in derived.Meta!)
+                    {
+                        writer.WritePropertyName(item.Key);
+                        item.Value.WriteTo(writer);
+                    }
+                    writer.WriteEndObject();
+                }
+                if (derived.ExtensionData is not null)
+                {
+                    foreach (var item in derived.ExtensionData)
+                    {
+                        writer.WritePropertyName(item.Key);
+                        item.Value.WriteTo(writer);
+                    }
+                }
+                break;
+            case McpServerStdio derived:
+                writer.WriteString("type", "stdio");
+                writer.WritePropertyName("name");
+                writer.WriteStringValue(derived.Name);
+                writer.WritePropertyName("command");
+                writer.WriteStringValue(derived.Command);
+                writer.WritePropertyName("args");
+                writer.WriteStartArray();
+                foreach (var item in derived.Args)
+                {
+                    writer.WriteStringValue(item);
+                }
+                writer.WriteEndArray();
+                writer.WritePropertyName("env");
+                writer.WriteStartArray();
+                foreach (var item in derived.Env)
+                {
+                    WriteEnvVariable(writer, item);
+                }
+                writer.WriteEndArray();
+                if (derived.Meta is not null)
+                {
+                    writer.WritePropertyName("_meta");
+                    writer.WriteStartObject();
+                    foreach (var item in derived.Meta!)
+                    {
+                        writer.WritePropertyName(item.Key);
+                        item.Value.WriteTo(writer);
+                    }
+                    writer.WriteEndObject();
+                }
+                if (derived.ExtensionData is not null)
+                {
+                    foreach (var item in derived.ExtensionData)
+                    {
+                        writer.WritePropertyName(item.Key);
+                        item.Value.WriteTo(writer);
+                    }
+                }
+                break;
+            default: throw new ArgumentOutOfRangeException(nameof(value));
+        }
+        writer.WriteEndObject();
+    }
+
     private static void WriteNewSessionRequest(Utf8JsonWriter writer, NewSessionRequest value)
     {
         writer.WriteStartObject();
@@ -6714,23 +6827,6 @@ internal static class GeneratedJson
         }
     }
 
-    private static void WriteMcpServer(Utf8JsonWriter writer, McpServer value)
-    {
-        switch (value)
-        {
-            case McpServerHttp caseValue:
-                WriteMcpServerHttp(writer, caseValue);
-                break;
-            case McpServerSse caseValue:
-                WriteMcpServerSse(writer, caseValue);
-                break;
-            case McpServerStdio caseValue:
-                WriteMcpServerStdio(writer, caseValue);
-                break;
-            default: throw new ArgumentOutOfRangeException(nameof(value));
-        }
-    }
-
     private static void WriteSetSessionConfigOptionRequest(Utf8JsonWriter writer, SetSessionConfigOptionRequest value)
     {
         switch (value)
@@ -6997,13 +7093,7 @@ internal static class GeneratedJson
     internal static EmbeddedResource DeserializeEmbeddedResource(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return new EmbeddedResource
-        {
-            Annotations = (value.TryGetProperty("annotations", out var property_Annotations) && property_Annotations.ValueKind != JsonValueKind.Null ? DeserializeAnnotations(property_Annotations) : null),
-            Resource = DeserializeEmbeddedResourceResource(Required(value, "resource")),
-            Meta = (value.TryGetProperty("_meta", out var property_Meta) && property_Meta.ValueKind != JsonValueKind.Null ? ReadElementDictionary(property_Meta) : null),
-            ExtensionData = ReadExtensionData(value, "annotations", "resource", "_meta"),
-        };
+        return value.Deserialize(JsonContext.Default.EmbeddedResource) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static Content DeserializeContent(JsonElement value)
@@ -7122,17 +7212,7 @@ internal static class GeneratedJson
     internal static MultiSelectPropertySchema DeserializeMultiSelectPropertySchema(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return new MultiSelectPropertySchema
-        {
-            Title = (value.TryGetProperty("title", out var property_Title) && property_Title.ValueKind != JsonValueKind.Null ? ReadStringValue(property_Title) : null),
-            Description = (value.TryGetProperty("description", out var property_Description) && property_Description.ValueKind != JsonValueKind.Null ? ReadStringValue(property_Description) : null),
-            MinItems = (value.TryGetProperty("minItems", out var property_MinItems) && property_MinItems.ValueKind != JsonValueKind.Null ? ReadUInt64Value(property_MinItems) : null),
-            MaxItems = (value.TryGetProperty("maxItems", out var property_MaxItems) && property_MaxItems.ValueKind != JsonValueKind.Null ? ReadUInt64Value(property_MaxItems) : null),
-            Items = DeserializeMultiSelectItems(Required(value, "items")),
-            Default = (value.TryGetProperty("default", out var property_Default) && property_Default.ValueKind != JsonValueKind.Null ? ReadList(property_Default, static item => ReadStringValue(item)) : null),
-            Meta = (value.TryGetProperty("_meta", out var property_Meta) && property_Meta.ValueKind != JsonValueKind.Null ? ReadElementDictionary(property_Meta) : null),
-            ExtensionData = ReadExtensionData(value, "title", "description", "minItems", "maxItems", "items", "default", "_meta"),
-        };
+        return value.Deserialize(JsonContext.Default.MultiSelectPropertySchema) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static ElicitationPropertySchemaCase5 DeserializeElicitationPropertySchemaCase5(JsonElement value)
@@ -7852,28 +7932,13 @@ internal static class GeneratedJson
     internal static NewSessionRequest DeserializeNewSessionRequest(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return new NewSessionRequest
-        {
-            Cwd = ReadStringValue(Required(value, "cwd")),
-            AdditionalDirectories = (value.TryGetProperty("additionalDirectories", out var property_AdditionalDirectories) && property_AdditionalDirectories.ValueKind != JsonValueKind.Null ? ReadList(property_AdditionalDirectories, static item => ReadStringValue(item)) : null),
-            McpServers = ReadList(Required(value, "mcpServers"), static item => DeserializeMcpServer(item)),
-            Meta = (value.TryGetProperty("_meta", out var property_Meta) && property_Meta.ValueKind != JsonValueKind.Null ? ReadElementDictionary(property_Meta) : null),
-            ExtensionData = ReadExtensionData(value, "cwd", "additionalDirectories", "mcpServers", "_meta"),
-        };
+        return value.Deserialize(JsonContext.Default.NewSessionRequest) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static LoadSessionRequest DeserializeLoadSessionRequest(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return new LoadSessionRequest
-        {
-            McpServers = ReadList(Required(value, "mcpServers"), static item => DeserializeMcpServer(item)),
-            Cwd = ReadStringValue(Required(value, "cwd")),
-            AdditionalDirectories = (value.TryGetProperty("additionalDirectories", out var property_AdditionalDirectories) && property_AdditionalDirectories.ValueKind != JsonValueKind.Null ? ReadList(property_AdditionalDirectories, static item => ReadStringValue(item)) : null),
-            SessionId = ReadStringValue(Required(value, "sessionId")),
-            Meta = (value.TryGetProperty("_meta", out var property_Meta) && property_Meta.ValueKind != JsonValueKind.Null ? ReadElementDictionary(property_Meta) : null),
-            ExtensionData = ReadExtensionData(value, "mcpServers", "cwd", "additionalDirectories", "sessionId", "_meta"),
-        };
+        return value.Deserialize(JsonContext.Default.LoadSessionRequest) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static ListSessionsRequest DeserializeListSessionsRequest(JsonElement value)
@@ -7891,15 +7956,7 @@ internal static class GeneratedJson
     internal static ResumeSessionRequest DeserializeResumeSessionRequest(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        return new ResumeSessionRequest
-        {
-            SessionId = ReadStringValue(Required(value, "sessionId")),
-            Cwd = ReadStringValue(Required(value, "cwd")),
-            AdditionalDirectories = (value.TryGetProperty("additionalDirectories", out var property_AdditionalDirectories) && property_AdditionalDirectories.ValueKind != JsonValueKind.Null ? ReadList(property_AdditionalDirectories, static item => ReadStringValue(item)) : null),
-            McpServers = (value.TryGetProperty("mcpServers", out var property_McpServers) && property_McpServers.ValueKind != JsonValueKind.Null ? ReadList(property_McpServers, static item => DeserializeMcpServer(item)) : null),
-            Meta = (value.TryGetProperty("_meta", out var property_Meta) && property_Meta.ValueKind != JsonValueKind.Null ? ReadElementDictionary(property_Meta) : null),
-            ExtensionData = ReadExtensionData(value, "sessionId", "cwd", "additionalDirectories", "mcpServers", "_meta"),
-        };
+        return value.Deserialize(JsonContext.Default.ResumeSessionRequest) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
     internal static CloseSessionRequest DeserializeCloseSessionRequest(JsonElement value)
@@ -8096,32 +8153,33 @@ internal static class GeneratedJson
         };
     }
 
+    internal static McpServer DeserializeMcpServer(JsonElement value)
+    {
+        return JsonSerializer.Deserialize(value, JsonContext.Default.McpServer) ?? throw new JsonException("Expected a non-null JSON value.");
+    }
+
     internal static RequestPermissionOutcome DeserializeRequestPermissionOutcome(JsonElement value)
     {
-        return ReadStringValue(Required(value, "outcome")) switch
-        {
-            "cancelled" => DeserializeRequestPermissionOutcomeVariant0Cancelled(value),
-            "selected" => DeserializeRequestPermissionOutcomeVariant1Selected(value),
-            _ => throw new JsonException("Unknown discriminator value."),
-        };
+        return JsonSerializer.Deserialize(value, JsonContext.Default.RequestPermissionOutcome) ?? throw new JsonException("Expected a non-null JSON value.");
     }
 
-    internal static object DeserializeEmbeddedResourceResourceValue(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        if (value.TryGetProperty("text", out _)) return DeserializeTextResourceContents(value);
-        if (value.TryGetProperty("blob", out _)) return DeserializeBlobResourceContents(value);
-        throw new JsonException("Value did not match any union case.");
-    }
+    internal static RequestId DeserializeRequestId(JsonElement value) =>
+        JsonSerializer.Deserialize(value, JsonContext.Default.RequestId)!;
 
-    internal static object DeserializeMultiSelectItemsValue(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        if (value.TryGetProperty("enum", out _)) return DeserializeStringMultiSelectItems(value);
-        if (value.TryGetProperty("type", out _)) return DeserializeMultiSelectItemsCase1(value);
-        if (value.TryGetProperty("anyOf", out _)) return DeserializeTitledMultiSelectItems(value);
-        throw new JsonException("Value did not match any union case.");
-    }
+    internal static EmbeddedResourceResource DeserializeEmbeddedResourceResource(JsonElement value) =>
+        JsonSerializer.Deserialize(value, JsonContext.Default.EmbeddedResourceResource)!;
+
+    internal static ElicitationFormMode DeserializeElicitationFormMode(JsonElement value) =>
+        JsonSerializer.Deserialize(value, JsonContext.Default.ElicitationFormMode)!;
+
+    internal static ElicitationUrlMode DeserializeElicitationUrlMode(JsonElement value) =>
+        JsonSerializer.Deserialize(value, JsonContext.Default.ElicitationUrlMode)!;
+
+    internal static CreateElicitationRequestCase2 DeserializeCreateElicitationRequestCase2(JsonElement value) =>
+        JsonSerializer.Deserialize(value, JsonContext.Default.CreateElicitationRequestCase2)!;
+
+    internal static MultiSelectItems DeserializeMultiSelectItems(JsonElement value) =>
+        JsonSerializer.Deserialize(value, JsonContext.Default.MultiSelectItems)!;
 
     internal static object DeserializeElicitationPropertySchemaValue(JsonElement value)
     {
@@ -8149,41 +8207,11 @@ internal static class GeneratedJson
         throw new JsonException("Array did not match any union case.");
     }
 
-    internal static object DeserializeMcpServerValue(JsonElement value)
-    {
-        if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
-        if (value.TryGetProperty("command", out _)) return DeserializeMcpServerStdio(value);
-        throw new JsonException("Value did not match any union case.");
-    }
-
     internal static object DeserializeSetSessionConfigOptionRequestValue(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
         if (value.TryGetProperty("type", out _)) return DeserializeSetSessionConfigOptionRequestCase0(value);
         throw new JsonException("Value did not match any union case.");
-    }
-
-    internal static EmbeddedResourceResource DeserializeEmbeddedResourceResource(JsonElement value)
-    {
-        var parsed = DeserializeEmbeddedResourceResourceValue(value);
-        return parsed switch
-        {
-            TextResourceContents item => item,
-            BlobResourceContents item => item,
-            _ => throw new JsonException("Value did not match a union case.")
-        };
-    }
-
-    internal static MultiSelectItems DeserializeMultiSelectItems(JsonElement value)
-    {
-        var parsed = DeserializeMultiSelectItemsValue(value);
-        return parsed switch
-        {
-            StringMultiSelectItems item => item,
-            MultiSelectItemsCase1 item => item,
-            TitledMultiSelectItems item => item,
-            _ => throw new JsonException("Value did not match a union case.")
-        };
     }
 
     internal static ElicitationPropertySchema DeserializeElicitationPropertySchema(JsonElement value)
@@ -8219,18 +8247,6 @@ internal static class GeneratedJson
         {
             List<SessionConfigSelectOption> item => item,
             List<SessionConfigSelectGroup> item => item,
-            _ => throw new JsonException("Value did not match a union case.")
-        };
-    }
-
-    internal static McpServer DeserializeMcpServer(JsonElement value)
-    {
-        var parsed = DeserializeMcpServerValue(value);
-        return parsed switch
-        {
-            McpServerHttp item => item,
-            McpServerSse item => item,
-            McpServerStdio item => item,
             _ => throw new JsonException("Value did not match a union case.")
         };
     }

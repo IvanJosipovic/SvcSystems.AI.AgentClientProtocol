@@ -71,18 +71,15 @@ internal static class ClientAdapters
         StdioMcpServerOptions stdio => (McpServer)new McpServerStdio
         {
             Name = stdio.Name, Command = stdio.Command, Args = stdio.Arguments?.ToList() ?? [],
-            Env = stdio.Environment?.Select(item => new EnvVariable { Name = item.Key, Value = item.Value }).ToList() ?? [],
-            ExtensionData = new Dictionary<string, JsonElement>(StringComparer.Ordinal) { ["type"] = JsonSerializer.SerializeToElement(Discriminators.ToWireValue(McpServerDiscriminator.Stdio), JsonContext.Default.String) }
+            Env = stdio.Environment?.Select(item => new EnvVariable { Name = item.Key, Value = item.Value }).ToList() ?? []
         },
         HttpMcpServerOptions http => new McpServerHttp
         {
-            Name = http.Name, Url = http.Url, Headers = ToHeaders(http.Headers),
-            ExtensionData = new Dictionary<string, JsonElement>(StringComparer.Ordinal) { ["type"] = JsonSerializer.SerializeToElement(Discriminators.ToWireValue(McpServerDiscriminator.Http), JsonContext.Default.String) }
+            Name = http.Name, Url = http.Url, Headers = ToHeaders(http.Headers)
         },
         SseMcpServerOptions sse => new McpServerSse
         {
-            Name = sse.Name, Url = sse.Url, Headers = ToHeaders(sse.Headers),
-            ExtensionData = new Dictionary<string, JsonElement>(StringComparer.Ordinal) { ["type"] = JsonSerializer.SerializeToElement(Discriminators.ToWireValue(McpServerDiscriminator.Sse), JsonContext.Default.String) }
+            Name = sse.Name, Url = sse.Url, Headers = ToHeaders(sse.Headers)
         },
         _ => throw new ArgumentOutOfRangeException(nameof(servers), $"Unknown MCP server configuration type '{server.GetType().Name}'.")
     }).ToList();

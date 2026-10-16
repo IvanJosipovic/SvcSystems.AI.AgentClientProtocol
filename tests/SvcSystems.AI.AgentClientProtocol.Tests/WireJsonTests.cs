@@ -9,6 +9,130 @@ namespace SvcSystems.AI.AgentClientProtocol.Tests;
 public sealed class WireJsonTests
 {
     [Fact]
+    public void UnambiguousSchemaUnionUsesSystemTextJsonSourceGeneratedMetadata()
+    {
+        EmbeddedResourceResource resource = new TextResourceContents
+        {
+            Uri = "file:///readme.txt",
+            Text = "hello"
+        };
+
+        using var serialized = JsonDocument.Parse(GeneratedJson.Serialize(resource));
+        Assert.Equal("file:///readme.txt", serialized.RootElement.GetProperty("uri").GetString());
+        Assert.Equal("hello", serialized.RootElement.GetProperty("text").GetString());
+
+        var roundTripped = GeneratedJson.DeserializeEmbeddedResourceResource(serialized.RootElement);
+        using var serializedAgain = JsonDocument.Parse(GeneratedJson.Serialize(roundTripped));
+        Assert.Equal(serialized.RootElement.GetProperty("text").GetString(), serializedAgain.RootElement.GetProperty("text").GetString());
+    }
+
+    [Fact]
+    public void SourceGeneratedUnionsRoundTripEveryDistinctJsonShape()
+    {
+        RequestId numericId = 42L;
+        AssertGeneratedUnionRoundTrip<RequestId>("42", GeneratedJson.Serialize(numericId), GeneratedJson.Serialize, GeneratedJson.DeserializeRequestId);
+
+        RequestId stringId = "request-1";
+        AssertGeneratedUnionRoundTrip<RequestId>("\"request-1\"", GeneratedJson.Serialize(stringId), GeneratedJson.Serialize, GeneratedJson.DeserializeRequestId);
+
+        EmbeddedResourceResource textResource = new TextResourceContents { Uri = "file:///text", Text = "body" };
+        AssertGeneratedUnionRoundTrip<EmbeddedResourceResource>(
+            "{\"uri\":\"file:///text\",\"text\":\"body\"}",
+            GeneratedJson.Serialize(textResource),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeEmbeddedResourceResource);
+
+        EmbeddedResourceResource blobResource = new BlobResourceContents { Uri = "file:///blob", Blob = "AAE=", MimeType = "application/octet-stream" };
+        AssertGeneratedUnionRoundTrip<EmbeddedResourceResource>(
+            "{\"uri\":\"file:///blob\",\"blob\":\"AAE=\",\"mimeType\":\"application/octet-stream\"}",
+            GeneratedJson.Serialize(blobResource),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeEmbeddedResourceResource);
+
+        ElicitationFormMode sessionMode = new ElicitationSessionScope { SessionId = "session-1", ToolCallId = "tool-1" };
+        AssertGeneratedUnionRoundTrip<ElicitationFormMode>(
+            "{\"sessionId\":\"session-1\",\"toolCallId\":\"tool-1\"}",
+            GeneratedJson.Serialize(sessionMode),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeElicitationFormMode);
+
+        ElicitationFormMode requestMode = new ElicitationRequestScope { RequestId = stringId };
+        AssertGeneratedUnionRoundTrip<ElicitationFormMode>(
+            "{\"requestId\":\"request-1\"}",
+            GeneratedJson.Serialize(requestMode),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeElicitationFormMode);
+
+        MultiSelectItems stringItems = new StringMultiSelectItems { Enum = ["red", "blue"] };
+        AssertGeneratedUnionRoundTrip<MultiSelectItems>(
+            "{\"enum\":[\"red\",\"blue\"]}",
+            GeneratedJson.Serialize(stringItems),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeMultiSelectItems);
+
+        MultiSelectItems titledItems = new TitledMultiSelectItems
+        {
+            AnyOf = [new EnumOption { Const = "red", Title = "Red" }]
+        };
+        AssertGeneratedUnionRoundTrip<MultiSelectItems>(
+            "{\"anyOf\":[{\"const\":\"red\",\"title\":\"Red\"}]}",
+            GeneratedJson.Serialize(titledItems),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeMultiSelectItems);
+
+        MultiSelectItems typedItems = new MultiSelectItemsCase1 { Type = "dynamic" };
+        AssertGeneratedUnionRoundTrip<MultiSelectItems>(
+            "{\"type\":\"dynamic\"}",
+            GeneratedJson.Serialize(typedItems),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeMultiSelectItems);
+
+        ElicitationUrlMode urlMode = new ElicitationRequestScope { RequestId = numericId };
+        AssertGeneratedUnionRoundTrip<ElicitationUrlMode>(
+            "{\"requestId\":42}",
+            GeneratedJson.Serialize(urlMode),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeElicitationUrlMode);
+
+        CreateElicitationRequestCase2 scopedRequest = new ElicitationRequestScope { RequestId = stringId };
+        AssertGeneratedUnionRoundTrip<CreateElicitationRequestCase2>(
+            "{\"requestId\":\"request-1\"}",
+            GeneratedJson.Serialize(scopedRequest),
+            GeneratedJson.Serialize,
+            GeneratedJson.DeserializeCreateElicitationRequestCase2);
+    }
+
+    [Fact]
+    public void AmbiguousUnionFallbacksPreserveEachSelectedWireShape()
+    {
+        AssertUnionRoundTrip<SessionConfigSelectOptions>(
+            "[{\"value\":\"fast\",\"name\":\"Fast\"}]",
+            GeneratedJson.DeserializeSessionConfigSelectOptions,
+            GeneratedJson.Serialize);
+        AssertUnionRoundTrip<SessionConfigSelectOptions>(
+            "[{\"group\":\"recommended\",\"name\":\"Recommended\",\"options\":[{\"value\":\"fast\",\"name\":\"Fast\"}]}]",
+            GeneratedJson.DeserializeSessionConfigSelectOptions,
+            GeneratedJson.Serialize);
+
+        AssertUnionRoundTrip<ElicitationPropertySchema>(
+            "{\"type\":\"string\",\"title\":\"Name\",\"minLength\":1}",
+            GeneratedJson.DeserializeElicitationPropertySchema,
+            GeneratedJson.Serialize);
+        AssertUnionRoundTrip<ElicitationPropertySchema>(
+            "{\"type\":\"integer\",\"title\":\"Count\",\"minimum\":1}",
+            GeneratedJson.DeserializeElicitationPropertySchema,
+            GeneratedJson.Serialize);
+    }
+
+    [Fact]
+    public void TaggedMcpServerHierarchyDeserializesEachDiscriminator()
+    {
+        AssertMcpServer("""{"type":"stdio","name":"local","command":"agent","args":["--stdio"],"env":[]}""", typeof(McpServerStdio));
+        AssertMcpServer("""{"type":"http","name":"remote","url":"https://example.test/mcp","headers":[]}""", typeof(McpServerHttp));
+        AssertMcpServer("""{"type":"sse","name":"events","url":"https://example.test/events","headers":[]}""", typeof(McpServerSse));
+    }
+
+    [Fact]
     public void InitializeUsesGeneratedRequestModelAndAdvertisesOnlyConfiguredCapabilities()
     {
         var request = new InitializeRequest
@@ -201,7 +325,7 @@ public sealed class WireJsonTests
         Assert.Equal("Inspect", Assert.IsType<PlanEntry>(Assert.Single(plan.Entries)).Content);
 
         using var toolNotification = JsonDocument.Parse("""
-            { "update": { "sessionUpdate": "tool_call", "toolCallId": "tool-1", "locations": [{ "path": "src/a.cs", "line": 12 }] } }
+            { "update": { "sessionUpdate": "tool_call", "toolCallId": "tool-1", "title": "Inspect file", "locations": [{ "path": "src/a.cs", "line": 12 }] } }
             """);
         var tool = Assert.IsType<AgentToolCallUpdate>(WireJson.ReadSessionUpdate(toolNotification.RootElement));
         var location = Assert.IsType<ToolCallLocation>(Assert.Single(tool.Locations!));
@@ -217,5 +341,35 @@ public sealed class WireJsonTests
             """);
 
         Assert.Equal("Agent title", WireJson.ReadAgentInfo(response.RootElement).Title);
+    }
+
+    private static void AssertGeneratedUnionRoundTrip<T>(string expectedJson, byte[] serialized, Func<T, byte[]> serialize, Func<JsonElement, T> deserialize)
+    {
+        AssertJsonEqual(expectedJson, serialized);
+        using var document = JsonDocument.Parse(serialized);
+        AssertJsonEqual(expectedJson, serialize(deserialize(document.RootElement)));
+    }
+
+    private static void AssertUnionRoundTrip<T>(string json, Func<JsonElement, T> deserialize, Func<T, byte[]> serialize)
+    {
+        using var document = JsonDocument.Parse(json);
+        AssertJsonEqual(json, serialize(deserialize(document.RootElement)));
+    }
+
+    private static void AssertMcpServer(string json, Type expectedType)
+    {
+        using var document = JsonDocument.Parse(json);
+        var server = GeneratedJson.DeserializeMcpServer(document.RootElement);
+        Assert.IsType(expectedType, server);
+        AssertJsonEqual(json, GeneratedJson.Serialize(server));
+    }
+
+    private static void AssertJsonEqual(string expected, byte[] actual)
+    {
+        using var expectedDocument = JsonDocument.Parse(expected);
+        using var actualDocument = JsonDocument.Parse(actual);
+        Assert.True(
+            JsonElement.DeepEquals(expectedDocument.RootElement, actualDocument.RootElement),
+            $"Expected JSON {expectedDocument.RootElement.GetRawText()} but got {actualDocument.RootElement.GetRawText()}.");
     }
 }

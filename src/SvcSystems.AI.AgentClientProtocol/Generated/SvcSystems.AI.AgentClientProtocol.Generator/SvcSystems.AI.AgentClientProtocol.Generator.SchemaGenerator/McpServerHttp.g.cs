@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Protocol.Generated;
-public sealed partial class McpServerHttp
+public sealed class McpServerHttp : McpServer
 {
     [JsonPropertyName("name")]
     public required string Name { get; init; }

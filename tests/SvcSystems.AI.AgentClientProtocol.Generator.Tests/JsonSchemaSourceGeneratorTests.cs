@@ -106,9 +106,11 @@ public sealed class JsonSchemaSourceGeneratorTests
         var jsonRenderer = Assert.Single(generatedSources, source => source.Contains("internal static class GeneratedJson", StringComparison.Ordinal));
 
         Assert.Contains("Serialize(Thing value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Thing)", jsonRenderer, StringComparison.Ordinal);
-        Assert.Contains("Serialize(Container value) => Serialize(writer => WriteContainer(writer, value))", jsonRenderer, StringComparison.Ordinal);
+        Assert.Contains("Serialize(Container value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Container)", jsonRenderer, StringComparison.Ordinal);
+        Assert.Contains("Serialize(Choice value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.Choice)", jsonRenderer, StringComparison.Ordinal);
         Assert.Contains("DeserializeThing(JsonElement value)", jsonRenderer, StringComparison.Ordinal);
         Assert.Contains("value.Deserialize(JsonContext.Default.Thing)", jsonRenderer, StringComparison.Ordinal);
+        Assert.Contains("JsonSerializer.Deserialize(value, JsonContext.Default.Choice)", jsonRenderer, StringComparison.Ordinal);
     }
 
     [Fact]
