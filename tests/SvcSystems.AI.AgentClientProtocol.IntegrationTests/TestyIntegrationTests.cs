@@ -251,7 +251,8 @@ public sealed class TestyIntegrationTests
             var text = ((PromptTextContent)report.Content).Text;
             Assert.Contains("session/request_permission: ok", text, StringComparison.Ordinal);
             Assert.Contains("fs/write_text_file: ok", text, StringComparison.Ordinal);
-            Assert.Contains("fs/read_text_file: ok written by testy", text, StringComparison.Ordinal);
+            Assert.Contains("fs/read_text_file: ok", text, StringComparison.Ordinal);
+            Assert.Contains("content: \"written by testy\\n\"", text, StringComparison.Ordinal);
             Assert.Contains("terminal/create: ok", text, StringComparison.Ordinal);
             Assert.Contains("terminal/output: ok", text, StringComparison.Ordinal);
             Assert.Contains("terminal/wait_for_exit: ok", text, StringComparison.Ordinal);
