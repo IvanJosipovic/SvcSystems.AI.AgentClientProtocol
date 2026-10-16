@@ -24,13 +24,18 @@ internal sealed class ClassModel(
     string? baseType = null,
     string? discriminatorName = null,
     IReadOnlyList<DiscriminatorCase>? discriminatorCases = null,
-    bool hasExtensionData = false) : TypeModel(name)
+    bool hasExtensionData = false,
+    bool allowUnknownDiscriminator = false,
+    bool isRawPayloadVariant = false) : TypeModel(name)
 {
     public IReadOnlyList<PropertyModel> Properties { get; } = properties;
     public string? BaseType { get; } = baseType;
     public string? DiscriminatorName { get; } = discriminatorName;
     public IReadOnlyList<DiscriminatorCase> DiscriminatorCases { get; } = discriminatorCases ?? [];
     public bool HasExtensionData { get; } = hasExtensionData;
+    public bool AllowUnknownDiscriminator { get; } = allowUnknownDiscriminator;
+    public bool IsRawPayloadVariant { get; } = isRawPayloadVariant;
+    public string? UnknownVariantTypeName => AllowUnknownDiscriminator ? Name + "Unknown" : null;
 }
 
 internal sealed class EnumModel(string name, IReadOnlyList<string> values) : TypeModel(name)
@@ -44,7 +49,14 @@ internal sealed class UnionModel(string name, IReadOnlyList<string> cases, bool 
     public bool StructuralClassifier { get; } = structuralClassifier;
 }
 
-internal sealed class PropertyModel(string wireName, string identifier, string typeName, bool isRequired, bool isNullable, string? constValue = null)
+internal sealed class PropertyModel(
+    string wireName,
+    string identifier,
+    string typeName,
+    bool isRequired,
+    bool isNullable,
+    string? constValue = null,
+    bool isIgnored = false)
 {
     public string WireName { get; } = wireName;
     public string Identifier { get; } = identifier;
@@ -52,6 +64,7 @@ internal sealed class PropertyModel(string wireName, string identifier, string t
     public bool IsRequired { get; } = isRequired;
     public bool IsNullable { get; } = isNullable;
     public string? ConstValue { get; } = constValue;
+    public bool IsIgnored { get; } = isIgnored;
 }
 
 internal sealed class DiscriminatorCase(string typeName, string discriminatorValue)

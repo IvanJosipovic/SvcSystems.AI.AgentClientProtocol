@@ -364,7 +364,7 @@ internal static class GeneratedJson
 
     private static void WriteContentBlock(Utf8JsonWriter writer, ContentBlock value)
     {
-        if (value is UnknownWireContent unknown)
+        if (value is ContentBlockUnknown unknown)
         {
             unknown.RawPayload.WriteTo(writer);
             return;
@@ -742,6 +742,11 @@ internal static class GeneratedJson
             }
         }
         writer.WriteEndObject();
+    }
+
+    private static void WriteContentBlockUnknown(Utf8JsonWriter writer, ContentBlockUnknown value)
+    {
+        value.RawPayload.WriteTo(writer);
     }
 
     private static void WriteToolCallContent(Utf8JsonWriter writer, ToolCallContent value)
@@ -6987,6 +6992,9 @@ internal static class GeneratedJson
         };
     }
 
+    internal static ContentBlockUnknown DeserializeContentBlockUnknown(JsonElement value) =>
+        new ContentBlockUnknown { RawPayload = value.Clone() };
+
     internal static ToolCallContentVariant0Content DeserializeToolCallContentVariant0Content(JsonElement value)
     {
         if (value.ValueKind != JsonValueKind.Object) throw new JsonException("Expected a JSON object.");
@@ -8106,7 +8114,7 @@ internal static class GeneratedJson
             "audio" => DeserializeContentBlockVariant2Audio(value),
             "resource_link" => DeserializeContentBlockVariant3ResourceLink(value),
             "resource" => DeserializeContentBlockVariant4Resource(value),
-            _ => new UnknownWireContent(value.Clone()),
+            _ => new ContentBlockUnknown { RawPayload = value.Clone() },
         };
     }
 

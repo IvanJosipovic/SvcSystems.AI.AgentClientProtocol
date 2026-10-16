@@ -19,7 +19,7 @@
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
-        <DefineConstants>$(DefineConstants);ACP_STJ_SOURCE_GEN</DefineConstants>
+        <DefineConstants>$(DefineConstants);ACP_STJ_SOURCE_GEN;ACP_CLIENT_ADAPTERS</DefineConstants>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>

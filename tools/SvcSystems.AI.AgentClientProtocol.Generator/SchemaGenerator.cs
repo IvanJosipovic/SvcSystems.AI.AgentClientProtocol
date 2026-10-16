@@ -35,8 +35,11 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         var generateJsonContext = context.ParseOptionsProvider
             .Select(static (options, _) => options is CSharpParseOptions csharpOptions &&
                 csharpOptions.PreprocessorSymbolNames.Contains("ACP_STJ_SOURCE_GEN"));
+        var generateClientAdapters = context.ParseOptionsProvider
+            .Select(static (options, _) => options is CSharpParseOptions csharpOptions &&
+                csharpOptions.PreprocessorSymbolNames.Contains("ACP_CLIENT_ADAPTERS"));
         context.RegisterPreCompilationSourceOutput(schemaInputs.Combine(generateJsonContext), GenerateModels);
-        context.RegisterSourceOutput(schemaInputs.Combine(generateJsonContext), Generate);
+        context.RegisterSourceOutput(schemaInputs.Combine(generateJsonContext).Combine(generateClientAdapters), Generate);
     }
 
     private static void GenerateModels(PreCompilationSourceProductionContext context, (ImmutableArray<SchemaInput> Inputs, bool GenerateJsonContext) input)
@@ -53,9 +56,9 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         }
     }
 
-    private static void Generate(SourceProductionContext context, (ImmutableArray<SchemaInput> Inputs, bool GenerateJsonContext) input)
+    private static void Generate(SourceProductionContext context, ((ImmutableArray<SchemaInput> Inputs, bool GenerateJsonContext) Input, bool GenerateClientAdapters) input)
     {
-        var inputs = input.Inputs;
+        var inputs = input.Input.Inputs;
         if (inputs.Length != 1 || inputs[0].Text is null)
         {
             context.ReportDiagnostic(Diagnostic.Create(MissingSchema, Location.None, SchemaExtension));
@@ -73,7 +76,7 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         }
 
         var model = new SchemaModelBuilder(context.ReportDiagnostic, UnsupportedSchema).Build(parseResult.Schema);
-        foreach (var source in ModelRenderer.RenderInfrastructure(model, input.GenerateJsonContext))
+        foreach (var source in ModelRenderer.RenderInfrastructure(model, input.Input.GenerateJsonContext, input.GenerateClientAdapters))
         {
             context.AddSource(source.HintName, SourceText.From(source.Text, System.Text.Encoding.UTF8));
         }

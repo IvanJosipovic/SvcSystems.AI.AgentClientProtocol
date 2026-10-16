@@ -239,16 +239,7 @@ public sealed class JsonSchemaSourceGeneratorTests
     {
         var schemaPath = Path.Combine(AppContext.BaseDirectory, "acp-v1.schema.json");
         var schema = File.ReadAllText(schemaPath);
-        var result = RunGenerator(schema, "any/path/any-version.json", """
-            namespace SvcSystems.AI.AgentClientProtocol.Serialization
-            {
-                internal sealed class UnknownWireContent(System.Text.Json.JsonElement rawPayload)
-                    : SvcSystems.AI.AgentClientProtocol.Protocol.Generated.ContentBlock
-                {
-                    public System.Text.Json.JsonElement RawPayload { get; } = rawPayload;
-                }
-            }
-            """);
+        var result = RunGenerator(schema, "any/path/any-version.json");
 
         Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
         Assert.Contains(result.GeneratedSources, source => ContainsType(source, "InitializeRequest"));

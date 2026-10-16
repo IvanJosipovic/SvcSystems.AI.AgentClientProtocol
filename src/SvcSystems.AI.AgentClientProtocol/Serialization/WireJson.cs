@@ -427,8 +427,3 @@ internal static class WireJson
         element.ValueKind == JsonValueKind.Object && element.TryGetProperty(propertyName, out var value) ? value.Clone() : null;
 
 }
-
-internal sealed class UnknownWireContent(JsonElement rawPayload) : ContentBlock
-{
-    public JsonElement RawPayload { get; } = rawPayload;
-}

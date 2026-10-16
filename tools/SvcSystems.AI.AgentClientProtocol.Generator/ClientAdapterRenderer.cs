@@ -38,7 +38,7 @@ internal static class ClientAdapters
             BlobResourceContents blob => new EmbeddedResourceContent(blob.Uri, null, blob.Blob, blob.MimeType),
             _ => throw new ProtocolException("ACP embedded resource did not match a known resource variant.")
         },
-        UnknownWireContent unknown => new UnknownContent(ReadString(unknown.RawPayload, "type") ?? "unknown", unknown.RawPayload),
+        ContentBlockUnknown unknown => new UnknownContent(ReadString(unknown.RawPayload, "type") ?? "unknown", unknown.RawPayload),
         _ => throw new ProtocolException("ACP content block did not match a known schema variant.")
     };
 
@@ -62,7 +62,7 @@ internal static class ClientAdapters
                 ? new BlobResourceContents { Blob = resource.Blob, MimeType = resource.MimeType, Uri = resource.Uri }
                 : new TextResourceContents { Text = resource.Text ?? string.Empty, MimeType = resource.MimeType, Uri = resource.Uri }
         },
-        UnknownContent unknown => new UnknownWireContent(unknown.RawPayload),
+        UnknownContent unknown => new ContentBlockUnknown { RawPayload = unknown.RawPayload },
         _ => throw new ArgumentException($"Unsupported ACP prompt content type '{block.GetType().Name}'.", nameof(block))
     };
 
