@@ -1,0 +1,40 @@
+name: ACP TCK v1 interoperability
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [main, alpha, beta]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tck:
+    name: ACP TCK v1 (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-quality: preview
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.5'
+      - name: Run official agent baselines and .NET client matrix
+        shell: pwsh
+        run: ./tools/Test-AcpTck.ps1
+      - name: Upload upstream conformance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acp-tck-v1-${{ matrix.os }}
+          path: artifacts/acp-tck/reports
+          if-no-files-found: warn

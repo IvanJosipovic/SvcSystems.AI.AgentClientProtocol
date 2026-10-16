@@ -36,7 +36,11 @@ public sealed record AgentCommandsUpdate(IReadOnlyList<AgentCommand> Commands) :
 public sealed record ModeUpdate(string CurrentModeId) : SessionEvent;
 
 /// <summary>The agent updated session metadata.</summary>
-public sealed record SessionMetadataUpdate(string? Title, string? UpdatedAt) : SessionEvent;
+public sealed record SessionMetadataUpdate(string? Title, string? UpdatedAt) : SessionEvent
+{
+    /// <summary>Optional promptSuggestions extension. Null means absent; an empty list clears previous suggestions.</summary>
+    public IReadOnlyList<string>? PromptSuggestions { get; init; }
+}
 
 /// <summary>The agent reported context usage.</summary>
 public sealed record TokenUsageUpdate(ulong Used, ulong Size, double? CostAmount = null, string? CostCurrency = null) : SessionEvent

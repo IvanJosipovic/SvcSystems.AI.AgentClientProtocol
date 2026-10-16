@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Generated;
 
@@ -5,6 +6,52 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 
 internal static class WireJson
 {
+    public static Dictionary<string, JsonElement>? CopyMetadata(IReadOnlyDictionary<string, JsonElement>? metadata) =>
+        metadata?.ToDictionary(pair => pair.Key, pair => pair.Value.Clone(), StringComparer.Ordinal);
+
+    public static byte[] WriteJsonValue(JsonElement value)
+    {
+        var buffer = new ArrayBufferWriter<byte>();
+        using (var writer = new Utf8JsonWriter(buffer)) value.WriteTo(writer);
+        return buffer.WrittenSpan.ToArray();
+    }
+
+    public static AuthenticationStatus ReadAuthenticationStatus(JsonElement parameters)
+    {
+        if (parameters.ValueKind != JsonValueKind.Object ||
+            !parameters.TryGetProperty("authStatus", out var status) || status.ValueKind != JsonValueKind.Object)
+            throw new ProtocolException("_auth/status_update must contain an authStatus object.");
+
+        var kind = ReadString(status, "kind")
+            ?? throw new ProtocolException("authStatus must contain a string kind.");
+        var label = ReadString(status, "label")
+            ?? throw new ProtocolException("authStatus must contain a string label.");
+        AuthenticationAccount? account = null;
+        if (status.TryGetProperty("account", out var accountValue) && accountValue.ValueKind != JsonValueKind.Null)
+        {
+            if (accountValue.ValueKind != JsonValueKind.Object)
+                throw new ProtocolException("authStatus.account must be an object.");
+            account = new AuthenticationAccount(
+                ReadOptionalString(accountValue, "email"), ReadOptionalString(accountValue, "organization"), ReadOptionalString(accountValue, "plan"));
+        }
+        JsonElement? vendor = null;
+        if (status.TryGetProperty("vendor", out var vendorValue) && vendorValue.ValueKind != JsonValueKind.Null)
+        {
+            if (vendorValue.ValueKind != JsonValueKind.Object)
+                throw new ProtocolException("authStatus.vendor must be an object.");
+            vendor = vendorValue.Clone();
+        }
+        return new AuthenticationStatus(kind, label, ReadOptionalString(status, "detail"), account, vendor, parameters.Clone());
+    }
+
+    private static string? ReadOptionalString(JsonElement value, string name)
+    {
+        if (!value.TryGetProperty(name, out var property) || property.ValueKind == JsonValueKind.Null) return null;
+        if (property.ValueKind != JsonValueKind.String)
+            throw new ProtocolException($"Extension field '{name}' must be a string.");
+        return property.GetString();
+    }
+
     public static byte[] WriteInitializeRequest(InitializeRequest request, Implementation clientInfo, ClientOptions options)
     {
         var capabilities = request.ClientCapabilities;
@@ -66,11 +113,12 @@ internal static class WireJson
             ExtensionData = request.ExtensionData
         });
 
-    public static byte[] WritePromptRequest(string sessionId, IReadOnlyList<AgentContentBlock> content) =>
+    public static byte[] WritePromptRequest(string sessionId, IReadOnlyList<AgentContentBlock> content, PromptOptions? options = null) =>
         GeneratedJson.Serialize(new PromptRequest
         {
             SessionId = sessionId,
-            Prompt = content.Select(ClientAdapters.ToContentBlock).ToList()
+            Prompt = content.Select(ClientAdapters.ToContentBlock).ToList(),
+            Meta = CopyMetadata(options?.Metadata)
         });
 
     public static byte[] WriteCancelNotification(CancelNotification notification) => GeneratedJson.Serialize(notification);
@@ -90,7 +138,8 @@ internal static class WireJson
             SessionId = sessionId,
             Cwd = options.WorkingDirectory,
             McpServers = options.McpServers.Count > 0 ? ClientAdapters.ToMcpServers(options.McpServers) : null,
-            AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null
+            AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null,
+            Meta = CopyMetadata(options.Metadata)
         });
 
     public static byte[] WriteSetModeRequest(string sessionId, string modeId) =>
@@ -326,7 +375,10 @@ internal static class WireJson
                     WireCommand = command
                 }).ToArray()),
             SessionUpdateVariant7CurrentModeUpdate value => new ModeUpdate(value.CurrentModeId),
-            SessionUpdateVariant9SessionInfoUpdate value => new SessionMetadataUpdate(value.Title, value.UpdatedAt),
+            SessionUpdateVariant9SessionInfoUpdate value => new SessionMetadataUpdate(value.Title, value.UpdatedAt)
+            {
+                PromptSuggestions = ReadPromptSuggestions(update)
+            },
             SessionUpdateVariant10UsageUpdate value => new TokenUsageUpdate(value.Used, value.Size, value.Cost?.Amount, value.Cost?.Currency)
             {
                 WireCost = value.Cost
@@ -345,6 +397,17 @@ internal static class WireJson
 
     private static SessionEvent WithRawPayload(SessionEvent value, JsonElement payload) =>
         value with { RawPayload = payload.Clone() };
+
+    private static IReadOnlyList<string>? ReadPromptSuggestions(JsonElement update)
+    {
+        if (!update.TryGetProperty("_meta", out var meta) || meta.ValueKind != JsonValueKind.Object ||
+            !meta.TryGetProperty("promptSuggestions", out var suggestions)) return null;
+        if (suggestions.ValueKind != JsonValueKind.Object ||
+            !suggestions.TryGetProperty("suggestions", out var items) || items.ValueKind != JsonValueKind.Array)
+            throw new ProtocolException("promptSuggestions must contain a suggestions array.");
+        return items.EnumerateArray().Select(item =>
+            ReadString(item, "text") ?? throw new ProtocolException("Each prompt suggestion must contain a string text.")).ToArray();
+    }
 
     private static AgentToolCallUpdate ToAgentToolCallUpdate(SessionUpdateVariant3ToolCall value) =>
         new(value.ToolCallId, value.Name, value.Title, value.Kind, value.Status, false,

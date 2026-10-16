@@ -13,6 +13,7 @@ public sealed class Session
     private readonly Channel<SessionEvent> _updates;
     private readonly int _maximumBufferedUpdates;
     private Exception? _updateBufferFailure;
+    private IReadOnlyList<string>? _promptSuggestions;
     private readonly SemaphoreSlim _promptLock = new(1, 1);
 
     internal Session(Client client, string id, int maximumBufferedUpdates = 1024)
@@ -42,6 +43,9 @@ public sealed class Session
     /// <summary>The agent's initial or most recently reported configuration options.</summary>
     public IReadOnlyList<SessionConfigOption> ConfigOptions { get; private set; } = Array.Empty<SessionConfigOption>();
 
+    /// <summary>Latest suggested next prompts, or null when no suggestions have been reported.</summary>
+    public IReadOnlyList<string>? PromptSuggestions => Volatile.Read(ref _promptSuggestions);
+
     /// <summary>Sends a text prompt and streams normalized ACP updates until the turn finishes.</summary>
     public IAsyncEnumerable<SessionEvent> PromptAsync(string prompt, CancellationToken cancellationToken = default)
     {
@@ -49,10 +53,32 @@ public sealed class Session
         return PromptAsync([new PromptTextContent(prompt)], cancellationToken);
     }
 
+    /// <summary>Sends a text prompt with request-scoped extension metadata.</summary>
+    public IAsyncEnumerable<SessionEvent> PromptAsync(string prompt, CancellationToken cancellationToken, PromptOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(prompt);
+        ArgumentNullException.ThrowIfNull(options);
+        return PromptCoreAsync([new PromptTextContent(prompt)], options, cancellationToken);
+    }
+
     /// <summary>Sends typed prompt content and streams normalized ACP updates until the turn finishes.</summary>
-    public async IAsyncEnumerable<SessionEvent> PromptAsync(
+    public IAsyncEnumerable<SessionEvent> PromptAsync(
         IReadOnlyList<AgentContentBlock> content,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        PromptCoreAsync(content, null, cancellationToken);
+
+    /// <summary>Sends typed prompt content with request-scoped extension metadata.</summary>
+    public IAsyncEnumerable<SessionEvent> PromptAsync(
+        IReadOnlyList<AgentContentBlock> content, CancellationToken cancellationToken, PromptOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return PromptCoreAsync(content, options, cancellationToken);
+    }
+
+    private async IAsyncEnumerable<SessionEvent> PromptCoreAsync(
+        IReadOnlyList<AgentContentBlock> content,
+        PromptOptions? options,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(content);
         await _promptLock.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -62,7 +88,7 @@ public sealed class Session
         try
         {
             ThrowIfUpdateBufferFailed();
-            promptTask = _client.PromptAsync(Id, content, promptRequestCancellation.Token);
+            promptTask = _client.PromptAsync(Id, content, promptRequestCancellation.Token, options);
 
             while (true)
             {
@@ -136,6 +162,9 @@ public sealed class Session
         if (Volatile.Read(ref _updateBufferFailure) is not null) return false;
         switch (update)
         {
+            case SessionMetadataUpdate { PromptSuggestions: { } suggestions }:
+                Volatile.Write(ref _promptSuggestions, suggestions);
+                break;
             case ModeUpdate mode when ModeState is { } state:
                 ModeState = new SessionModeState
                 {

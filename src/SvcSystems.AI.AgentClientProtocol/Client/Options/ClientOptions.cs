@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Generated;
 
 namespace SvcSystems.AI.AgentClientProtocol;
@@ -7,6 +8,33 @@ public sealed class ClientOptions
 {
     /// <summary>Identifies this ACP client to the agent.</summary>
     public Implementation ClientInfo { get; init; } = new() { Name = "SvcSystems.AI.AgentClientProtocol", Version = "0.1.0" };
+
+    /// <summary>ACP _meta attached to the initialize request.</summary>
+    public IReadOnlyDictionary<string, JsonElement>? Metadata { get; init; }
+
+    /// <summary>ACP _meta attached to clientCapabilities during initialization.</summary>
+    /// <remarks>Advertise only extension behavior that the application implements.</remarks>
+    public IReadOnlyDictionary<string, JsonElement>? CapabilityMetadata { get; init; }
+
+    /// <summary>Handlers for incoming custom requests. Method names must begin with an underscore.</summary>
+    /// <remarks>Handlers run concurrently and may send requests. Throw RpcException to return a protocol error.
+    /// Returned JSON is serialized immediately after the handler completes and must still be valid then.</remarks>
+    public IReadOnlyDictionary<string, Func<JsonElement, CancellationToken, ValueTask<JsonElement>>> ExtensionRequestHandlers { get; init; } =
+        new Dictionary<string, Func<JsonElement, CancellationToken, ValueTask<JsonElement>>>();
+
+    /// <summary>Receives unrecognized notifications and supported extension notifications, including authentication status.</summary>
+    /// <remarks>Runs on the receive loop, including during initialization. Do not block or wait for ACP operations.
+    /// Exceptions terminate the connection and are surfaced through Completion and pending operations.</remarks>
+    public Action<ExtensionNotification>? ExtensionNotificationReceived { get; init; }
+
+    /// <summary>Receives connection-wide authentication identity updates, including during initialization.</summary>
+    /// <remarks>Runs on the receive loop. Do not block or wait for ACP operations. Exceptions terminate the connection.</remarks>
+    public Action<AuthenticationStatus>? AuthenticationStatusChanged { get; init; }
+
+    /// <summary>Receives session id and suggested next prompts, including suggestions delivered after a turn completes.</summary>
+    /// <remarks>An empty list clears previous suggestions. Runs on the receive loop; do not block or wait for ACP operations.
+    /// Exceptions terminate the connection.</remarks>
+    public Action<string, IReadOnlyList<string>>? PromptSuggestionsChanged { get; init; }
 
     /// <summary>Handles agent requests for user permission. Missing handlers reject safely when possible.</summary>
     public IPermissionHandler? PermissionHandler { get; init; }
@@ -38,4 +66,3 @@ public sealed class ClientOptions
     /// <summary>Maximum number of unread session updates buffered per session before its update stream fails.</summary>
     public int MaximumBufferedSessionUpdates { get; init; } = 1024;
 }
-

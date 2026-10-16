@@ -16,6 +16,7 @@ public sealed class Client : IClient
     private readonly ProcessOptions? _processOptions;
     private readonly ConcurrentDictionary<string, Session> _sessions = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activePromptCancellation = new(StringComparer.Ordinal);
+    private AuthenticationStatus? _authenticationStatus;
     private int _disposed;
 
     private Client(JsonRpcConnection connection, ProcessOptions? processOptions, ClientOptions options)
@@ -28,6 +29,20 @@ public sealed class Client : IClient
         _processOptions = processOptions;
         _options = options;
         RegisterHostCallbacks();
+        foreach (var (method, handler) in options.ExtensionRequestHandlers)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(method);
+            ArgumentNullException.ThrowIfNull(handler);
+            if (!method.StartsWith('_'))
+                throw new ArgumentException("Incoming extension request method names must begin with an underscore.", nameof(options));
+            _connection.RegisterRequestHandler(method, async (parameters, cancellationToken) =>
+            {
+                if (parameters.ValueKind is not (JsonValueKind.Object or JsonValueKind.Array))
+                    throw new RpcException(-32602, "JSON-RPC parameters must be an object or array.", method);
+                return WireJson.WriteJsonValue(await handler(parameters, cancellationToken).ConfigureAwait(false));
+            });
+        }
+        _connection.UnhandledNotificationReceived = HandleExtensionNotification;
     }
 
     /// <summary>Negotiated agent identity and capabilities.</summary>
@@ -35,6 +50,43 @@ public sealed class Client : IClient
 
     /// <summary>Completes when the underlying connection closes; the result contains the transport failure, if any.</summary>
     public Task<Exception?> Completion => _connection.Completion;
+
+    /// <inheritdoc />
+    public AuthenticationStatus? AuthenticationStatus => Volatile.Read(ref _authenticationStatus);
+
+    /// <inheritdoc />
+    public Task<JsonElement> SendExtensionRequestAsync(string method, JsonElement parameters, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ValidateExtensionParameters(method, parameters);
+        return _connection.SendRequestAsync(method, WireJson.WriteJsonValue(parameters), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public ValueTask SendExtensionNotificationAsync(string method, JsonElement parameters, CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        ValidateExtensionParameters(method, parameters);
+        return _connection.SendNotificationAsync(method, WireJson.WriteJsonValue(parameters), cancellationToken);
+    }
+
+    private static void ValidateExtensionParameters(string method, JsonElement parameters)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(method);
+        if (parameters.ValueKind is not (JsonValueKind.Object or JsonValueKind.Array))
+            throw new ArgumentException("JSON-RPC parameters must be an object or array. Use an empty object for parameterless methods.", nameof(parameters));
+    }
+
+    private void HandleExtensionNotification(string method, JsonElement parameters)
+    {
+        if (method == "_auth/status_update")
+        {
+            var status = WireJson.ReadAuthenticationStatus(parameters);
+            Volatile.Write(ref _authenticationStatus, status);
+            _options.AuthenticationStatusChanged?.Invoke(status);
+        }
+        _options.ExtensionNotificationReceived?.Invoke(new ExtensionNotification(method, parameters));
+    }
 
     /// <summary>Starts an agent process and completes the ACP initialize handshake.</summary>
     public static async Task<Client> StartAsync(
@@ -103,7 +155,8 @@ public sealed class Client : IClient
         {
             Cwd = options.WorkingDirectory,
             McpServers = [],
-            AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null
+            AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null,
+            Meta = WireJson.CopyMetadata(options.Metadata)
         };
         var response = await _connection.SendRequestAsync(
             Methods.SessionNew,
@@ -137,7 +190,8 @@ public sealed class Client : IClient
                 SessionId = sessionId,
                 Cwd = options.WorkingDirectory,
                 McpServers = [],
-                AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null
+                AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null,
+                Meta = WireJson.CopyMetadata(options.Metadata)
             };
             var response = await _connection.SendRequestAsync(Methods.SessionLoad, WireJson.WriteLoadSessionRequest(request, options.McpServers), cancellationToken).ConfigureAwait(false);
             WireJson.ApplySessionInitialState(session, response);
@@ -275,7 +329,7 @@ public sealed class Client : IClient
         return WireJson.ReadConfigOptionsResponse(response);
     }
 
-    internal async Task<(string StopReason, JsonElement RawPayload)> PromptAsync(string sessionId, IReadOnlyList<AgentContentBlock> content, CancellationToken cancellationToken)
+    internal async Task<(string StopReason, JsonElement RawPayload)> PromptAsync(string sessionId, IReadOnlyList<AgentContentBlock> content, CancellationToken cancellationToken, PromptOptions? options = null)
     {
         ThrowIfDisposed();
         ValidatePromptContent(content);
@@ -287,7 +341,7 @@ public sealed class Client : IClient
         }
         try
         {
-            var response = await _connection.SendRequestAsync(Methods.SessionPrompt, WireJson.WritePromptRequest(sessionId, content), cancellationToken).ConfigureAwait(false);
+            var response = await _connection.SendRequestAsync(Methods.SessionPrompt, WireJson.WritePromptRequest(sessionId, content, options), cancellationToken).ConfigureAwait(false);
             return (WireJson.ReadStopReason(response), response.Clone());
         }
         finally
@@ -319,12 +373,14 @@ public sealed class Client : IClient
                 WriteTextFile = _options.FileSystemHandler is not null
             },
             Terminal = _options.TerminalHandler is not null,
-            Auth = new AuthCapabilities { Terminal = _options.TerminalAuthenticationHandler is not null }
+            Auth = new AuthCapabilities { Terminal = _options.TerminalAuthenticationHandler is not null },
+            Meta = WireJson.CopyMetadata(_options.CapabilityMetadata)
         };
         var request = new InitializeRequest
         {
             ProtocolVersion = ProtocolVersion,
-            ClientCapabilities = clientCapabilities
+            ClientCapabilities = clientCapabilities,
+            Meta = WireJson.CopyMetadata(_options.Metadata)
         };
 
         var response = await _connection.SendRequestAsync(Methods.Initialize, WireJson.WriteInitializeRequest(request, _options.ClientInfo, _options), cancellationToken).ConfigureAwait(false);
@@ -472,7 +528,12 @@ public sealed class Client : IClient
     private async ValueTask HandleSessionUpdateAsync(JsonElement parameters)
     {
         var sessionId = WireJson.ReadNotificationSessionId(parameters);
-        if (_sessions.TryGetValue(sessionId, out var session) && !session.Publish(WireJson.ReadSessionUpdate(parameters)))
+        if (!_sessions.TryGetValue(sessionId, out var session)) return;
+        var update = WireJson.ReadSessionUpdate(parameters);
+        var published = session.Publish(update);
+        if (update is SessionMetadataUpdate { PromptSuggestions: { } suggestions })
+            _options.PromptSuggestionsChanged?.Invoke(sessionId, suggestions);
+        if (!published)
         {
             try { await CancelSessionAsync(sessionId, CancellationToken.None).ConfigureAwait(false); }
             catch { /* The update stream already carries the failure; cancellation is best effort. */ }

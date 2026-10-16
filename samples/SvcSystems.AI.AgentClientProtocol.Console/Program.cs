@@ -1,9 +1,16 @@
 using SvcSystems.AI.AgentClientProtocol;
 
+if (args is ["--extension-smoke-test"])
+{
+    await ExtensionSmokeTest.RunAsync();
+    return;
+}
+
 if (args is ["--help"] or ["-h"])
 {
     Console.WriteLine("Usage: SvcSystems.AI.AgentClientProtocol.Console [agent-executable] [agent-arguments...]");
     Console.WriteLine("ACP_PROMPT can set the default prompt text.");
+    Console.WriteLine("--extension-smoke-test validates extension APIs without an external agent.");
     return;
 }
 

@@ -18,6 +18,8 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     private long _nextRequestId;
     private int _disposed;
 
+    public Action<string, JsonElement>? UnhandledNotificationReceived { get; set; }
+
     public JsonRpcConnection(ITransport transport)
     {
         _transport = transport;
@@ -78,8 +80,12 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
     }
 
-    public ValueTask SendNotificationAsync(string method, ReadOnlyMemory<byte> parameters, CancellationToken cancellationToken) =>
-        _transport.SendAsync(WriteNotification(method, parameters), cancellationToken);
+    public ValueTask SendNotificationAsync(string method, ReadOnlyMemory<byte> parameters, CancellationToken cancellationToken)
+    {
+        ThrowIfUnavailable();
+        cancellationToken.ThrowIfCancellationRequested();
+        return _transport.SendAsync(WriteNotification(method, parameters), cancellationToken);
+    }
 
     private async Task SendCancellationAsync(long requestId)
     {
@@ -162,6 +168,10 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 else if (_notificationHandlers.TryGetValue(method, out var handler))
                 {
                     await DispatchNotificationAsync(handler, parameters).ConfigureAwait(false);
+                }
+                else
+                {
+                    UnhandledNotificationReceived?.Invoke(method, parameters);
                 }
                 return;
             }
