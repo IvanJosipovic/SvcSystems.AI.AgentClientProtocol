@@ -8,12 +8,15 @@
     {
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true,
-      "matchFileNames": ["global.json"]
+      "matchFileNames": ["tests/**", "tools/**"]
     },
     {
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchUpdateTypes": ["src/**", "minor", "patch", "digest"],
       "automerge": true,
-      "matchFileNames": ["src/**", "tests/**", "tools/**"]
+      "semanticCommitType": "fix",
+      "matchFileNames": [
+        "src/**"
+      ]
     }
   ]
 }
