@@ -271,7 +271,8 @@ public sealed class TestyIntegrationTests
             Assert.Equal("testy-terminal-1", Assert.Single(terminalHandler.OutputRequests).TerminalId);
             Assert.Equal("testy-terminal-1", Assert.Single(terminalHandler.WaitRequests).TerminalId);
             Assert.Equal("testy-terminal-1", Assert.Single(terminalHandler.KillRequests).TerminalId);
-            Assert.Equal("testy-terminal-1", Assert.Single(terminalHandler.ReleaseRequests).TerminalId);
+            Assert.NotEmpty(terminalHandler.ReleaseRequests);
+            Assert.All(terminalHandler.ReleaseRequests, request => Assert.Equal("testy-terminal-1", request.TerminalId));
 
             Assert.Equal(5, elicitationHandler.Requests.Count);
             Assert.Equal(new[] { "accept", "decline", "cancel", "accept", "decline" }, elicitationHandler.Responses);

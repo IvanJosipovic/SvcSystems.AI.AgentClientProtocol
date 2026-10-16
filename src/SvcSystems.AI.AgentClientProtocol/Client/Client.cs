@@ -275,7 +275,7 @@ public sealed class Client : IClient
         return WireJson.ReadConfigOptionsResponse(response);
     }
 
-    internal async Task<string> PromptAsync(string sessionId, IReadOnlyList<AgentContentBlock> content, CancellationToken cancellationToken)
+    internal async Task<(string StopReason, JsonElement RawPayload)> PromptAsync(string sessionId, IReadOnlyList<AgentContentBlock> content, CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
         ValidatePromptContent(content);
@@ -288,7 +288,7 @@ public sealed class Client : IClient
         try
         {
             var response = await _connection.SendRequestAsync(Methods.SessionPrompt, WireJson.WritePromptRequest(sessionId, content), cancellationToken).ConfigureAwait(false);
-            return WireJson.ReadStopReason(response);
+            return (WireJson.ReadStopReason(response), response.Clone());
         }
         finally
         {

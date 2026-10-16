@@ -185,7 +185,7 @@ internal static class WireJson
         var configOptions = response.TryGetProperty("configOptions", out var config) && config.ValueKind == JsonValueKind.Array
             ? ReadConfigOptions(response)
             : null;
-        session.SetInitialState(modeState, configOptions);
+        session.SetInitialState(modeState, configOptions, response);
     }
 
     public static string ReadSessionId(JsonElement response) =>
@@ -321,10 +321,16 @@ internal static class WireJson
             SessionUpdateVariant2AgentThoughtChunk value => new ContentUpdate("thought", ClientAdapters.ToAgentContent(value.Content), value.MessageId),
             SessionUpdateVariant5Plan value => new PlanUpdate(value.Entries),
             SessionUpdateVariant6AvailableCommandsUpdate value => new AgentCommandsUpdate(
-                value.AvailableCommands.Select(command => new AgentCommand(command.Name, command.Description, command.Input?.Hint)).ToArray()),
+                value.AvailableCommands.Select(command => new AgentCommand(command.Name, command.Description, command.Input?.Hint)
+                {
+                    WireCommand = command
+                }).ToArray()),
             SessionUpdateVariant7CurrentModeUpdate value => new ModeUpdate(value.CurrentModeId),
             SessionUpdateVariant9SessionInfoUpdate value => new SessionMetadataUpdate(value.Title, value.UpdatedAt),
-            SessionUpdateVariant10UsageUpdate value => new TokenUsageUpdate(value.Used, value.Size, value.Cost?.Amount, value.Cost?.Currency),
+            SessionUpdateVariant10UsageUpdate value => new TokenUsageUpdate(value.Used, value.Size, value.Cost?.Amount, value.Cost?.Currency)
+            {
+                WireCost = value.Cost
+            },
             SessionUpdateVariant11Notice value => new NoticeUpdate(value.Severity, value.Title, value.Description),
             SessionUpdateVariant12CompactionUpdate value => new ContextCompactionUpdate(
                 value.CompactionId,

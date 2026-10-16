@@ -49,6 +49,7 @@ internal sealed class StdioTransport : ITransport
             FileName = options.FileName,
             WorkingDirectory = options.WorkingDirectory ?? Environment.CurrentDirectory,
             UseShellExecute = false,
+            CreateNoWindow = true,
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

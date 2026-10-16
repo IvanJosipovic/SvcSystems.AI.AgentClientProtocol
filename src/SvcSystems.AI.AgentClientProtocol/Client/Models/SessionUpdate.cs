@@ -6,7 +6,7 @@ namespace SvcSystems.AI.AgentClientProtocol;
 /// <summary>Base type for normalized updates received during an ACP prompt turn.</summary>
 public abstract record SessionEvent
 {
-    /// <summary>The complete ACP update payload, including metadata and unrecognized fields.</summary>
+    /// <summary>The complete ACP payload associated with this event, including metadata and unrecognized fields.</summary>
     public JsonElement? RawPayload { get; init; }
 }
 
@@ -39,7 +39,11 @@ public sealed record ModeUpdate(string CurrentModeId) : SessionEvent;
 public sealed record SessionMetadataUpdate(string? Title, string? UpdatedAt) : SessionEvent;
 
 /// <summary>The agent reported context usage.</summary>
-public sealed record TokenUsageUpdate(ulong Used, ulong Size, double? CostAmount = null, string? CostCurrency = null) : SessionEvent;
+public sealed record TokenUsageUpdate(ulong Used, ulong Size, double? CostAmount = null, string? CostCurrency = null) : SessionEvent
+{
+    /// <summary>The complete schema-generated cost object, including metadata and extension fields.</summary>
+    public Cost? WireCost { get; init; }
+}
 
 /// <summary>A user-facing, out-of-history notice.</summary>
 public sealed record NoticeUpdate(string Severity, string Title, string? Description) : SessionEvent;
@@ -66,7 +70,11 @@ public sealed record UnmappedUpdate(string Kind) : SessionEvent;
 public sealed record Completed(string Reason) : SessionEvent;
 
 /// <summary>A command advertised by the agent.</summary>
-public sealed record AgentCommand(string Name, string Description, string? InputHint);
+public sealed record AgentCommand(string Name, string Description, string? InputHint)
+{
+    /// <summary>The complete schema-generated command, including metadata and extension fields.</summary>
+    public AvailableCommand? WireCommand { get; init; }
+}
 
 /// <summary>Base type for content blocks accepted by ACP prompt methods.</summary>
 public abstract record AgentContentBlock
