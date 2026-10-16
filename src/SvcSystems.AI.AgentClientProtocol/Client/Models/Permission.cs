@@ -1,10 +1,22 @@
+using System.Text.Json;
+
 namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Permission request sent by an ACP agent before performing a tool operation.</summary>
-public sealed record PermissionRequest(string SessionId, PermissionToolCall ToolCall, IReadOnlyList<PermissionChoice> Options);
+public sealed record PermissionRequest(
+    string SessionId,
+    PermissionToolCall ToolCall,
+    IReadOnlyList<PermissionChoice> Options,
+    IReadOnlyDictionary<string, JsonElement>? Meta);
 
 /// <summary>Summary of the tool call requiring permission.</summary>
-public sealed record PermissionToolCall(string Id, string? Title, string? Name, string? Status);
+public sealed record PermissionToolCall(
+    string Id,
+    string? Title,
+    string? Name,
+    string? Status,
+    JsonElement? RawInput,
+    IReadOnlyDictionary<string, JsonElement>? Meta);
 
 /// <summary>Permission option offered by the agent.</summary>
 public sealed record PermissionChoice(string Id, string Name, string Kind);

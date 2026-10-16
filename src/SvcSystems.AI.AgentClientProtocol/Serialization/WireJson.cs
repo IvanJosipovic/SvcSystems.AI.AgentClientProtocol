@@ -201,8 +201,15 @@ internal static class WireJson
         var request = GeneratedJson.DeserializeRequestPermissionRequest(parameters);
         return new PermissionRequest(
             request.SessionId,
-            new PermissionToolCall(request.ToolCall.ToolCallId, request.ToolCall.Title, request.ToolCall.Name, request.ToolCall.Status),
-            request.Options.Select(option => new PermissionChoice(option.OptionId, option.Name, option.Kind)).ToArray());
+            new PermissionToolCall(
+                request.ToolCall.ToolCallId,
+                request.ToolCall.Title,
+                request.ToolCall.Name,
+                request.ToolCall.Status,
+                request.ToolCall.RawInput,
+                request.ToolCall.Meta),
+            request.Options.Select(option => new PermissionChoice(option.OptionId, option.Name, option.Kind)).ToArray(),
+            request.Meta);
     }
 
     public static ReadTextFileRequest ReadTextFileReadRequest(JsonElement parameters) =>
