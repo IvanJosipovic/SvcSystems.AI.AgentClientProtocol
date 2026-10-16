@@ -17,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\schema\v1\schema.json" Link="acp-v1.schema.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\schema\v1\schema.generator.json" Link="acp-v1.generator.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
 

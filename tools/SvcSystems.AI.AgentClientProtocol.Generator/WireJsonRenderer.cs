@@ -46,16 +46,7 @@ internal static class WireJsonRenderer
         {
             if (useSystemTextJsonContext && stjSafeClasses.Contains(item.Name))
             {
-                if (item.Name == "ContentBlock")
-                {
-                    code.AppendLine("    internal static byte[] Serialize(ContentBlock value) => value is UnknownWireContent unknown")
-                        .AppendLine("        ? System.Text.Encoding.UTF8.GetBytes(unknown.RawPayload.GetRawText())")
-                        .AppendLine("        : JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.ContentBlock);");
-                }
-                else
-                {
-                    code.Append("    internal static byte[] Serialize(").Append(item.Name).Append(" value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.").Append(item.Name).AppendLine(");");
-                }
+                code.Append("    internal static byte[] Serialize(").Append(item.Name).Append(" value) => JsonSerializer.SerializeToUtf8Bytes(value, JsonContext.Default.").Append(item.Name).AppendLine(");");
             }
             else
             {
@@ -175,7 +166,6 @@ internal static class WireJsonRenderer
             return CanUseSystemTextJson(type.Substring(5, type.Length - 6), classes, unions, visiting);
         if (type.StartsWith("Dictionary<string, ", StringComparison.Ordinal))
             return CanUseSystemTextJson(type.Substring("Dictionary<string, ".Length, type.Length - "Dictionary<string, ".Length - 1), classes, unions, visiting);
-        if (type == "ContentBlock") return false;
         var union = unions.FirstOrDefault(item => item.Name == type);
         if (union is not null)
         {
@@ -188,6 +178,7 @@ internal static class WireJsonRenderer
 
         var model = classes.FirstOrDefault(item => item.Name == type);
         if (model is null) return false;
+        if (model.AllowUnknownDiscriminator) return false;
         if (!visiting.Add(type)) return true;
         var canUse = (model.BaseType is null || CanUseSystemTextJson(model.BaseType, classes, unions, visiting)) &&
             (model.DiscriminatorName is null
@@ -404,6 +395,13 @@ internal static class WireJsonRenderer
 
     private static void RenderClassReader(StringBuilder code, ClassModel model, IReadOnlyList<ClassModel> classes, IReadOnlyList<UnionModel> unions, bool useSystemTextJson)
     {
+        if (model.IsRawPayloadVariant)
+        {
+            code.Append("    internal static ").Append(model.Name).Append(" Deserialize").Append(model.Name).AppendLine("(JsonElement value) =>")
+                .Append("        new ").Append(model.Name).AppendLine(" { RawPayload = value.Clone() };")
+                .AppendLine();
+            return;
+        }
         if (useSystemTextJson)
         {
             code.Append("    internal static ").Append(model.Name).Append(" Deserialize").Append(model.Name).AppendLine("(JsonElement value)")
@@ -490,10 +488,12 @@ internal static class WireJsonRenderer
         {
             code.Append("    internal static ").Append(model.Name).Append(" Deserialize").Append(model.Name).AppendLine("(JsonElement value)")
                 .AppendLine("    {");
-            if (model.Name == "ContentBlock")
+            if (model.AllowUnknownDiscriminator)
             {
-                code.AppendLine("        if (value.ValueKind == JsonValueKind.Object && value.TryGetProperty(\"type\", out var discriminator) && discriminator.ValueKind == JsonValueKind.String && Discriminators.ParseContentBlockDiscriminator(discriminator.GetString()) == ContentBlockDiscriminator.Unknown)")
-                    .AppendLine("            return new UnknownWireContent(value.Clone());");
+                code.Append("        if (value.ValueKind == JsonValueKind.Object && value.TryGetProperty(")
+                    .Append(Literal(model.DiscriminatorName!)).Append(", out var discriminator) && discriminator.ValueKind == JsonValueKind.String && Discriminators.Parse")
+                    .Append(model.Name).Append("Discriminator(discriminator.GetString()) == ").Append(model.Name).AppendLine("Discriminator.Unknown)")
+                    .Append("            return new ").Append(model.UnknownVariantTypeName).AppendLine(" { RawPayload = value.Clone() };");
             }
             code.Append("        return JsonSerializer.Deserialize(value, JsonContext.Default.").Append(model.Name).AppendLine(") ?? throw new JsonException(\"Expected a non-null JSON value.\");")
                 .AppendLine("    }")
@@ -507,8 +507,8 @@ internal static class WireJsonRenderer
             .AppendLine("        {");
         foreach (var item in model.DiscriminatorCases)
             code.Append("            ").Append(Literal(item.DiscriminatorValue)).Append(" => Deserialize").Append(item.TypeName).AppendLine("(value),");
-        if (model.Name == "ContentBlock")
-            code.AppendLine("            _ => new UnknownWireContent(value.Clone()),");
+        if (model.AllowUnknownDiscriminator)
+            code.Append("            _ => new ").Append(model.UnknownVariantTypeName).AppendLine(" { RawPayload = value.Clone() },");
         else
             code.AppendLine("            _ => throw new JsonException(\"Unknown discriminator value.\"),");
         code.AppendLine("        };" )
@@ -556,11 +556,18 @@ internal static class WireJsonRenderer
     {
         code.Append("    private static void Write").Append(model.Name).Append("(Utf8JsonWriter writer, ").Append(model.Name).AppendLine(" value)")
             .AppendLine("    {");
+        if (model.IsRawPayloadVariant)
+        {
+            code.AppendLine("        value.RawPayload.WriteTo(writer);")
+                .AppendLine("    }")
+                .AppendLine();
+            return;
+        }
         if (model.DiscriminatorName is not null)
         {
-            if (model.Name == "ContentBlock")
+            if (model.AllowUnknownDiscriminator)
             {
-                code.AppendLine("        if (value is UnknownWireContent unknown)")
+                code.Append("        if (value is ").Append(model.UnknownVariantTypeName).AppendLine(" unknown)")
                     .AppendLine("        {")
                     .AppendLine("            unknown.RawPayload.WriteTo(writer);")
                     .AppendLine("            return;")

@@ -34,7 +34,10 @@ internal static class ModelRenderer
         return sources;
     }
 
-    public static IReadOnlyList<GeneratedSource> RenderInfrastructure(SchemaModel model, bool useSystemTextJsonContext = false)
+    public static IReadOnlyList<GeneratedSource> RenderInfrastructure(
+        SchemaModel model,
+        bool useSystemTextJsonContext = false,
+        bool generateClientAdapters = false)
     {
         var sources = new List<GeneratedSource>(6)
         {
@@ -45,12 +48,9 @@ internal static class ModelRenderer
         if (useSystemTextJsonContext)
         {
             sources.Add(new GeneratedSource("CallbackRoutes.g.cs", RenderCallbackRoutes(model)));
-            if (new[] { "ContentBlock", "ToolCallContent", "McpServer", "McpServerStdio", "McpServerHttp", "McpServerSse" }
-                .All(name => model.Types.Any(type => type.Name == name)))
-            {
-                sources.Add(new GeneratedSource("ClientAdapters.g.cs", ClientAdapterRenderer.Render(model)));
-            }
         }
+        if (generateClientAdapters)
+            sources.Add(new GeneratedSource("ClientAdapters.g.cs", ClientAdapterRenderer.Render(model)));
         return sources;
     }
 
@@ -225,6 +225,10 @@ internal static class ModelRenderer
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
             .WithAccessorList(InitAccessors())
             .WithAttributeLists(SyntaxFactory.SingletonList(AttributeList("JsonPropertyName", StringArgument(model.WireName))));
+        if (model.IsIgnored)
+        {
+            property = property.AddAttributeLists(AttributeList("JsonIgnore"));
+        }
         if (model.ConstValue is not null)
         {
             return property

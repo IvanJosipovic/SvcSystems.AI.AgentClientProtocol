@@ -201,8 +201,15 @@ internal static class WireJson
         var request = GeneratedJson.DeserializeRequestPermissionRequest(parameters);
         return new PermissionRequest(
             request.SessionId,
-            new PermissionToolCall(request.ToolCall.ToolCallId, request.ToolCall.Title, request.ToolCall.Name, request.ToolCall.Status),
-            request.Options.Select(option => new PermissionChoice(option.OptionId, option.Name, option.Kind)).ToArray());
+            new PermissionToolCall(
+                request.ToolCall.ToolCallId,
+                request.ToolCall.Title,
+                request.ToolCall.Name,
+                request.ToolCall.Status,
+                request.ToolCall.RawInput,
+                request.ToolCall.Meta),
+            request.Options.Select(option => new PermissionChoice(option.OptionId, option.Name, option.Kind)).ToArray(),
+            request.Meta);
     }
 
     public static ReadTextFileRequest ReadTextFileReadRequest(JsonElement parameters) =>
@@ -426,9 +433,4 @@ internal static class WireJson
     private static JsonElement? ReadOptionalElement(JsonElement element, string propertyName) =>
         element.ValueKind == JsonValueKind.Object && element.TryGetProperty(propertyName, out var value) ? value.Clone() : null;
 
-}
-
-internal sealed class UnknownWireContent(JsonElement rawPayload) : ContentBlock
-{
-    public JsonElement RawPayload { get; } = rawPayload;
 }

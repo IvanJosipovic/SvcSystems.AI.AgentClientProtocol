@@ -9,6 +9,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Generator;
 public sealed class SchemaGenerator : IIncrementalGenerator
 {
     private const string SchemaExtension = ".json";
+    private const string OptionsSuffix = ".generator.json";
 
     private static readonly DiagnosticDescriptor MissingSchema = new(
         "ACPGEN001", "JSON Schema AdditionalFile is missing",
@@ -28,34 +29,51 @@ public sealed class SchemaGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var schemaInputs = context.AdditionalTextsProvider
-            .Where(static file => file.Path.EndsWith(SchemaExtension, StringComparison.OrdinalIgnoreCase))
+            .Where(static file => file.Path.EndsWith(SchemaExtension, StringComparison.OrdinalIgnoreCase) &&
+                !file.Path.EndsWith(OptionsSuffix, StringComparison.OrdinalIgnoreCase))
             .Select(static (file, cancellationToken) => new SchemaInput(file.Path, file.GetText(cancellationToken)?.ToString()))
             .Collect();
+
+        var generatorOptions = context.AdditionalTextsProvider
+            .Where(static file => file.Path.EndsWith(OptionsSuffix, StringComparison.OrdinalIgnoreCase))
+            .Select(static (file, cancellationToken) => file.GetText(cancellationToken)?.ToString())
+            .Collect()
+            .Select(static (files, _) => files.Length == 1 ? files[0] : null);
 
         var generateJsonContext = context.ParseOptionsProvider
             .Select(static (options, _) => options is CSharpParseOptions csharpOptions &&
                 csharpOptions.PreprocessorSymbolNames.Contains("ACP_STJ_SOURCE_GEN"));
-        context.RegisterPreCompilationSourceOutput(schemaInputs.Combine(generateJsonContext), GenerateModels);
-        context.RegisterSourceOutput(schemaInputs.Combine(generateJsonContext), Generate);
+        var generateClientAdapters = context.ParseOptionsProvider
+            .Select(static (options, _) => options is CSharpParseOptions csharpOptions &&
+                csharpOptions.PreprocessorSymbolNames.Contains("ACP_CLIENT_ADAPTERS"));
+        var inputs = schemaInputs.Combine(generateJsonContext).Combine(generatorOptions);
+        context.RegisterPreCompilationSourceOutput(inputs, GenerateModels);
+        context.RegisterSourceOutput(inputs.Combine(generateClientAdapters), Generate);
     }
 
-    private static void GenerateModels(PreCompilationSourceProductionContext context, (ImmutableArray<SchemaInput> Inputs, bool GenerateJsonContext) input)
+    private static void GenerateModels(
+        PreCompilationSourceProductionContext context,
+        ((ImmutableArray<SchemaInput> Inputs, bool GenerateJsonContext) Input, string? OptionsJson) input)
     {
-        var inputs = input.Inputs;
+        var inputs = input.Input.Inputs;
         if (inputs.Length != 1 || inputs[0].Text is null) return;
         var parseResult = SchemaParser.Parse(inputs[0].Text!);
         if (parseResult.Schema is null) return;
 
-        var model = new SchemaModelBuilder(null, UnsupportedSchema).Build(parseResult.Schema);
-        foreach (var source in ModelRenderer.RenderModels(model, input.GenerateJsonContext))
+        var options = SchemaGeneratorOptions.Parse(input.OptionsJson);
+        var model = new SchemaModelBuilder(null, UnsupportedSchema, options).Build(parseResult.Schema);
+        foreach (var source in ModelRenderer.RenderModels(model, input.Input.GenerateJsonContext))
         {
             context.AddSource(source.HintName, SourceText.From(source.Text, System.Text.Encoding.UTF8));
         }
     }
 
-    private static void Generate(SourceProductionContext context, (ImmutableArray<SchemaInput> Inputs, bool GenerateJsonContext) input)
+    private static void Generate(
+        SourceProductionContext context,
+        (((ImmutableArray<SchemaInput> Inputs, bool GenerateJsonContext) Input, string? OptionsJson) SchemaInput,
+            bool GenerateClientAdapters) input)
     {
-        var inputs = input.Inputs;
+        var inputs = input.SchemaInput.Input.Inputs;
         if (inputs.Length != 1 || inputs[0].Text is null)
         {
             context.ReportDiagnostic(Diagnostic.Create(MissingSchema, Location.None, SchemaExtension));
@@ -72,8 +90,9 @@ public sealed class SchemaGenerator : IIncrementalGenerator
             return;
         }
 
-        var model = new SchemaModelBuilder(context.ReportDiagnostic, UnsupportedSchema).Build(parseResult.Schema);
-        foreach (var source in ModelRenderer.RenderInfrastructure(model, input.GenerateJsonContext))
+        var options = SchemaGeneratorOptions.Parse(input.SchemaInput.OptionsJson);
+        var model = new SchemaModelBuilder(context.ReportDiagnostic, UnsupportedSchema, options).Build(parseResult.Schema);
+        foreach (var source in ModelRenderer.RenderInfrastructure(model, input.SchemaInput.Input.GenerateJsonContext, input.GenerateClientAdapters))
         {
             context.AddSource(source.HintName, SourceText.From(source.Text, System.Text.Encoding.UTF8));
         }
