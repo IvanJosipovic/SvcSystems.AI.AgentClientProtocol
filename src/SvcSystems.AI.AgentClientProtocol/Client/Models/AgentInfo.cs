@@ -19,6 +19,10 @@ public sealed record AgentInfo(
 
     /// <summary>Agent title, forwarded from the schema-generated agentInfo model.</summary>
     public string? Title => Implementation.Title;
+
+    /// <summary>Whether the agent advertises the connection-wide authStatus push extension.</summary>
+    public bool SupportsAuthenticationStatus =>
+        Capabilities.Meta is { } meta && meta.TryGetValue("authStatus", out var value) && value.ValueKind == JsonValueKind.Object;
 }
 
 /// <summary>An authentication method advertised by the ACP agent.</summary>

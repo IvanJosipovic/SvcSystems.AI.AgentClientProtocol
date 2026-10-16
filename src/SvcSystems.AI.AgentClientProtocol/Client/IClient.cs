@@ -1,5 +1,6 @@
 namespace SvcSystems.AI.AgentClientProtocol;
 
+using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Generated;
 
 /// <summary>Consumer-facing ACP client operations.</summary>
@@ -10,6 +11,16 @@ public interface IClient : IAsyncDisposable
 
     /// <summary>Completes when the underlying connection closes; the result contains the transport failure, if any.</summary>
     Task<Exception?> Completion { get; }
+
+    /// <summary>Latest reported authentication identity, or null when the agent has not reported one.</summary>
+    AuthenticationStatus? AuthenticationStatus { get; }
+
+    /// <summary>Sends a custom or legacy adapter request and returns its complete JSON result.</summary>
+    /// <remarks>Parameters must be an object or array. Capability checks are the caller's responsibility.</remarks>
+    Task<JsonElement> SendExtensionRequestAsync(string method, JsonElement parameters, CancellationToken cancellationToken = default);
+
+    /// <summary>Sends a custom or legacy adapter notification without expecting a response.</summary>
+    ValueTask SendExtensionNotificationAsync(string method, JsonElement parameters, CancellationToken cancellationToken = default);
 
     /// <summary>Creates a new ACP session.</summary>
     Task<Session> CreateSessionAsync(SessionOptions options, CancellationToken cancellationToken = default);

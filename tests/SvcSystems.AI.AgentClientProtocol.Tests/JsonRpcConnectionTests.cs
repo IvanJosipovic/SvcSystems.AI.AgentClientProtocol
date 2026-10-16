@@ -62,6 +62,59 @@ public sealed class JsonRpcConnectionTests
         Assert.Contains("missing", exception.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("_auth/status_update")]
+    [InlineData("$/cancel_request")]
+    [InlineData("future/notification")]
+    public async Task UnknownNotificationDoesNotInterruptAuthentication(string method)
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        var authentication = connection.SendRequestAsync("authenticate", Json("{\"methodId\":\"login\"}"), TestContext.Current.CancellationToken);
+        using var request = await ReadMessageAsync(transport.Sent);
+        var requestId = request.RootElement.GetProperty("id").GetInt64();
+
+        transport.Receive(Json($"{{\"jsonrpc\":\"2.0\",\"method\":\"{method}\",\"params\":{{\"status\":\"pending\"}}}}"));
+        transport.Receive(Json($"{{\"jsonrpc\":\"2.0\",\"id\":{requestId},\"result\":{{}}}}"));
+
+        var result = await authentication.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        Assert.Equal(JsonValueKind.Object, result.ValueKind);
+        Assert.False(connection.Completion.IsCompleted);
+        Assert.False(transport.Sent.TryRead(out _));
+    }
+
+    [Fact]
+    public async Task RegisteredNotificationsStillDispatch()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        var received = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        connection.RegisterNotificationHandler("_auth/status_update", parameters =>
+        {
+            received.TrySetResult(parameters.GetProperty("status").GetString()!);
+            return ValueTask.CompletedTask;
+        });
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","method":"_auth/status_update","params":{"status":"pending"}}"""));
+
+        Assert.Equal("pending", await received.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken));
+        Assert.False(connection.Completion.IsCompleted);
+    }
+
+    [Fact]
+    public async Task UnknownRequestStillReturnsMethodNotFound()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"auth-1","method":"_auth/status_update","params":{}}"""));
+
+        using var response = await ReadMessageAsync(transport.Sent);
+        Assert.Equal("auth-1", response.RootElement.GetProperty("id").GetString());
+        Assert.Equal(-32601, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+        Assert.False(connection.Completion.IsCompleted);
+    }
+
     [Fact]
     public void ReflectionSerializationIsDisabledForTheTestConsumer()
     {

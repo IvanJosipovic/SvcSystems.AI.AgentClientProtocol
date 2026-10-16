@@ -1,0 +1,7 @@
+using System.Text.Json;
+
+namespace SvcSystems.AI.AgentClientProtocol;
+
+/// <summary>An unrecognized agent notification, or a notification with built-in extension support.</summary>
+/// <remarks>The parameters are owned by this value and remain valid after the callback returns.</remarks>
+public sealed record ExtensionNotification(string Method, JsonElement Parameters);

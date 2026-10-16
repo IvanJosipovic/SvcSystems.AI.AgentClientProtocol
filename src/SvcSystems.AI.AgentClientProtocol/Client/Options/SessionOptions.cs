@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Options used to create or load an ACP session.</summary>
@@ -11,4 +13,7 @@ public sealed class SessionOptions
 
     /// <summary>MCP servers configured for this session.</summary>
     public IReadOnlyList<McpServerOptions> McpServers { get; init; } = [];
+
+    /// <summary>ACP _meta attached to session/new, session/load, or session/resume.</summary>
+    public IReadOnlyDictionary<string, JsonElement>? Metadata { get; init; }
 }

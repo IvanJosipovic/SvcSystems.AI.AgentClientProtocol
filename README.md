@@ -34,6 +34,8 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 
 `Client.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
 
+Unrecognized JSON-RPC notifications, including agent-specific extensions such as `_auth/status_update`, are ignored without closing the connection. Unsupported requests still receive a JSON-RPC "Method not found" error.
+
 ## Host capabilities
 
 ACP callbacks are enabled only when the host provides a handler. The client can host filesystem, terminal, permission, and elicitation operations. Do not configure filesystem or terminal handlers unless the application has an appropriate workspace/command security policy.
@@ -50,13 +52,43 @@ var clientOptions = new ClientOptions
 
 The client advertises only the capabilities supported by these configured handlers. `Session` exposes prompt streaming, cancellation, mode changes, and session configuration. `IClient` exposes create/load/list/resume/delete/close, authentication, and logout operations, with optional operations gated by the agent's negotiated capabilities.
 
+## Adapter extensions and metadata
+
+Use the generic extension APIs for adapter-specific methods. They preserve trim safety; capability
+checks and authorization remain the application's responsibility.
+
+```csharp
+var clientOptions = new ClientOptions
+{
+    ExtensionNotificationReceived = notification =>
+        Console.WriteLine($"Adapter notification: {notification.Method}"),
+};
+
+using var parameters = JsonDocument.Parse("""{"sessionId":"session-id","title":"New title"}""");
+var response = await client.SendExtensionRequestAsync("_session/rename", parameters.RootElement);
+await client.SendExtensionNotificationAsync("_example/event", parameters.RootElement);
+```
+
+Register incoming request handlers in `ClientOptions.ExtensionRequestHandlers` before connecting.
+Names must start with `_`; unhandled requests receive “Method not found.” Callbacks run on the
+receive loop and must not block on ACP operations or disposal. Callback exceptions fail the
+connection. Outgoing names may also target legacy methods; these low-level calls do not perform
+capability checks or session bookkeeping.
+
+`_auth/status_update` is available as `client.AuthenticationStatus`; prompt suggestions are
+available on session updates and `session.PromptSuggestions`. These are optional adapter
+extensions, not authentication proof or ACP guarantees.
+
+`ClientOptions.Metadata` and `CapabilityMetadata` attach `_meta` to `initialize` and
+`clientCapabilities`; `SessionOptions.Metadata` and `PromptOptions.Metadata` attach it to
+session and prompt requests. Other extension calls can include `_meta` directly in their JSON
+parameters. Incoming raw payloads retain metadata and unknown fields.
+
 ## Schema-generated wire models
 
-The internal wire model generator is an **incremental Roslyn source generator**. It accepts JSON Schema `AdditionalFiles`, parses them with Microsoft's `Microsoft.OpenApi` JSON Schema reader, and emits C# models into the current compilation. It does not depend on an ACP schema version or a `schema/v1` path. The checked-in ACP v1 schema is simply the first input file used by this library.
-
-The generator emits typed object models, tagged hierarchies, C# union types, and trim-safe JSON writers from the schema. Primitive aliases remain CLR primitives, and genuinely open JSON payloads such as `_meta` remain `JsonElement`-based. Protocol wire models are internal except for schema types that are part of the public API, such as `Implementation`.
-
-The library uses `Utf8JsonWriter`, `Utf8JsonReader`, and `JsonDocument` for ACP framing and typed protocol mapping. It does not use reflection-based `JsonSerializer` overloads.
+The incremental Roslyn generator builds typed wire models and trim-safe JSON writers from the
+checked-in ACP v1 schema. Open payloads such as `_meta` remain `JsonElement`-based; the library
+does not use reflection-based `JsonSerializer` overloads.
 
 ## Trimming and NativeAOT
 
@@ -76,6 +108,12 @@ dotnet publish samples/SvcSystems.AI.AgentClientProtocol.Console `
 
 CI also publishes the sample for `net11.0` on Linux.
 
+Run the published console executable with `--extension-smoke-test` to exercise metadata, incoming and outgoing extension requests/notifications, authentication status, and prompt suggestions without an external agent:
+
+```powershell
+& .\samples\SvcSystems.AI.AgentClientProtocol.Console\bin\Release\net11.0\win-x64\publish\SvcSystems.AI.AgentClientProtocol.Console.exe --extension-smoke-test
+```
+
 ## Testing
 
 - `SvcSystems.AI.AgentClientProtocol.Tests` tests JSON-RPC correlation, cancellation, error responses, and reflection-disabled execution.
@@ -94,6 +132,29 @@ dotnet test tests/SvcSystems.AI.AgentClientProtocol.IntegrationTests --framework
 ```
 
 If Cargo is unavailable, Testy tests are reported as skipped unless the binary paths are configured. Set `ACP_TESTY_AUTO_DOWNLOAD=false` to disable automatic provisioning. The OpenCode handshake check is opt-in with `ACP_OPENCODE_BIN`. The normal unit and generator tests do not require Rust or agent credentials.
+
+### ACP TCK
+
+[ACP TCK](https://github.com/agentclientprotocol/acp-tck) tests agents, not clients. We run its
+complete v1 suite against official reference agents, plus a separate .NET client interoperability
+suite against the same fixtures. These checks do not claim ACP TCK certification of this client.
+
+```powershell
+pwsh -File .\tools\Test-AcpTck.ps1
+```
+
+Requires Git, [uv](https://docs.astral.sh/uv/), and the .NET SDK in `global.json`. The first
+run checks out a pinned TCK revision and provisions Python 3.14; no model, credentials, or
+Cargo are needed. Reports and sources go under `artifacts/acp-tck`.
+
+The upstream run covers all **56 registered v1 requirements** across minimal, authenticated,
+and full-capability fixtures; the runner fails if any requirement lacks a passing result.
+Client tests cover v1 sessions, prompts, capabilities, metadata, extensions, transport, and
+error handling. GitHub Actions runs both suites on Windows and Linux.
+
+ACP v2 is not supported (the client test verifies that a v2-only agent is rejected). TCK does
+not cover positive MCP, filesystem, or terminal operations; those remain in the separate Testy
+integration tests.
 
 ## Scope
 
