@@ -1,0 +1,46 @@
+using System.Text;
+using SvcSystems.AI.AgentClientProtocol;
+using SvcSystems.AI.AgentClientProtocol.Transport;
+using Xunit;
+
+namespace SvcSystems.AI.AgentClientProtocol.Tests;
+
+public sealed class TransportBufferingTests
+{
+    [Fact]
+    public async Task StdioFrameReaderEnforcesByteLimitBeforeNewline()
+    {
+        using var input = new MemoryStream(Encoding.UTF8.GetBytes("123456789"));
+
+        var exception = await Assert.ThrowsAsync<ProtocolException>(async () =>
+        {
+            await foreach (var _ in StdioTransport.ReadFramesAsync(input, maximumFrameBytes: 8, TestContext.Current.CancellationToken)) { }
+        });
+
+        Assert.Contains("8 byte limit", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task StdioFrameReaderAcceptsExactLimitAndCrLf()
+    {
+        using var input = new MemoryStream(Encoding.UTF8.GetBytes("12345\r\n{}\n"));
+
+        var frames = new List<string>();
+        await foreach (var frame in StdioTransport.ReadFramesAsync(input, maximumFrameBytes: 5, TestContext.Current.CancellationToken))
+        {
+            frames.Add(Encoding.UTF8.GetString(frame.Span));
+        }
+
+        Assert.Equal(["12345", "{}"], frames);
+    }
+
+    [Fact]
+    public void SessionUpdateQueueFailsInsteadOfGrowingOrDroppingUpdates()
+    {
+        var session = new Session(null!, "session-1", maximumBufferedUpdates: 1);
+
+        Assert.True(session.Publish(new ModeUpdate("first")));
+        Assert.False(session.Publish(new ModeUpdate("second")));
+        Assert.False(session.Publish(new ModeUpdate("third")));
+    }
+}
