@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageId>SvcSystems.AI.AgentClientProtocol</PackageId>
+    <Authors>SVCSystems</Authors>
+    <Description>A trim- and NativeAOT-compatible .NET client for the Agent Client Protocol.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>ACP;Agent Client Protocol;AI;stdio</PackageTags>
+    <RepositoryUrl>https://github.com/SVCSystems/AI.AgentClientProtocol</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <InternalsVisibleTo Include="SvcSystems.AI.AgentClientProtocol.Tests" />
+    <AdditionalFiles Include="..\..\schema\v1\schema.json" />
+    <ProjectReference Include="..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\SvcSystems.AI.AgentClientProtocol.Generator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      GlobalPropertiesToRemove="PublishAot;PublishTrimmed;RuntimeIdentifier;SelfContained" />
+  </ItemGroup>
+
+  <Target Name="AddProtocolGeneratorDependencies" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Include="$(MSBuildProjectDirectory)\..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\bin\$(Configuration)\netstandard2.0\*.dll"
+                Exclude="$(MSBuildProjectDirectory)\..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\bin\$(Configuration)\netstandard2.0\SvcSystems.AI.AgentClientProtocol.Generator.dll;$(MSBuildProjectDirectory)\..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\bin\$(Configuration)\netstandard2.0\Microsoft.CodeAnalysis*.dll" />
+    </ItemGroup>
+  </Target>
+</Project>
