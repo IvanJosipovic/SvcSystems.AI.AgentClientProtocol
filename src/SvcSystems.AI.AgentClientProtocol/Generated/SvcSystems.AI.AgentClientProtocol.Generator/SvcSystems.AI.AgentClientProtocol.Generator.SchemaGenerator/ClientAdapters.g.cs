@@ -11,31 +11,39 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 
 internal static class ClientAdapters
 {
-    internal static AgentContentBlock ToAgentContent(ContentBlock content) => content switch
+    internal static AgentContentBlock ToAgentContent(ContentBlock content)
     {
-        ContentBlockVariant0Text text => new PromptTextContent(text.Text),
-        ContentBlockVariant1Image image => new PromptImageContent(image.Data, image.MimeType, image.Uri),
-        ContentBlockVariant2Audio audio => new PromptAudioContent(audio.Data, audio.MimeType),
-        ContentBlockVariant3ResourceLink link => new ResourceLinkContent(link.Name, link.Uri, link.Description, link.MimeType),
-        ContentBlockVariant4Resource resource => resource.Resource switch
+        AgentContentBlock adapted = content switch
         {
-            TextResourceContents text => new EmbeddedResourceContent(text.Uri, text.Text, null, text.MimeType),
-            BlobResourceContents blob => new EmbeddedResourceContent(blob.Uri, null, blob.Blob, blob.MimeType),
-            _ => throw new ProtocolException("ACP embedded resource did not match a known resource variant.")
-        },
-        ContentBlockUnknown unknown => new UnknownContent(ReadString(unknown.RawPayload, "type") ?? "unknown", unknown.RawPayload),
-        _ => throw new ProtocolException("ACP content block did not match a known schema variant.")
-    };
+            ContentBlockVariant0Text text => new PromptTextContent(text.Text),
+            ContentBlockVariant1Image image => new PromptImageContent(image.Data, image.MimeType, image.Uri),
+            ContentBlockVariant2Audio audio => new PromptAudioContent(audio.Data, audio.MimeType),
+            ContentBlockVariant3ResourceLink link => new ResourceLinkContent(link.Name, link.Uri, link.Description, link.MimeType),
+            ContentBlockVariant4Resource resource => resource.Resource switch
+            {
+                TextResourceContents text => new EmbeddedResourceContent(text.Uri, text.Text, null, text.MimeType),
+                BlobResourceContents blob => new EmbeddedResourceContent(blob.Uri, null, blob.Blob, blob.MimeType),
+                _ => throw new ProtocolException("ACP embedded resource did not match a known resource variant.")
+            },
+            ContentBlockUnknown unknown => new UnknownContent(ReadString(unknown.RawPayload, "type") ?? "unknown", unknown.RawPayload),
+            _ => throw new ProtocolException("ACP content block did not match a known schema variant.")
+        };
+        return adapted with { WireContent = content };
+    }
 
-    internal static AgentContentBlock ToAgentToolCallContent(ToolCallContent content) => content switch
+    internal static AgentContentBlock ToAgentToolCallContent(ToolCallContent content)
     {
-        ToolCallContentVariant0Content nested => ToAgentContent(nested.Content),
-        ToolCallContentVariant1Diff diff => new DiffContent(diff.Path, diff.OldText, diff.NewText),
-        ToolCallContentVariant2Terminal terminal => new TerminalReference(terminal.TerminalId),
-        _ => throw new ProtocolException("ACP tool call content did not match a known schema variant.")
-    };
+        AgentContentBlock adapted = content switch
+        {
+            ToolCallContentVariant0Content nested => ToAgentContent(nested.Content),
+            ToolCallContentVariant1Diff diff => new DiffContent(diff.Path, diff.OldText, diff.NewText),
+            ToolCallContentVariant2Terminal terminal => new TerminalReference(terminal.TerminalId),
+            _ => throw new ProtocolException("ACP tool call content did not match a known schema variant.")
+        };
+        return adapted with { WireToolCallContent = content };
+    }
 
-    internal static ContentBlock ToContentBlock(AgentContentBlock block) => block switch
+    internal static ContentBlock ToContentBlock(AgentContentBlock block) => block.WireContent ?? (block switch
     {
         PromptTextContent text => new ContentBlockVariant0Text { Text = text.Text },
         PromptImageContent image => new ContentBlockVariant1Image { Data = image.Data, MimeType = image.MimeType, Uri = image.Uri },
@@ -49,7 +57,7 @@ internal static class ClientAdapters
         },
         UnknownContent unknown => new ContentBlockUnknown { RawPayload = unknown.RawPayload },
         _ => throw new ArgumentException($"Unsupported ACP prompt content type '{block.GetType().Name}'.", nameof(block))
-    };
+    });
 
     internal static List<McpServer> ToMcpServers(IReadOnlyList<McpServerOptions> servers) => servers.Select(server => server switch
     {

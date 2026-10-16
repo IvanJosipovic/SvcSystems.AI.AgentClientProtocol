@@ -1,26 +1,6 @@
-using System.Text.Json;
+using SvcSystems.AI.AgentClientProtocol.Generated;
 
 namespace SvcSystems.AI.AgentClientProtocol;
-
-/// <summary>Permission request sent by an ACP agent before performing a tool operation.</summary>
-public sealed record PermissionRequest(
-    string SessionId,
-    PermissionToolCall ToolCall,
-    IReadOnlyList<PermissionChoice> Options,
-    IReadOnlyDictionary<string, JsonElement>? Meta);
-
-/// <summary>Summary of the tool call requiring permission.</summary>
-public sealed record PermissionToolCall(
-    string Id,
-    string? Title,
-    string? Name,
-    string? Kind,
-    string? Status,
-    JsonElement? RawInput,
-    IReadOnlyDictionary<string, JsonElement>? Meta);
-
-/// <summary>Permission option offered by the agent.</summary>
-public sealed record PermissionChoice(string Id, string Name, string Kind);
 
 /// <summary>Decision returned for an agent permission request.</summary>
 public sealed record PermissionDecision(string? SelectedOptionId, bool Cancelled = false)
@@ -37,6 +17,6 @@ public interface IPermissionHandler
 {
     /// <summary>Requests a user or policy decision for the supplied operation.</summary>
     ValueTask<PermissionDecision> RequestPermissionAsync(
-        PermissionRequest request,
+        RequestPermissionRequest request,
         CancellationToken cancellationToken = default);
 }

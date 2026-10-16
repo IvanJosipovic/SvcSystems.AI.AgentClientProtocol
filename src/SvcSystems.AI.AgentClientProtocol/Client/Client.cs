@@ -13,12 +13,12 @@ public sealed class Client : IClient
     private const int ProtocolVersion = 1;
     private readonly JsonRpcConnection _connection;
     private readonly ClientOptions _options;
-    private readonly ProcessOptions _processOptions;
+    private readonly ProcessOptions? _processOptions;
     private readonly ConcurrentDictionary<string, Session> _sessions = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activePromptCancellation = new(StringComparer.Ordinal);
     private int _disposed;
 
-    private Client(JsonRpcConnection connection, ProcessOptions processOptions, ClientOptions options)
+    private Client(JsonRpcConnection connection, ProcessOptions? processOptions, ClientOptions options)
     {
         if (options.MaximumBufferedSessionUpdates <= 0)
         {
@@ -32,6 +32,9 @@ public sealed class Client : IClient
 
     /// <summary>Negotiated agent identity and capabilities.</summary>
     public AgentInfo Agent { get; private set; } = null!;
+
+    /// <summary>Completes when the underlying connection closes; the result contains the transport failure, if any.</summary>
+    public Task<Exception?> Completion => _connection.Completion;
 
     /// <summary>Starts an agent process and completes the ACP initialize handshake.</summary>
     public static async Task<Client> StartAsync(
@@ -59,6 +62,32 @@ public sealed class Client : IClient
             {
                 await transport.DisposeAsync().ConfigureAwait(false);
             }
+            throw;
+        }
+    }
+
+    /// <summary>Connects over a caller-provided transport and completes the ACP initialize handshake.</summary>
+    /// <remarks>The client takes ownership of <paramref name="transport"/> and disposes it with the client.</remarks>
+    public static async Task<Client> ConnectAsync(
+        ITransport transport,
+        ClientOptions? clientOptions = null,
+        CancellationToken cancellationToken = default,
+        ProcessOptions? terminalAuthenticationProcessOptions = null)
+    {
+        ArgumentNullException.ThrowIfNull(transport);
+        clientOptions ??= new ClientOptions();
+        JsonRpcConnection? connection = null;
+        try
+        {
+            connection = new JsonRpcConnection(transport);
+            var client = new Client(connection, terminalAuthenticationProcessOptions, clientOptions);
+            await client.InitializeAsync(cancellationToken).ConfigureAwait(false);
+            return client;
+        }
+        catch
+        {
+            if (connection is not null) await connection.DisposeAsync().ConfigureAwait(false);
+            else await transport.DisposeAsync().ConfigureAwait(false);
             throw;
         }
     }
@@ -130,16 +159,18 @@ public sealed class Client : IClient
         if (method is null) throw new ArgumentException($"Authentication method '{methodId}' was not advertised by the ACP agent.", nameof(methodId));
         if (Discriminators.ParseAuthMethodDiscriminator(method.Type) == AuthMethodDiscriminator.Terminal)
         {
+            var processOptions = _processOptions
+                ?? throw new NotSupportedException("Terminal authentication requires process options and is unavailable for a caller-provided transport.");
             var handler = _options.TerminalAuthenticationHandler
                 ?? throw new NotSupportedException("This agent requires terminal authentication but no terminal authentication handler is configured.");
-            var environment = _processOptions.Environment.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+            var environment = processOptions.Environment.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
             if (method.Environment is not null)
             {
                 foreach (var variable in method.Environment) environment[variable.Key] = variable.Value;
             }
-            var arguments = _processOptions.Arguments.Concat(method.Arguments ?? []).ToArray();
+            var arguments = processOptions.Arguments.Concat(method.Arguments ?? []).ToArray();
             var exitCode = await handler.RunAsync(
-                new TerminalAuthenticationRequest(_processOptions.FileName, arguments, _processOptions.WorkingDirectory ?? Environment.CurrentDirectory, environment),
+                new TerminalAuthenticationRequest(processOptions.FileName, arguments, processOptions.WorkingDirectory ?? Environment.CurrentDirectory, environment),
                 cancellationToken).ConfigureAwait(false);
             if (exitCode != 0) throw new ProcessException($"Terminal authentication exited with code {exitCode}.");
             return;
@@ -334,11 +365,11 @@ public sealed class Client : IClient
             {
                 throw new RpcException(-32601, "No permission handler is configured and the agent supplied no reject option.", Methods.SessionRequestPermission);
             }
-            decision = PermissionDecision.Select(rejectOption.Id);
+            decision = PermissionDecision.Select(rejectOption.OptionId);
         }
 
         if (linkedCancellation.IsCancellationRequested) decision = PermissionDecision.Cancel();
-        if (!decision.Cancelled && (decision.SelectedOptionId is null || !request.Options.Any(option => option.Id == decision.SelectedOptionId)))
+        if (!decision.Cancelled && (decision.SelectedOptionId is null || !request.Options.Any(option => option.OptionId == decision.SelectedOptionId)))
         {
             throw new RpcException(-32602, "Permission handler returned an option id that was not offered by the agent.", Methods.SessionRequestPermission);
         }
@@ -363,14 +394,14 @@ public sealed class Client : IClient
             {
                 var request = WireJson.ReadTextFileReadRequest(parameters);
                 ValidateAbsolutePath(request.Path, "path");
-                var content = await fileSystem.ReadTextFileAsync(request.SessionId, request.Path, request.Line, request.Limit, cancellationToken).ConfigureAwait(false);
+                var content = await fileSystem.ReadTextFileAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteTextFileReadResponse(content);
             };
             requests[Methods.FsWriteTextFile] = async (parameters, cancellationToken) =>
             {
                 var request = WireJson.ReadTextFileWriteRequest(parameters);
                 ValidateAbsolutePath(request.Path, "path");
-                await fileSystem.WriteTextFileAsync(request.SessionId, request.Path, request.Content, cancellationToken).ConfigureAwait(false);
+                await fileSystem.WriteTextFileAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyResponse();
             };
         }
@@ -387,26 +418,26 @@ public sealed class Client : IClient
             };
             requests[Methods.TerminalOutput] = async (parameters, cancellationToken) =>
             {
-                var (sessionId, terminalId) = WireJson.ReadTerminalRequest(parameters);
-                var output = await terminal.GetOutputAsync(sessionId, terminalId, cancellationToken).ConfigureAwait(false);
+                var request = WireJson.ReadTerminalOutputRequest(parameters);
+                var output = await terminal.GetOutputAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteTerminalOutputResponse(output);
             };
             requests[Methods.TerminalWaitForExit] = async (parameters, cancellationToken) =>
             {
-                var (sessionId, terminalId) = WireJson.ReadTerminalRequest(parameters);
-                var status = await terminal.WaitForExitAsync(sessionId, terminalId, cancellationToken).ConfigureAwait(false);
+                var request = WireJson.ReadTerminalExitRequest(parameters);
+                var status = await terminal.WaitForExitAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteTerminalExitStatusResponse(status);
             };
             requests[Methods.TerminalKill] = async (parameters, cancellationToken) =>
             {
-                var (sessionId, terminalId) = WireJson.ReadTerminalRequest(parameters);
-                await terminal.KillAsync(sessionId, terminalId, cancellationToken).ConfigureAwait(false);
+                var request = WireJson.ReadTerminalKillRequest(parameters);
+                await terminal.KillAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyResponse();
             };
             requests[Methods.TerminalRelease] = async (parameters, cancellationToken) =>
             {
-                var (sessionId, terminalId) = WireJson.ReadTerminalRequest(parameters);
-                await terminal.ReleaseAsync(sessionId, terminalId, cancellationToken).ConfigureAwait(false);
+                var request = WireJson.ReadTerminalReleaseRequest(parameters);
+                await terminal.ReleaseAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyResponse();
             };
         }

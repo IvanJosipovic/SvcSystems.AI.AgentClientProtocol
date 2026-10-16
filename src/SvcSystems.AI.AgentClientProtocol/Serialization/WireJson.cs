@@ -163,13 +163,14 @@ internal static class WireJson
                         name,
                         ReadString(method, "description"),
                         type,
+                        method.Clone(),
                         arguments,
                         environment));
                 }
             }
         }
 
-        return new AgentInfo(info, protocolVersion, capabilities, authMethods);
+        return new AgentInfo(info, protocolVersion, capabilities, response.Clone(), authMethods);
     }
 
     public static ListSessionsResponse ReadSessionListPage(JsonElement response) =>
@@ -196,22 +197,8 @@ internal static class WireJson
     public static string ReadNotificationSessionId(JsonElement parameters) =>
         ReadString(parameters, "sessionId") ?? throw new ProtocolException("ACP session notification did not include sessionId.");
 
-    public static PermissionRequest ReadPermissionRequest(JsonElement parameters)
-    {
-        var request = GeneratedJson.DeserializeRequestPermissionRequest(parameters);
-        return new PermissionRequest(
-            request.SessionId,
-            new PermissionToolCall(
-                request.ToolCall.ToolCallId,
-                request.ToolCall.Title,
-                request.ToolCall.Name,
-                request.ToolCall.Kind,
-                request.ToolCall.Status,
-                request.ToolCall.RawInput,
-                request.ToolCall.Meta),
-            request.Options.Select(option => new PermissionChoice(option.OptionId, option.Name, option.Kind)).ToArray(),
-            request.Meta);
-    }
+    public static RequestPermissionRequest ReadPermissionRequest(JsonElement parameters) =>
+        GeneratedJson.DeserializeRequestPermissionRequest(parameters);
 
     public static ReadTextFileRequest ReadTextFileReadRequest(JsonElement parameters) =>
         GeneratedJson.DeserializeReadTextFileRequest(parameters);
@@ -222,11 +209,17 @@ internal static class WireJson
     public static CreateTerminalRequest ReadTerminalCreateRequest(JsonElement parameters) =>
         GeneratedJson.DeserializeCreateTerminalRequest(parameters);
 
-    public static (string SessionId, string TerminalId) ReadTerminalRequest(JsonElement parameters)
-    {
-        var request = GeneratedJson.DeserializeTerminalOutputRequest(parameters);
-        return (request.SessionId, request.TerminalId);
-    }
+    public static TerminalOutputRequest ReadTerminalOutputRequest(JsonElement parameters) =>
+        GeneratedJson.DeserializeTerminalOutputRequest(parameters);
+
+    public static WaitForTerminalExitRequest ReadTerminalExitRequest(JsonElement parameters) =>
+        GeneratedJson.DeserializeWaitForTerminalExitRequest(parameters);
+
+    public static KillTerminalRequest ReadTerminalKillRequest(JsonElement parameters) =>
+        GeneratedJson.DeserializeKillTerminalRequest(parameters);
+
+    public static ReleaseTerminalRequest ReadTerminalReleaseRequest(JsonElement parameters) =>
+        GeneratedJson.DeserializeReleaseTerminalRequest(parameters);
 
     public static ElicitationRequest ReadElicitationRequest(JsonElement parameters)
     {
@@ -240,11 +233,12 @@ internal static class WireJson
             ReadString(parameters, "requestId"),
             ReadString(parameters, "elicitationId"),
             ReadString(parameters, "url"),
-            requestedSchema);
+            requestedSchema,
+            parameters.Clone());
     }
 
     public static ElicitationCompleted ReadElicitationCompleted(JsonElement parameters) =>
-        new(GeneratedJson.DeserializeCompleteElicitationNotification(parameters).ElicitationId);
+        new(GeneratedJson.DeserializeCompleteElicitationNotification(parameters).ElicitationId, parameters.Clone());
 
     public static byte[] WriteTextFileReadResponse(string content) =>
         GeneratedJson.Serialize(new ReadTextFileResponse { Content = content });
@@ -262,6 +256,7 @@ internal static class WireJson
         {
             ExitCode = status.ExitCode,
             Signal = status.Signal,
+            Meta = status.Meta,
             ExtensionData = MergeNullOptionalValues(status.ExtensionData, status.ExitCode is null, status.Signal is null)
         });
 
@@ -292,13 +287,13 @@ internal static class WireJson
 
         var kind = ReadString(update, "sessionUpdate") ?? throw new ProtocolException("session/update did not include the sessionUpdate discriminator.");
         var updateKind = Discriminators.ParseSessionUpdateDiscriminator(kind);
-        if (updateKind == SessionUpdateDiscriminator.Unknown) return new UnmappedUpdate(kind, update.Clone());
+        if (updateKind == SessionUpdateDiscriminator.Unknown) return WithRawPayload(new UnmappedUpdate(kind), update);
 
         if (updateKind is SessionUpdateDiscriminator.ToolCall or SessionUpdateDiscriminator.ToolCallUpdate)
         {
             if (HasUnknownToolCallContent(update))
             {
-                return new AgentToolCallUpdate(
+                return WithRawPayload(new AgentToolCallUpdate(
                     ReadString(update, "toolCallId") ?? string.Empty,
                     ReadString(update, "name"),
                     ReadString(update, "title"),
@@ -308,17 +303,18 @@ internal static class WireJson
                     Content: ReadToolCallContent(update),
                     Locations: ReadToolCallLocations(update),
                     RawInput: ReadOptionalElement(update, "rawInput"),
-                    RawOutput: ReadOptionalElement(update, "rawOutput"));
+                    RawOutput: ReadOptionalElement(update, "rawOutput")), update);
             }
-            return updateKind == SessionUpdateDiscriminator.ToolCall
+            var toolCallUpdate = updateKind == SessionUpdateDiscriminator.ToolCall
                 ? ToAgentToolCallUpdate(GeneratedJson.DeserializeSessionUpdateVariant3ToolCall(update))
                 : ToAgentToolCallUpdate(GeneratedJson.DeserializeSessionUpdateVariant4ToolCallUpdate(update));
+            return WithRawPayload(toolCallUpdate, update);
         }
 
         if (updateKind == SessionUpdateDiscriminator.ConfigOptionUpdate)
-            return new ConfigOptionsUpdate(ReadConfigOptions(update));
+            return WithRawPayload(new ConfigOptionsUpdate(ReadConfigOptions(update)), update);
 
-        return GeneratedJson.DeserializeSessionUpdate(update) switch
+        SessionEvent mapped = GeneratedJson.DeserializeSessionUpdate(update) switch
         {
             SessionUpdateVariant0UserMessageChunk value => new ContentUpdate("user", ClientAdapters.ToAgentContent(value.Content), value.MessageId),
             SessionUpdateVariant1AgentMessageChunk value => new ContentUpdate("agent", ClientAdapters.ToAgentContent(value.Content), value.MessageId),
@@ -336,9 +332,13 @@ internal static class WireJson
                 value.Summary?.Select(ClientAdapters.ToAgentContent).ToArray(),
                 value.Error),
             SessionUpdateVariant13CompactionSummaryChunk value => new CompactionSummaryUpdate(value.CompactionId, ClientAdapters.ToAgentContent(value.Content)),
-            _ => new UnmappedUpdate(kind, update.Clone())
+            _ => new UnmappedUpdate(kind)
         };
+        return WithRawPayload(mapped, update);
     }
+
+    private static SessionEvent WithRawPayload(SessionEvent value, JsonElement payload) =>
+        value with { RawPayload = payload.Clone() };
 
     private static AgentToolCallUpdate ToAgentToolCallUpdate(SessionUpdateVariant3ToolCall value) =>
         new(value.ToolCallId, value.Name, value.Title, value.Kind, value.Status, false,

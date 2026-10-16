@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Base exception for ACP client failures.</summary>
@@ -32,11 +34,12 @@ public sealed class ProtocolException : AgentException
 public sealed class RpcException : AgentException
 {
     /// <summary>Initializes an RPC exception.</summary>
-    public RpcException(int code, string message, string? method = null)
+    public RpcException(int code, string message, string? method = null, JsonElement? data = null)
         : base(method is null ? message : $"ACP method '{method}' failed ({code}): {message}")
     {
         Code = code;
         Method = method;
+        ErrorData = data?.Clone();
     }
 
     /// <summary>JSON-RPC error code.</summary>
@@ -44,4 +47,7 @@ public sealed class RpcException : AgentException
 
     /// <summary>Method that returned the error, if known.</summary>
     public string? Method { get; }
+
+    /// <summary>Structured JSON-RPC error data, when supplied by the peer.</summary>
+    public JsonElement? ErrorData { get; }
 }
