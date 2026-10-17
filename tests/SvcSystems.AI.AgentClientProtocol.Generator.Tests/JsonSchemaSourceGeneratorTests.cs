@@ -350,6 +350,7 @@ public sealed class JsonSchemaSourceGeneratorTests
 
         var diagnostic = Assert.Single(diagnostics.Where(item => item.Id == "ACPGEN005"));
         Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+        Assert.DoesNotContain(diagnostics, item => item.Id == "ACPGEN004");
     }
 
     [Fact]

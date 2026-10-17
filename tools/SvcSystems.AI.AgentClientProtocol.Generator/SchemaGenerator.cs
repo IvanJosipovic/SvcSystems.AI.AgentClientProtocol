@@ -121,14 +121,19 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         }
 
         var matchedPairs = MatchSchemas(context.ReportDiagnostic, inputs.Schemas, inputs.Options, inputs.Metadata).ToArray();
-        var matchedOptionKeys = new HashSet<string>(
-            matchedPairs.Where(input => input.OptionsInput is not null)
-                .Select(input => input.OptionsInput!.PairKey),
+
+        // An options file is unmatched only when no schema shares its name prefix. When several options
+        // files match one schema the pair is reported as a duplicate (ACPGEN005) and skipped, so those
+        // options must not additionally be reported as unmatched.
+        var schemaKeys = new HashSet<string>(
+            inputs.Schemas
+                .Where(schema => !IsRegistryAgentSchema(schema, inputs.Schemas))
+                .Select(schema => schema.PairKey),
             StringComparer.OrdinalIgnoreCase);
 
         foreach (var options in inputs.Options)
         {
-            if (!matchedOptionKeys.Contains(options.PairKey))
+            if (!schemaKeys.Contains(options.PairKey))
             {
                 context.ReportDiagnostic(Diagnostic.Create(UnmatchedOptions, Location.None, options.Path, SchemaSuffix));
             }
