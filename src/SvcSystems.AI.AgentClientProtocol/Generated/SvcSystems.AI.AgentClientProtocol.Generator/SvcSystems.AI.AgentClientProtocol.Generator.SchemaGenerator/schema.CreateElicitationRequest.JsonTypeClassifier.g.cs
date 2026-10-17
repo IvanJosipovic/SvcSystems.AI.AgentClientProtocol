@@ -18,8 +18,7 @@ internal sealed class CreateElicitationRequestJsonTypeClassifier : JsonTypeClass
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
-            var matchedCase = -1;
+            // Schema discriminator values select recognized cases.
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName) continue;
@@ -33,31 +32,10 @@ internal sealed class CreateElicitationRequestJsonTypeClassifier : JsonTypeClass
                         _ => typeof(CreateElicitationRequestCase2),
                     };
                 }
-                if (reader.ValueTextEquals("requestedSchema"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
-                if (reader.ValueTextEquals("elicitationId"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 1) return null;
-                    matchedCase = 1;
-                }
-                if (reader.ValueTextEquals("url"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 1) return null;
-                    matchedCase = 1;
-                }
                 if (!reader.Read()) return null;
                 reader.Skip();
             }
-            return matchedCase switch
-            {
-                0 => typeof(ElicitationFormMode),
-                1 => typeof(ElicitationUrlMode),
-                2 => typeof(CreateElicitationRequestCase2),
-                _ => null,
-            };
+            return null;
         };
     }
 }

@@ -10,10 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// Update to session metadata. All fields are optional to support partial updates.
-/// 
-/// Agents send this notification to update session information like title or custom metadata.
-/// This allows clients to display dynamic session names and track session state changes.
+/// Session metadata has been updated (title, timestamps, custom metadata)
 /// </summary>
 public sealed partial class SessionInfoUpdate
 {
@@ -38,6 +35,9 @@ public sealed partial class SessionInfoUpdate
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "session_info_update";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

@@ -32,6 +32,9 @@ public sealed partial class CurrentModeUpdate
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
 
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "current_mode_update";
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

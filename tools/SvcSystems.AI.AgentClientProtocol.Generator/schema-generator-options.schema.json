@@ -45,21 +45,6 @@
       "items": { "type": "string", "minLength": 1, "description": "Exact name of a discriminated union definition in the paired JSON Schema." },
       "uniqueItems": true
     },
-    "reuseAllOfVariants": {
-      "description": "Names of allOf definitions whose generated variants should reuse the referenced schema type instead of generating a separate duplicate variant model. Use this when an allOf wrapper represents an existing model and keeping one shared C# type is preferable. Names must match definitions in the paired schema.",
-      "type": "array",
-      "items": { "type": "string", "minLength": 1, "description": "Exact name of an allOf definition in the paired JSON Schema." },
-      "uniqueItems": true
-    },
-    "defaultDiscriminatorValues": {
-      "description": "Fallback discriminator strings for branches of discriminated unions. The outer property name is the union definition name; each inner property name is a branch schema's title, and its string value is the discriminator to use when the branch does not declare one in the schema. This is useful when an upstream schema omits discriminator values for a known variant.",
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "description": "Maps branch titles to the discriminator values used for that union.",
-        "additionalProperties": { "type": "string", "minLength": 1, "description": "Discriminator string assigned to the branch with this title." }
-      }
-    },
     "defaultUnionCases": {
       "description": "Selects which generated case represents the default value of a union. Each property name is a union definition name and its value is the generated case name. The selected case is initialized when the union is default-constructed; it does not affect which case is chosen when JSON is deserialized.",
       "type": "object",

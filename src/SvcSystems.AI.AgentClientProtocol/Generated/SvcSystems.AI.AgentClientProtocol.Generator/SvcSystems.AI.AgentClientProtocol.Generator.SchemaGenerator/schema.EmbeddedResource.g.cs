@@ -10,7 +10,11 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// The contents of a resource, embedded into a prompt or tool call result.
+/// Complete resource contents embedded directly in the message.
+/// 
+/// Preferred for including context as it avoids extra round-trips.
+/// 
+/// Requires the `embeddedContext` prompt capability when included in prompts.
 /// </summary>
 public sealed partial class EmbeddedResource
 {
@@ -35,6 +39,9 @@ public sealed partial class EmbeddedResource
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; } = "resource";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

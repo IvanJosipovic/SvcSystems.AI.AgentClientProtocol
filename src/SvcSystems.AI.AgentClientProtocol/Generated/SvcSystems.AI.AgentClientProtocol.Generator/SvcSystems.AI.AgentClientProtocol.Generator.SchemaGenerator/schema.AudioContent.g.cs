@@ -10,7 +10,9 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// Audio provided to or from an LLM.
+/// Audio data for transcription or analysis.
+/// 
+/// Requires the `audio` prompt capability when included in prompts.
 /// </summary>
 public sealed partial class AudioContent
 {
@@ -41,6 +43,9 @@ public sealed partial class AudioContent
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; } = "audio";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

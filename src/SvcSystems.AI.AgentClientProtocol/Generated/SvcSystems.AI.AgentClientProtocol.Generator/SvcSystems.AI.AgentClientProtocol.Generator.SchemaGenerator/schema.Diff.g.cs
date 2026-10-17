@@ -10,11 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// A diff representing file modifications.
-/// 
-/// Shows changes to files in a format suitable for display in the client UI.
-/// 
-/// See protocol docs: [Content](https://agentclientprotocol.com/protocol/tool-calls#content)
+/// File modification shown as a diff.
 /// </summary>
 public sealed partial class Diff
 {
@@ -45,6 +41,9 @@ public sealed partial class Diff
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; } = "diff";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

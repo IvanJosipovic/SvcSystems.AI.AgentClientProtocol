@@ -10,7 +10,10 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// Text provided to or from an LLM.
+/// Text content. May be plain text or formatted with Markdown.
+/// 
+/// All agents MUST support text content blocks in prompts.
+/// Clients SHOULD render this text as Markdown.
 /// </summary>
 public sealed partial class TextContent
 {
@@ -35,6 +38,9 @@ public sealed partial class TextContent
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; } = "text";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

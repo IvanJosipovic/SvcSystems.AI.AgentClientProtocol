@@ -387,26 +387,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             {
                 return Create_ContentBlock(options);
             }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant0Text))
-            {
-                return Create_ContentBlockVariant0Text(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant1Image))
-            {
-                return Create_ContentBlockVariant1Image(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant2Audio))
-            {
-                return Create_ContentBlockVariant2Audio(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant3ResourceLink))
-            {
-                return Create_ContentBlockVariant3ResourceLink(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource))
-            {
-                return Create_ContentBlockVariant4Resource(options);
-            }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentChunk))
             {
                 return Create_ContentChunk(options);
@@ -635,10 +615,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             {
                 return Create_RequestPermissionOutcomeVariant0Cancelled(options);
             }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.RequestPermissionOutcomeVariant1Selected))
-            {
-                return Create_RequestPermissionOutcomeVariant1Selected(options);
-            }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ResourceLink))
             {
                 return Create_ResourceLink(options);
@@ -670,14 +646,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionsCapabilities))
             {
                 return Create_SessionConfigOptionsCapabilities(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select))
-            {
-                return Create_SessionConfigOptionVariant0Select(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean))
-            {
-                return Create_SessionConfigOptionVariant1Boolean(options);
             }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigSelect))
             {
@@ -731,22 +699,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             {
                 return Create_SessionUpdateVariant0UserMessageChunk(options);
             }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant10UsageUpdate))
-            {
-                return Create_SessionUpdateVariant10UsageUpdate(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant11Notice))
-            {
-                return Create_SessionUpdateVariant11Notice(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant12CompactionUpdate))
-            {
-                return Create_SessionUpdateVariant12CompactionUpdate(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant13CompactionSummaryChunk))
-            {
-                return Create_SessionUpdateVariant13CompactionSummaryChunk(options);
-            }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk))
             {
                 return Create_SessionUpdateVariant1AgentMessageChunk(options);
@@ -754,34 +706,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant2AgentThoughtChunk))
             {
                 return Create_SessionUpdateVariant2AgentThoughtChunk(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant3ToolCall))
-            {
-                return Create_SessionUpdateVariant3ToolCall(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant4ToolCallUpdate))
-            {
-                return Create_SessionUpdateVariant4ToolCallUpdate(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant5Plan))
-            {
-                return Create_SessionUpdateVariant5Plan(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate))
-            {
-                return Create_SessionUpdateVariant6AvailableCommandsUpdate(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant7CurrentModeUpdate))
-            {
-                return Create_SessionUpdateVariant7CurrentModeUpdate(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant8ConfigOptionUpdate))
-            {
-                return Create_SessionUpdateVariant8ConfigOptionUpdate(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant9SessionInfoUpdate))
-            {
-                return Create_SessionUpdateVariant9SessionInfoUpdate(options);
             }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SetSessionConfigOptionRequestCase0))
             {
@@ -830,18 +754,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent))
             {
                 return Create_ToolCallContent(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content))
-            {
-                return Create_ToolCallContentVariant0Content(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff))
-            {
-                return Create_ToolCallContentVariant1Diff(options);
-            }
-            if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal))
-            {
-                return Create_ToolCallContentVariant2Terminal(options);
             }
             if (type == typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallLocation))
             {

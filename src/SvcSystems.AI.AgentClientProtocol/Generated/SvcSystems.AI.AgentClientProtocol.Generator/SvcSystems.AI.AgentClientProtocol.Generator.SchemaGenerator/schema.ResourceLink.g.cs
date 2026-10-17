@@ -10,7 +10,9 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// A resource that the server is capable of reading, included in a prompt or tool call result.
+/// References to resources that the agent can access.
+/// 
+/// All agents MUST support resource links in prompts.
 /// </summary>
 public sealed partial class ResourceLink
 {
@@ -65,6 +67,9 @@ public sealed partial class ResourceLink
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; } = "resource_link";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

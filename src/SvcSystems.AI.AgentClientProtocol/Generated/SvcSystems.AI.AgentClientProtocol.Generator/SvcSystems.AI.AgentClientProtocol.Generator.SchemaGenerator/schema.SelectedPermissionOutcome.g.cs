@@ -12,7 +12,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// The user selected one of the provided options.
 /// </summary>
-public sealed partial class SelectedPermissionOutcome
+public sealed class SelectedPermissionOutcome : RequestPermissionOutcome
 {
     /// <summary>
     /// The ID of the option the user selected.

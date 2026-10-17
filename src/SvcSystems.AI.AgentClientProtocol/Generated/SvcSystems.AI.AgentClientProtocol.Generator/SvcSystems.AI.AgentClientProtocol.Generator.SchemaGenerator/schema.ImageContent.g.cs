@@ -10,7 +10,9 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// An image provided to or from an LLM.
+/// Images for visual context or analysis.
+/// 
+/// Requires the `image` prompt capability when included in prompts.
 /// </summary>
 public sealed partial class ImageContent
 {
@@ -47,6 +49,9 @@ public sealed partial class ImageContent
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; } = "image";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

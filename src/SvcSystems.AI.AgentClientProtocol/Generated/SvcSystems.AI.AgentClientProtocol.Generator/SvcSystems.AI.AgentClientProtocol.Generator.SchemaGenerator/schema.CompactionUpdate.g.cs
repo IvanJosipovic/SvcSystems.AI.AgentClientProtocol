@@ -10,14 +10,10 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// A context compaction upsert. The first notification fixes the compaction's
-/// timeline position. Later updates with the same ID patch that entity in place.
+/// A context compaction has been created or updated.
+/// 
 /// Agents MUST only send this update when the Client advertised
 /// [`ClientSessionCapabilities::compaction`].
-/// 
-/// `summary`, `error`, and `_meta` have patch semantics: omission leaves the
-/// stored value unchanged, `null` clears it, and a concrete value replaces it.
-/// `summary: []` also clears the summary.
 /// </summary>
 public sealed partial class CompactionUpdate
 {
@@ -50,6 +46,9 @@ public sealed partial class CompactionUpdate
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "compaction_update";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

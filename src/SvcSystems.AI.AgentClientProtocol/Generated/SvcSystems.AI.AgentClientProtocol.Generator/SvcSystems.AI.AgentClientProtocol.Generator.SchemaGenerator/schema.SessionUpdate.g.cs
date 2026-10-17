@@ -16,4 +16,4 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/prompt-turn#3-agent-reports-output)
 /// </summary>
 [JsonUnion(TypeClassifier = typeof(SessionUpdateJsonTypeClassifier))]
-public union SessionUpdate(SessionUpdateVariant0UserMessageChunk, SessionUpdateVariant1AgentMessageChunk, SessionUpdateVariant2AgentThoughtChunk, SessionUpdateVariant3ToolCall, SessionUpdateVariant4ToolCallUpdate, SessionUpdateVariant5Plan, SessionUpdateVariant6AvailableCommandsUpdate, SessionUpdateVariant7CurrentModeUpdate, SessionUpdateVariant8ConfigOptionUpdate, SessionUpdateVariant9SessionInfoUpdate, SessionUpdateVariant10UsageUpdate, SessionUpdateVariant11Notice, SessionUpdateVariant12CompactionUpdate, SessionUpdateVariant13CompactionSummaryChunk, JsonElement);
+public union SessionUpdate(SessionUpdateVariant0UserMessageChunk, SessionUpdateVariant1AgentMessageChunk, SessionUpdateVariant2AgentThoughtChunk, ToolCall, ToolCallUpdate, Plan, AvailableCommandsUpdate, CurrentModeUpdate, ConfigOptionUpdate, SessionInfoUpdate, UsageUpdate, Notice, CompactionUpdate, CompactionSummaryChunk, JsonElement);

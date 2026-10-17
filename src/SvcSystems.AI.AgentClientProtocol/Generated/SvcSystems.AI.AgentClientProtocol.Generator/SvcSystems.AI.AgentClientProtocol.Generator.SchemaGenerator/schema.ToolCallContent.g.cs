@@ -17,4 +17,4 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// See protocol docs: [Content](https://agentclientprotocol.com/protocol/tool-calls#content)
 /// </summary>
 [JsonUnion(TypeClassifier = typeof(ToolCallContentJsonTypeClassifier))]
-public union ToolCallContent(ToolCallContentVariant0Content, ToolCallContentVariant1Diff, ToolCallContentVariant2Terminal, JsonElement);
+public union ToolCallContent(Content, Diff, Terminal, JsonElement);

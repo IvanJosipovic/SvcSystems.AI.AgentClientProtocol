@@ -10,12 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// An execution plan for accomplishing complex tasks.
-/// 
-/// Plans consist of multiple entries representing individual tasks or goals.
-/// Agents report plans to clients to provide visibility into their execution strategy.
-/// Plans can evolve during execution as the agent discovers new requirements or completes tasks.
-/// 
+/// The agent's execution plan for complex tasks.
 /// See protocol docs: [Agent Plan](https://agentclientprotocol.com/protocol/agent-plan)
 /// </summary>
 public sealed partial class Plan
@@ -38,6 +33,9 @@ public sealed partial class Plan
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "plan";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

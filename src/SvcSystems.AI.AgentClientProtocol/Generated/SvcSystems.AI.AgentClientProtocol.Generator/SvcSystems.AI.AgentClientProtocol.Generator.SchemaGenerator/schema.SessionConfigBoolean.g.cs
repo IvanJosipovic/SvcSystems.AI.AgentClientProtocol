@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// A boolean on/off toggle session configuration option payload.
+/// Boolean on/off toggle.
 /// </summary>
 public sealed partial class SessionConfigBoolean
 {
@@ -19,6 +19,43 @@ public sealed partial class SessionConfigBoolean
     /// </summary>
     [JsonPropertyName("currentValue")]
     public required bool CurrentValue { get; init; }
+
+    /// <summary>
+    /// Unique identifier for the configuration option.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public required string Id { get; init; }
+
+    /// <summary>
+    /// Human-readable label for the option.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// Optional description for the Client to display to the user.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; init; }
+
+    /// <summary>
+    /// Optional semantic category for this option (UX only).
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; init; }
+
+    /// <summary>
+    /// The _meta property is reserved by ACP to allow clients and agents to attach additional
+    /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
+    /// these keys.
+    /// 
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// </summary>
+    [JsonPropertyName("_meta")]
+    public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("type")]
+    public string Type { get; } = "boolean";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

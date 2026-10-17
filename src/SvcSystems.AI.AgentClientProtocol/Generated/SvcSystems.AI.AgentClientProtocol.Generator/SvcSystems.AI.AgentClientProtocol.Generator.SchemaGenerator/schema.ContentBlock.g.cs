@@ -25,4 +25,4 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// See protocol docs: [Content](https://agentclientprotocol.com/protocol/content)
 /// </summary>
 [JsonUnion(TypeClassifier = typeof(ContentBlockJsonTypeClassifier))]
-public union ContentBlock(ContentBlockVariant0Text, ContentBlockVariant1Image, ContentBlockVariant2Audio, ContentBlockVariant3ResourceLink, ContentBlockVariant4Resource, JsonElement);
+public union ContentBlock(TextContent, ImageContent, AudioContent, ResourceLink, EmbeddedResource, JsonElement);

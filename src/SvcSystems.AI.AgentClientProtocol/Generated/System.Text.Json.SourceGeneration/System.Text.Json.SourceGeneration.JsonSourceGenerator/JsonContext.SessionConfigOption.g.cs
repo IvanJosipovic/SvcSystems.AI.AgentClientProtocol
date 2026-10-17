@@ -28,11 +28,11 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             {
                 var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigSelect)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigBoolean)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigSelect caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigBoolean caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue1),
                         global::System.Text.Json.JsonElement caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue2),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
@@ -41,8 +41,8 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigSelect caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigSelect), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigBoolean caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigBoolean), (object?)caseValue1),
                             global::System.Text.Json.JsonElement caseValue2 => (typeof(global::System.Text.Json.JsonElement), (object?)caseValue2),
                         };
                     },

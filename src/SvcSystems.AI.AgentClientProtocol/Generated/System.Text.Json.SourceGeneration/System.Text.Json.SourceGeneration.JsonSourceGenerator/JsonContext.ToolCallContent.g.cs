@@ -28,12 +28,12 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             {
                 var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Content)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Diff)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Terminal)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue1),
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue2),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.Content caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.Diff caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.Terminal caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue2),
                         global::System.Text.Json.JsonElement caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue3),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
@@ -42,9 +42,9 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff), (object?)caseValue1),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal), (object?)caseValue2),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.Content caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Content), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.Diff caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Diff), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.Terminal caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Terminal), (object?)caseValue2),
                             global::System.Text.Json.JsonElement caseValue3 => (typeof(global::System.Text.Json.JsonElement), (object?)caseValue3),
                         };
                     },

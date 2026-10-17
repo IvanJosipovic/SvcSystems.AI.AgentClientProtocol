@@ -18,7 +18,7 @@ internal sealed class MultiSelectItemsJsonTypeClassifier : JsonTypeClassifierFac
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
+            // Schema discriminator values select recognized cases.
             var matchedCase = -1;
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {

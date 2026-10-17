@@ -18,7 +18,7 @@ internal sealed class SessionUpdateJsonTypeClassifier : JsonTypeClassifierFactor
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
+            // Schema discriminator values select recognized cases.
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName) continue;
@@ -30,17 +30,17 @@ internal sealed class SessionUpdateJsonTypeClassifier : JsonTypeClassifierFactor
                         "user_message_chunk" => typeof(SessionUpdateVariant0UserMessageChunk),
                         "agent_message_chunk" => typeof(SessionUpdateVariant1AgentMessageChunk),
                         "agent_thought_chunk" => typeof(SessionUpdateVariant2AgentThoughtChunk),
-                        "tool_call" => typeof(SessionUpdateVariant3ToolCall),
-                        "tool_call_update" => typeof(SessionUpdateVariant4ToolCallUpdate),
-                        "plan" => typeof(SessionUpdateVariant5Plan),
-                        "available_commands_update" => typeof(SessionUpdateVariant6AvailableCommandsUpdate),
-                        "current_mode_update" => typeof(SessionUpdateVariant7CurrentModeUpdate),
-                        "config_option_update" => typeof(SessionUpdateVariant8ConfigOptionUpdate),
-                        "session_info_update" => typeof(SessionUpdateVariant9SessionInfoUpdate),
-                        "usage_update" => typeof(SessionUpdateVariant10UsageUpdate),
-                        "notice" => typeof(SessionUpdateVariant11Notice),
-                        "compaction_update" => typeof(SessionUpdateVariant12CompactionUpdate),
-                        "compaction_summary_chunk" => typeof(SessionUpdateVariant13CompactionSummaryChunk),
+                        "tool_call" => typeof(ToolCall),
+                        "tool_call_update" => typeof(ToolCallUpdate),
+                        "plan" => typeof(Plan),
+                        "available_commands_update" => typeof(AvailableCommandsUpdate),
+                        "current_mode_update" => typeof(CurrentModeUpdate),
+                        "config_option_update" => typeof(ConfigOptionUpdate),
+                        "session_info_update" => typeof(SessionInfoUpdate),
+                        "usage_update" => typeof(UsageUpdate),
+                        "notice" => typeof(Notice),
+                        "compaction_update" => typeof(CompactionUpdate),
+                        "compaction_summary_chunk" => typeof(CompactionSummaryChunk),
                         _ => typeof(JsonElement),
                     };
                 }

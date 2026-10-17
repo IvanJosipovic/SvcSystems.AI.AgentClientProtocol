@@ -10,8 +10,8 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// A content block appended to a compaction's summary. A first-seen ID creates
-/// an in-progress compaction. Chunks append in receive order.
+/// A content block appended to a context compaction's retained summary.
+/// 
 /// Agents MUST only send this update when the Client advertised
 /// [`ClientSessionCapabilities::compaction`].
 /// </summary>
@@ -34,6 +34,9 @@ public sealed partial class CompactionSummaryChunk
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "compaction_summary_chunk";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

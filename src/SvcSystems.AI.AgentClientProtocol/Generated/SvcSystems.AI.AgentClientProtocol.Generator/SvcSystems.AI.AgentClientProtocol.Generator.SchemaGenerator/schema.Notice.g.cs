@@ -10,15 +10,10 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// Fire-and-forget information for the user.
+/// Information for the user that is not part of session history.
 /// 
-/// Notices are live events rather than session history. Agents must not rely on
-/// a notice being received, displayed, or seen by the user.
-/// Agents MUST only send notices when the Client advertised
-/// [`ClientSessionCapabilities::notices`]. Otherwise, Agents may use an agent
-/// message when the information should still be surfaced to the user.
-/// 
-/// See RFD: [Session Notices](https://agentclientprotocol.com/rfds/session-notices)
+/// Agents MUST only send this update when the Client advertised
+/// [`ClientSessionCapabilities::notices`].
 /// </summary>
 public sealed partial class Notice
 {
@@ -49,6 +44,9 @@ public sealed partial class Notice
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "notice";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

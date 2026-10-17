@@ -42,7 +42,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                     DerivedTypes =
                     {
                         new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.RequestPermissionOutcomeVariant0Cancelled), "cancelled"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.RequestPermissionOutcomeVariant1Selected), "selected"),
+                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SelectedPermissionOutcome), "selected"),
                     },
                 },
                     TypeClassifierFactory = null,

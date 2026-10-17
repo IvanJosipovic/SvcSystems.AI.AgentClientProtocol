@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// Context window and cost update for a session.
+/// Context window and cost update for the session.
 /// </summary>
 public sealed partial class UsageUpdate
 {
@@ -41,6 +41,9 @@ public sealed partial class UsageUpdate
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "usage_update";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

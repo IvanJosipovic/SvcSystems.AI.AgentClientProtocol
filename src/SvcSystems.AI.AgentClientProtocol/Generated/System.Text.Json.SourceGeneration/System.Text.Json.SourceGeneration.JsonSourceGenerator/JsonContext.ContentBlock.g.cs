@@ -28,14 +28,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             {
                 var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant0Text)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant1Image)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant2Audio)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant3ResourceLink)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.TextContent)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ImageContent)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.AudioContent)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ResourceLink)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResource)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant0Text caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant1Image caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue1),
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant2Audio caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue2),
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant3ResourceLink caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue3),
-                        global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource caseValue4 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue4),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.TextContent caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.ImageContent caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.AudioContent caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue2),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.ResourceLink caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue3),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResource caseValue4 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue4),
                         global::System.Text.Json.JsonElement caseValue5 => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock(caseValue5),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
@@ -44,11 +44,11 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant0Text caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant0Text), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant1Image caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant1Image), (object?)caseValue1),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant2Audio caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant2Audio), (object?)caseValue2),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant3ResourceLink caseValue3 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant3ResourceLink), (object?)caseValue3),
-                            global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource caseValue4 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource), (object?)caseValue4),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.TextContent caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.TextContent), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.ImageContent caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ImageContent), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.AudioContent caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.AudioContent), (object?)caseValue2),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.ResourceLink caseValue3 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ResourceLink), (object?)caseValue3),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResource caseValue4 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResource), (object?)caseValue4),
                             global::System.Text.Json.JsonElement caseValue5 => (typeof(global::System.Text.Json.JsonElement), (object?)caseValue5),
                         };
                     },

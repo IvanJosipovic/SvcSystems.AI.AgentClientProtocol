@@ -18,8 +18,7 @@ internal sealed class SetSessionConfigOptionRequestJsonTypeClassifier : JsonType
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
-            var matchedCase = -1;
+            // Schema discriminator values select recognized cases.
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName) continue;
@@ -32,20 +31,10 @@ internal sealed class SetSessionConfigOptionRequestJsonTypeClassifier : JsonType
                         _ => null,
                     };
                 }
-                if (reader.ValueTextEquals("type"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
                 if (!reader.Read()) return null;
                 reader.Skip();
             }
-            return matchedCase switch
-            {
-                0 => typeof(SetSessionConfigOptionRequestCase0),
-                1 => typeof(SetSessionConfigOptionRequestCase1),
-                _ => null,
-            };
+            return typeof(SetSessionConfigOptionRequestCase1);
         };
     }
 }

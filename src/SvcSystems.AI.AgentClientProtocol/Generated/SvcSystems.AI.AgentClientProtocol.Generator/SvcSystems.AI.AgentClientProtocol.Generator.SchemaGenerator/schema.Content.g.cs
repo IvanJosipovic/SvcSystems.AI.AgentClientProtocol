@@ -30,6 +30,9 @@ public sealed partial class Content
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
 
+    [JsonPropertyName("type")]
+    public string Type { get; } = "content";
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

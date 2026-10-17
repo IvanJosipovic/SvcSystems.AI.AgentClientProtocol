@@ -18,7 +18,7 @@ internal sealed class ToolCallContentJsonTypeClassifier : JsonTypeClassifierFact
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
+            // Schema discriminator values select recognized cases.
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName) continue;
@@ -27,9 +27,9 @@ internal sealed class ToolCallContentJsonTypeClassifier : JsonTypeClassifierFact
                     if (!reader.Read() || reader.TokenType != JsonTokenType.String) return null;
                     return reader.GetString() switch
                     {
-                        "content" => typeof(ToolCallContentVariant0Content),
-                        "diff" => typeof(ToolCallContentVariant1Diff),
-                        "terminal" => typeof(ToolCallContentVariant2Terminal),
+                        "content" => typeof(Content),
+                        "diff" => typeof(Diff),
+                        "terminal" => typeof(Terminal),
                         _ => typeof(JsonElement),
                     };
                 }

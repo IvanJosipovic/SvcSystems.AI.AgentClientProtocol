@@ -18,7 +18,7 @@ internal sealed class SessionConfigOptionJsonTypeClassifier : JsonTypeClassifier
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
+            // Schema discriminator values select recognized cases.
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName) continue;
@@ -27,8 +27,8 @@ internal sealed class SessionConfigOptionJsonTypeClassifier : JsonTypeClassifier
                     if (!reader.Read() || reader.TokenType != JsonTokenType.String) return null;
                     return reader.GetString() switch
                     {
-                        "select" => typeof(SessionConfigOptionVariant0Select),
-                        "boolean" => typeof(SessionConfigOptionVariant1Boolean),
+                        "select" => typeof(SessionConfigSelect),
+                        "boolean" => typeof(SessionConfigBoolean),
                         _ => typeof(JsonElement),
                     };
                 }

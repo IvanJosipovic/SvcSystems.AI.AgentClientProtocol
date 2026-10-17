@@ -18,7 +18,7 @@ internal sealed class ContentBlockJsonTypeClassifier : JsonTypeClassifierFactory
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
+            // Schema discriminator values select recognized cases.
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName) continue;
@@ -27,11 +27,11 @@ internal sealed class ContentBlockJsonTypeClassifier : JsonTypeClassifierFactory
                     if (!reader.Read() || reader.TokenType != JsonTokenType.String) return null;
                     return reader.GetString() switch
                     {
-                        "text" => typeof(ContentBlockVariant0Text),
-                        "image" => typeof(ContentBlockVariant1Image),
-                        "audio" => typeof(ContentBlockVariant2Audio),
-                        "resource_link" => typeof(ContentBlockVariant3ResourceLink),
-                        "resource" => typeof(ContentBlockVariant4Resource),
+                        "text" => typeof(TextContent),
+                        "image" => typeof(ImageContent),
+                        "audio" => typeof(AudioContent),
+                        "resource_link" => typeof(ResourceLink),
+                        "resource" => typeof(EmbeddedResource),
                         _ => typeof(JsonElement),
                     };
                 }

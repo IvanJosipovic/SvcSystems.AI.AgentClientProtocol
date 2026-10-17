@@ -10,12 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// Represents a tool call that the language model has requested.
-/// 
-/// Tool calls are actions that the agent executes on behalf of the language model,
-/// such as reading files, executing code, or fetching data from external sources.
-/// 
-/// See protocol docs: [Tool Calls](https://agentclientprotocol.com/protocol/tool-calls)
+/// Notification that a new tool call has been initiated.
 /// </summary>
 public sealed partial class ToolCall
 {
@@ -87,6 +82,9 @@ public sealed partial class ToolCall
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "tool_call";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

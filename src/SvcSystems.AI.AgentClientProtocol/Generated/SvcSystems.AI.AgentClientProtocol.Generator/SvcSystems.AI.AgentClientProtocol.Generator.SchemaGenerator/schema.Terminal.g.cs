@@ -34,6 +34,9 @@ public sealed partial class Terminal
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
 
+    [JsonPropertyName("type")]
+    public string Type { get; } = "terminal";
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

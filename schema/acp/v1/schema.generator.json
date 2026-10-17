@@ -6,14 +6,7 @@
   "serializationNamespace": "SvcSystems.AI.AgentClientProtocol.Serialization",
   "generateJsonContext": true,
   "allowUnknownDiscriminators": ["ContentBlock", "SessionConfigOption", "SessionUpdate", "ToolCallContent"],
-  "reuseAllOfVariants": ["McpServer"],
-  "defaultDiscriminatorValues": {
-    "McpServer": {
-      "stdio": "stdio"
-    }
-  },
   "defaultUnionCases": {
-    "AuthMethod": "agent",
     "SessionConfigSelectOptions": "Ungrouped"
   }
 }

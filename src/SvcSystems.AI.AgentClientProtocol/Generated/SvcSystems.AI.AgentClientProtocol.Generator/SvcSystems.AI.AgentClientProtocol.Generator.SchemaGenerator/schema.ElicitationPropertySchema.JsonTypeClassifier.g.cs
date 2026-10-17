@@ -18,8 +18,7 @@ internal sealed class ElicitationPropertySchemaJsonTypeClassifier : JsonTypeClas
         {
             // JSON token kinds identify scalar cases before object-shape rules.
             if (reader.TokenType != JsonTokenType.StartObject) return null;
-            // Schema const values take precedence over structural fallbacks.
-            var matchedCase = -1;
+            // Schema discriminator values select recognized cases.
             while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName) continue;
@@ -36,64 +35,10 @@ internal sealed class ElicitationPropertySchemaJsonTypeClassifier : JsonTypeClas
                         _ => typeof(ElicitationPropertySchemaCase5),
                     };
                 }
-                if (reader.ValueTextEquals("minLength"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
-                if (reader.ValueTextEquals("maxLength"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
-                if (reader.ValueTextEquals("pattern"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
-                if (reader.ValueTextEquals("format"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
-                if (reader.ValueTextEquals("enum"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
-                if (reader.ValueTextEquals("oneOf"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 0) return null;
-                    matchedCase = 0;
-                }
-                if (reader.ValueTextEquals("minItems"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 4) return null;
-                    matchedCase = 4;
-                }
-                if (reader.ValueTextEquals("maxItems"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 4) return null;
-                    matchedCase = 4;
-                }
-                if (reader.ValueTextEquals("items"u8))
-                {
-                    if (matchedCase >= 0 && matchedCase != 4) return null;
-                    matchedCase = 4;
-                }
                 if (!reader.Read()) return null;
                 reader.Skip();
             }
-            return matchedCase switch
-            {
-                0 => typeof(StringPropertySchema),
-                1 => typeof(NumberPropertySchema),
-                2 => typeof(IntegerPropertySchema),
-                3 => typeof(BooleanPropertySchema),
-                4 => typeof(MultiSelectPropertySchema),
-                5 => typeof(ElicitationPropertySchemaCase5),
-                _ => null,
-            };
+            return null;
         };
     }
 }

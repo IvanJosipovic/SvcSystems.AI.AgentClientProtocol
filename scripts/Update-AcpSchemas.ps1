@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch] $CreatePr
 )
 
@@ -66,9 +66,7 @@ Clear-SchemaDirectory -Path $registrySchemaDirectory -Preserve @('registry.gener
 & gh release download `
     --repo agentclientprotocol/agent-client-protocol `
     --pattern 'meta.json' `
-    --pattern 'meta.unstable.json' `
     --pattern 'schema.json' `
-    --pattern 'schema.unstable.json' `
     --clobber `
     --dir $acpSchemaDirectory
 if ($LASTEXITCODE -ne 0) {

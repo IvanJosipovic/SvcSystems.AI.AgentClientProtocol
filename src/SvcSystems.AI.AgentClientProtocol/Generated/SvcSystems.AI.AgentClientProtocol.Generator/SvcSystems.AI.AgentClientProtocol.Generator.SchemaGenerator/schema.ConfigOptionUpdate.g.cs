@@ -30,6 +30,9 @@ public sealed partial class ConfigOptionUpdate
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
 
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "config_option_update";
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

@@ -10,12 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// An update to an existing tool call.
-/// 
-/// Used to report progress and results as tools execute. All fields except
-/// the tool call ID are optional - only changed fields need to be included.
-/// 
-/// See protocol docs: [Updating](https://agentclientprotocol.com/protocol/tool-calls#updating)
+/// Update on the status or results of a tool call.
 /// </summary>
 public sealed partial class ToolCallUpdate
 {
@@ -85,6 +80,9 @@ public sealed partial class ToolCallUpdate
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonPropertyName("sessionUpdate")]
+    public string SessionUpdate { get; } = "tool_call_update";
 
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }

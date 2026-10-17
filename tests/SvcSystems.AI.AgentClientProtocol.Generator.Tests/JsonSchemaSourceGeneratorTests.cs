@@ -68,6 +68,124 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void ReusesUniqueAllOfVariantsAndPreservesBranchProperties()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "TextContent": {
+                  "type": "object",
+                  "properties": { "text": { "type": "string" } },
+                  "required": ["text"]
+                },
+                "ImageContent": {
+                  "type": "object",
+                  "properties": { "url": { "type": "string" } },
+                  "required": ["url"]
+                },
+                "ContentBlock": {
+                  "oneOf": [
+                    {
+                      "title": "Text",
+                      "allOf": [{ "$ref": "#/$defs/TextContent" }],
+                      "properties": {
+                        "kind": { "type": "string", "const": "text" },
+                        "bold": { "type": "boolean" }
+                      },
+                      "required": ["kind", "bold"]
+                    },
+                    {
+                      "title": "Image",
+                      "allOf": [{ "$ref": "#/$defs/ImageContent" }],
+                      "properties": { "kind": { "type": "string", "const": "image" } },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/allof-reuse.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var textContent = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class TextContent", StringComparison.Ordinal));
+        Assert.Contains("public sealed class TextContent : ContentBlock", textContent, StringComparison.Ordinal);
+        Assert.Contains("public required bool Bold { get; init; }", textContent, StringComparison.Ordinal);
+        var contentBlock = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")", StringComparison.Ordinal));
+        Assert.Contains("JsonDerivedType(typeof(TextContent), \"text\")", contentBlock, StringComparison.Ordinal);
+        Assert.Contains("JsonDerivedType(typeof(ImageContent), \"image\")", contentBlock, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void DoesNotReuseAnAllOfTargetSharedByMultipleTaggedUnions()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "Shared": {
+                  "type": "object",
+                  "properties": { "value": { "type": "string" } },
+                  "required": ["value"]
+                },
+                "LeftOnly": { "type": "object", "properties": { "left": { "type": "string" } } },
+                "RightOnly": { "type": "object", "properties": { "right": { "type": "string" } } },
+                "First": {
+                  "oneOf": [
+                    {
+                      "title": "Shared",
+                      "allOf": [{ "$ref": "#/$defs/Shared" }],
+                      "properties": { "kind": { "type": "string", "const": "shared" } },
+                      "required": ["kind"]
+                    },
+                    {
+                      "title": "Left",
+                      "allOf": [{ "$ref": "#/$defs/LeftOnly" }],
+                      "properties": { "kind": { "type": "string", "const": "left" } },
+                      "required": ["kind"]
+                    }
+                  ]
+                },
+                "Second": {
+                  "oneOf": [
+                    {
+                      "title": "Shared",
+                      "allOf": [{ "$ref": "#/$defs/Shared" }],
+                      "properties": { "kind": { "type": "string", "const": "shared" } },
+                      "required": ["kind"]
+                    },
+                    {
+                      "title": "Right",
+                      "allOf": [{ "$ref": "#/$defs/RightOnly" }],
+                      "properties": { "kind": { "type": "string", "const": "right" } },
+                      "required": ["kind"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/shared-allof-variant.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var shared = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class Shared", StringComparison.Ordinal));
+        Assert.DoesNotContain("class Shared : First", shared, StringComparison.Ordinal);
+        Assert.DoesNotContain("class Shared : Second", shared, StringComparison.Ordinal);
+        var first = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")", StringComparison.Ordinal) &&
+            source.Contains("class First", StringComparison.Ordinal));
+        var second = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")", StringComparison.Ordinal) &&
+            source.Contains("class Second", StringComparison.Ordinal));
+        Assert.DoesNotContain("JsonDerivedType(typeof(Shared), \"shared\")", first, StringComparison.Ordinal);
+        Assert.DoesNotContain("JsonDerivedType(typeof(Shared), \"shared\")", second, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void EmitsSerializerContextInPreCompilationWhenOptedIn()
     {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
@@ -399,6 +517,23 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains(result.GeneratedSources, source =>
             source.Contains("namespace SvcSystems.AI.AgentClientProtocol.Models;", StringComparison.Ordinal) &&
             source.Contains("class SessionUpdate", StringComparison.Ordinal));
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("class ContentBlockJsonTypeClassifier", StringComparison.Ordinal) &&
+            source.Contains("_ => typeof(JsonElement)", StringComparison.Ordinal));
+        var authMethodClassifier = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class AuthMethodJsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("return typeof(AuthMethodAgent);", authMethodClassifier, StringComparison.Ordinal);
+        Assert.DoesNotContain("ValueTextEquals(\"args\"u8)", authMethodClassifier, StringComparison.Ordinal);
+        var elicitationClassifier = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class CreateElicitationRequestJsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("ValueTextEquals(\"mode\"u8)", elicitationClassifier, StringComparison.Ordinal);
+        Assert.DoesNotContain("ValueTextEquals(\"requestedSchema\"u8)", elicitationClassifier, StringComparison.Ordinal);
+        var untaggedClassifier = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class MultiSelectItemsJsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("ValueTextEquals(\"anyOf\"u8)", untaggedClassifier, StringComparison.Ordinal);
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("class McpServer", StringComparison.Ordinal) &&
+            source.Contains("JsonDerivedType(typeof(McpServerStdio), \"stdio\")", StringComparison.Ordinal));
         Assert.True(result.GeneratedSources.Length > 150);
 
         using var document = JsonDocument.Parse(schema);
