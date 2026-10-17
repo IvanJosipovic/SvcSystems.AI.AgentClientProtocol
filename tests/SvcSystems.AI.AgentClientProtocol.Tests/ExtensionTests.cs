@@ -1,7 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using System.Threading.Channels;
-using SvcSystems.AI.AgentClientProtocol.Transport;
 using Xunit;
 
 namespace SvcSystems.AI.AgentClientProtocol.Tests;
@@ -69,180 +67,6 @@ public sealed class ExtensionTests
         await BarrierAsync(client, transport);
         Assert.Equal("none", client.AuthenticationStatus?.Kind);
         Assert.Null(client.AuthenticationStatus?.Account);
-    }
-
-    [Fact]
-    public async Task AdvertisedClientOperationsSendRequestsAndReturnResponses()
-    {
-        await using var transport = new TestTransport();
-        const string agentResponse = """
-            {
-              "protocolVersion": 1,
-              "agentCapabilities": {
-                "auth": { "logout": {} },
-                "sessionCapabilities": { "list": {}, "delete": {}, "close": {} }
-              },
-              "authMethods": [{ "id": "token", "name": "Token" }]
-            }
-            """;
-        await using var client = await ConnectAsync(transport, agentResponse: agentResponse);
-
-        var authentication = client.AuthenticateAsync("token", Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            Assert.Equal("authenticate", request.RootElement.GetProperty("method").GetString());
-            Assert.Equal("token", request.RootElement.GetProperty("params").GetProperty("methodId").GetString());
-            transport.Respond(request, "{}");
-        }
-        await authentication;
-
-        var logout = client.LogoutAsync(Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            Assert.Equal("logout", request.RootElement.GetProperty("method").GetString());
-            transport.Respond(request, "{}");
-        }
-        await logout;
-
-        var listPage = client.ListSessionsPageAsync(Path.GetTempPath(), "cursor", Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            Assert.Equal("session/list", request.RootElement.GetProperty("method").GetString());
-            Assert.Equal("cursor", request.RootElement.GetProperty("params").GetProperty("cursor").GetString());
-            transport.Respond(request, """{"sessions":[{"sessionId":"listed","cwd":"/tmp"}],"nextCursor":"next"}""");
-        }
-        var page = await listPage;
-        Assert.Equal("listed", Assert.Single(page.Sessions).SessionId);
-        Assert.Equal("next", page.NextCursor);
-
-        var listProjection = client.ListSessionsAsync(cancellationToken: Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            transport.Respond(request, """{"sessions":[{"sessionId":"projected","cwd":"/tmp"}]}""");
-        }
-        Assert.Equal("projected", Assert.Single(await listProjection).SessionId);
-
-        var deletion = client.DeleteSessionAsync("deleted", Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            Assert.Equal("session/delete", request.RootElement.GetProperty("method").GetString());
-            transport.Respond(request, "{}");
-        }
-        await deletion;
-
-        var close = client.CloseSessionAsync("closed", Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            Assert.Equal("session/close", request.RootElement.GetProperty("method").GetString());
-            transport.Respond(request, "{}");
-        }
-        await close;
-
-        var modeChange = client.SetSessionModeAsync("session", "mode", Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            Assert.Equal("session/set_mode", request.RootElement.GetProperty("method").GetString());
-            transport.Respond(request, "{}");
-        }
-        await modeChange;
-
-        var configChange = client.SetSessionConfigOptionAsync(
-            "session",
-            "confirm",
-            new SetSessionConfigOptionRequest(new SetSessionConfigOptionRequestCase0 { Value = true }),
-            Token);
-        using (var request = await transport.ReadSentAsync())
-        {
-            Assert.Equal("session/set_config_option", request.RootElement.GetProperty("method").GetString());
-            transport.Respond(request, """{"configOptions":[]}""");
-        }
-        Assert.Empty(await configChange);
-    }
-
-    [Fact]
-    public async Task TerminalAuthenticationRunsConfiguredCommandWithAgentOverrides()
-    {
-        await using var transport = new TestTransport();
-        var terminal = new RecordingTerminalAuthenticationHandler();
-        var processOptions = new ProcessOptions
-        {
-            FileName = "agent",
-            Arguments = ["--acp"],
-            WorkingDirectory = Path.GetTempPath(),
-            Environment = new Dictionary<string, string?> { ["SHARED"] = "base", ["BASE_ONLY"] = "yes" },
-        };
-        const string agentResponse = """
-            {
-              "protocolVersion": 1,
-              "authMethods": [{
-                "type": "terminal",
-                "id": "login",
-                "name": "Login",
-                "args": ["auth", "--interactive"],
-                "env": { "SHARED": "terminal", "TERMINAL_ONLY": "yes" }
-              }]
-            }
-            """;
-        await using var client = await ConnectAsync(
-            transport,
-            new ClientOptions { TerminalAuthenticationHandler = terminal },
-            agentResponse,
-            processOptions);
-
-        await client.AuthenticateAsync("login", Token);
-
-        Assert.NotNull(terminal.Request);
-        Assert.Equal("agent", terminal.Request.FileName);
-        Assert.Equal(["--acp", "auth", "--interactive"], terminal.Request.Arguments);
-        Assert.Equal(Path.GetTempPath(), terminal.Request.WorkingDirectory);
-        Assert.Equal("terminal", terminal.Request.Environment["SHARED"]);
-        Assert.Equal("yes", terminal.Request.Environment["BASE_ONLY"]);
-        Assert.Equal("yes", terminal.Request.Environment["TERMINAL_ONLY"]);
-    }
-
-    [Fact]
-    public async Task PermissionCallbackSelectsAnAdvertisedOption()
-    {
-        await using var transport = new TestTransport();
-        var permissionHandler = new SelectingPermissionHandler("allow");
-        await using var client = await ConnectAsync(transport, new ClientOptions { PermissionHandler = permissionHandler });
-        transport.Receive("""
-            {"jsonrpc":"2.0","id":41,"method":"session/request_permission","params":{
-              "sessionId":"session","toolCall":{"toolCallId":"call","title":"Run tool"},
-              "options":[{"optionId":"allow","name":"Allow","kind":"allow_once"}]}}
-            """);
-
-        using var response = await transport.ReadSentAsync();
-
-        Assert.Equal(41, response.RootElement.GetProperty("id").GetInt32());
-        Assert.Equal("selected", response.RootElement.GetProperty("result").GetProperty("outcome").GetProperty("outcome").GetString());
-        Assert.Equal("allow", response.RootElement.GetProperty("result").GetProperty("outcome").GetProperty("optionId").GetString());
-        Assert.Equal("session", permissionHandler.Request?.SessionId);
-    }
-
-    [Fact]
-    public async Task PermissionCallbackFallsBackToRejectAndErrorsWhenNoneIsOffered()
-    {
-        await using var transport = new TestTransport();
-        await using var client = await ConnectAsync(transport);
-
-        transport.Receive("""
-            {"jsonrpc":"2.0","id":42,"method":"session/request_permission","params":{
-              "sessionId":"session","toolCall":{"toolCallId":"call","title":"Run tool"},
-              "options":[{"optionId":"reject","name":"Reject","kind":"reject_once"}]}}
-            """);
-        using (var rejected = await transport.ReadSentAsync())
-        {
-            Assert.Equal("reject", rejected.RootElement.GetProperty("result").GetProperty("outcome").GetProperty("optionId").GetString());
-        }
-
-        transport.Receive("""
-            {"jsonrpc":"2.0","id":43,"method":"session/request_permission","params":{
-              "sessionId":"session","toolCall":{"toolCallId":"call","title":"Run tool"},
-              "options":[{"optionId":"allow","name":"Allow","kind":"allow_once"}]}}
-            """);
-        using var response = await transport.ReadSentAsync();
-        Assert.Equal(-32601, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
     }
 
     [Fact]
@@ -713,13 +537,9 @@ public sealed class ExtensionTests
 
     private static string QuoteJsonString(string value) => "\"" + JsonEncodedText.Encode(value) + "\"";
 
-    private static async Task<AcpClient> ConnectAsync(
-        TestTransport transport,
-        ClientOptions? options = null,
-        string? agentResponse = null,
-        ProcessOptions? terminalAuthenticationProcessOptions = null)
+    private static async Task<AcpClient> ConnectAsync(TestTransport transport, ClientOptions? options = null, string? agentResponse = null)
     {
-        var connecting = AcpClient.ConnectAsync(transport, options, Token, terminalAuthenticationProcessOptions);
+        var connecting = AcpClient.ConnectAsync(transport, options, Token);
         using var request = await transport.ReadSentAsync();
         transport.Respond(request, agentResponse ?? """{"protocolVersion":1,"agentCapabilities":{"loadSession":true,"sessionCapabilities":{"resume":{}}}}""");
         return await connecting.WaitAsync(TimeSpan.FromSeconds(5), Token);
@@ -770,59 +590,4 @@ public sealed class ExtensionTests
         }
     }
 
-    private sealed class RecordingTerminalAuthenticationHandler : ITerminalAuthenticationHandler
-    {
-        public TerminalAuthenticationRequest? Request { get; private set; }
-
-        public ValueTask<int> RunAsync(TerminalAuthenticationRequest request, CancellationToken cancellationToken = default)
-        {
-            Request = request;
-            return ValueTask.FromResult(0);
-        }
-    }
-
-    private sealed class SelectingPermissionHandler(string optionId) : IPermissionHandler
-    {
-        public RequestPermissionRequest? Request { get; private set; }
-
-        public ValueTask<PermissionDecision> RequestPermissionAsync(
-            RequestPermissionRequest request,
-            CancellationToken cancellationToken = default)
-        {
-            Request = request;
-            return ValueTask.FromResult(PermissionDecision.Select(optionId));
-        }
-    }
-
-    private sealed class TestTransport : ITransport
-    {
-        private readonly Channel<ReadOnlyMemory<byte>> _incoming = Channel.CreateUnbounded<ReadOnlyMemory<byte>>();
-        private readonly Channel<ReadOnlyMemory<byte>> _sent = Channel.CreateUnbounded<ReadOnlyMemory<byte>>();
-
-        public void Receive(string json) => Assert.True(_incoming.Writer.TryWrite(Encoding.UTF8.GetBytes(json)));
-        public void Respond(JsonDocument request, string result) =>
-            Receive($$"""{"jsonrpc":"2.0","id":{{request.RootElement.GetProperty("id").GetRawText()}},"result":{{result}}}""");
-        public void RespondError(JsonDocument request, int code, string message) =>
-            Receive($$$"""{"jsonrpc":"2.0","id":{{{request.RootElement.GetProperty("id").GetRawText()}}},"error":{"code":{{{code}}},"message":"{{{message}}}"}}""");
-        public async Task<JsonDocument> ReadSentAsync() =>
-            JsonDocument.Parse(await _sent.Reader.ReadAsync(Token).AsTask().WaitAsync(TimeSpan.FromSeconds(5), Token));
-        /// <summary>Optional hook that delays individual outbound messages (used to simulate a blocked peer).</summary>
-        public Func<ReadOnlyMemory<byte>, Task>? SendGate { get; set; }
-        public async ValueTask SendAsync(ReadOnlyMemory<byte> message, CancellationToken cancellationToken)
-        {
-            if (SendGate is { } gate) await gate(message).ConfigureAwait(false);
-            await _sent.Writer.WriteAsync(message.ToArray(), cancellationToken).ConfigureAwait(false);
-        }
-        public async IAsyncEnumerable<ReadOnlyMemory<byte>> ReceiveAsync(
-            [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
-        {
-            await foreach (var message in _incoming.Reader.ReadAllAsync(cancellationToken)) yield return message;
-        }
-        public ValueTask DisposeAsync()
-        {
-            _incoming.Writer.TryComplete();
-            _sent.Writer.TryComplete();
-            return ValueTask.CompletedTask;
-        }
-    }
 }
