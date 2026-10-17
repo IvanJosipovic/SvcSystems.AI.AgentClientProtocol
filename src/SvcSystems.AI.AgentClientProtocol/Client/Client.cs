@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using SvcSystems.AI.AgentClientProtocol.JsonRpc;
 using SvcSystems.AI.AgentClientProtocol.Serialization;
 using SvcSystems.AI.AgentClientProtocol.Transport;
@@ -13,6 +14,7 @@ public sealed class Client : IClient
     private readonly JsonRpcConnection _connection;
     private readonly ClientOptions _options;
     private readonly ProcessOptions? _processOptions;
+    private readonly ILogger? _logger;
     private readonly ConcurrentDictionary<string, Session> _sessions = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _fileSystemRoots = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activePromptCancellation = new(StringComparer.Ordinal);
@@ -32,6 +34,7 @@ public sealed class Client : IClient
         _connection = connection;
         _processOptions = processOptions;
         _options = options;
+        _logger = options.LoggerFactory?.CreateLogger<Client>();
         RegisterHostCallbacks();
         foreach (var (method, handler) in options.ExtensionRequestHandlers)
         {
@@ -47,6 +50,17 @@ public sealed class Client : IClient
             });
         }
         _connection.UnhandledNotificationReceived = HandleExtensionNotification;
+        // Surface the terminal failure without requiring callers to observe Completion. The continuation
+        // runs on the thread pool rather than the receive loop so a slow handler cannot stall teardown.
+        _ = _connection.Completion.ContinueWith(
+            static (completion, state) =>
+            {
+                if (completion.Result is { } failure) ((Client)state!).RaiseTransportFaulted(failure);
+            },
+            this,
+            CancellationToken.None,
+            TaskContinuationOptions.None,
+            TaskScheduler.Default);
     }
 
     /// <summary>Negotiated agent identity and capabilities.</summary>
@@ -54,6 +68,9 @@ public sealed class Client : IClient
 
     /// <summary>Completes when the underlying connection closes; the result contains the transport failure, if any.</summary>
     public Task<Exception?> Completion => _connection.Completion;
+
+    /// <inheritdoc />
+    public event EventHandler<TransportFaultedEventArgs>? TransportFaulted;
 
     /// <inheritdoc />
     public AuthenticationStatus? AuthenticationStatus => Volatile.Read(ref _authenticationStatus);
@@ -106,7 +123,8 @@ public sealed class Client : IClient
             connection = new JsonRpcConnection(
                 transport,
                 clientOptions.MaximumConcurrentIncomingRequests,
-                clientOptions.RequestHandlerException);
+                clientOptions.RequestHandlerException,
+                clientOptions.LoggerFactory);
             var client = new Client(connection, processOptions, clientOptions);
             await client.InitializeAsync(cancellationToken).ConfigureAwait(false);
             return client;
@@ -141,7 +159,8 @@ public sealed class Client : IClient
             connection = new JsonRpcConnection(
                 transport,
                 clientOptions.MaximumConcurrentIncomingRequests,
-                clientOptions.RequestHandlerException);
+                clientOptions.RequestHandlerException,
+                clientOptions.LoggerFactory);
             var client = new Client(connection, terminalAuthenticationProcessOptions, clientOptions);
             await client.InitializeAsync(cancellationToken).ConfigureAwait(false);
             return client;
@@ -713,6 +732,20 @@ public sealed class Client : IClient
         if (string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path))
         {
             throw new RpcException(-32602, $"ACP {parameterName} must be an absolute path.");
+        }
+    }
+
+    private void RaiseTransportFaulted(Exception failure)
+    {
+        var handler = TransportFaulted;
+        if (handler is null) return;
+        try
+        {
+            handler(this, new TransportFaultedEventArgs(failure));
+        }
+        catch (Exception handlerException)
+        {
+            _logger?.LogWarning(handlerException, "An ACP transport-fault handler threw.");
         }
     }
 

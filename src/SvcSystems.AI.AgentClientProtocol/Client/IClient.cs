@@ -11,6 +11,11 @@ public interface IClient : IAsyncDisposable
     /// <summary>Completes when the underlying connection closes; the result contains the transport failure, if any.</summary>
     Task<Exception?> Completion { get; }
 
+    /// <summary>Raised once when the connection ends because of a transport or protocol failure.</summary>
+    /// <remarks>Not raised for a clean shutdown. The same failure is available as the result of
+    /// <see cref="Completion"/>. Handlers run on a thread-pool thread and must not block.</remarks>
+    event EventHandler<TransportFaultedEventArgs>? TransportFaulted;
+
     /// <summary>Latest reported authentication identity, or null when the agent has not reported one.</summary>
     AuthenticationStatus? AuthenticationStatus { get; }
 

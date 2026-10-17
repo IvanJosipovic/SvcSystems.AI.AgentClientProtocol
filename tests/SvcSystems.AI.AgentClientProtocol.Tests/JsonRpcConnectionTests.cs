@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
+using Microsoft.Extensions.Logging;
 using SvcSystems.AI.AgentClientProtocol.JsonRpc;
 using SvcSystems.AI.AgentClientProtocol.Transport;
 using Xunit;
@@ -66,6 +67,25 @@ public sealed class JsonRpcConnectionTests
         var diagnostic = await reported.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
         Assert.Equal("host/fail", diagnostic.Method);
         Assert.Equal("C:\\private\\secret.txt", diagnostic.Exception.Message);
+    }
+
+    [Fact]
+    public async Task HandlerFailuresAreReportedToTheLogger()
+    {
+        await using var transport = new FakeTransport();
+        var loggerFactory = new RecordingLoggerFactory();
+        await using var connection = new JsonRpcConnection(transport, loggerFactory: loggerFactory);
+        connection.RegisterRequestHandler("host/fail", (_, _) => throw new InvalidOperationException("boom"));
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"failure","method":"host/fail","params":{}}"""));
+
+        using var response = await ReadMessageAsync(transport.Sent);
+        Assert.Equal(-32603, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+
+        var entry = Assert.Single(loggerFactory.Entries);
+        Assert.Equal(LogLevel.Warning, entry.Level);
+        Assert.Contains("host/fail", entry.Message, StringComparison.Ordinal);
+        Assert.IsType<InvalidOperationException>(entry.Exception);
     }
 
     [Fact]
@@ -212,6 +232,33 @@ public sealed class JsonRpcConnectionTests
     {
         var message = await reader.ReadAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(2));
         return JsonDocument.Parse(message);
+    }
+
+    private sealed record LogEntry(LogLevel Level, string Message, Exception? Exception);
+
+    private sealed class RecordingLoggerFactory : ILoggerFactory
+    {
+        public List<LogEntry> Entries { get; } = [];
+
+        public ILogger CreateLogger(string categoryName) => new RecordingLogger(this);
+
+        public void AddProvider(ILoggerProvider provider)
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+
+        private sealed class RecordingLogger(RecordingLoggerFactory factory) : ILogger
+        {
+            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+            public bool IsEnabled(LogLevel logLevel) => true;
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+                factory.Entries.Add(new LogEntry(logLevel, formatter(state, exception), exception));
+        }
     }
 
     private sealed class FakeTransport : ITransport

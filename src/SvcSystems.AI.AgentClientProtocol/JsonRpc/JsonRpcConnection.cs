@@ -2,8 +2,9 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
-using SvcSystems.AI.AgentClientProtocol.Transport;
+using Microsoft.Extensions.Logging;
 using SvcSystems.AI.AgentClientProtocol.Serialization;
+using SvcSystems.AI.AgentClientProtocol.Transport;
 
 namespace SvcSystems.AI.AgentClientProtocol.JsonRpc;
 
@@ -13,6 +14,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     private readonly CancellationTokenSource _shutdown = new();
     private readonly SemaphoreSlim _incomingRequestSlots;
     private readonly Action<string, Exception>? _requestHandlerException;
+    private readonly ILogger? _logger;
     private readonly object _incomingRequestsLock = new();
     private readonly HashSet<Task> _incomingRequests = [];
     private readonly ConcurrentDictionary<long, TaskCompletionSource<JsonElement>> _pendingRequests = new();
@@ -29,7 +31,8 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     public JsonRpcConnection(
         ITransport transport,
         int maximumConcurrentIncomingRequests = 32,
-        Action<string, Exception>? requestHandlerException = null)
+        Action<string, Exception>? requestHandlerException = null,
+        ILoggerFactory? loggerFactory = null)
     {
         ArgumentNullException.ThrowIfNull(transport);
         if (maximumConcurrentIncomingRequests <= 0)
@@ -39,6 +42,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         _transport = transport;
         _incomingRequestSlots = new SemaphoreSlim(maximumConcurrentIncomingRequests);
         _requestHandlerException = requestHandlerException;
+        _logger = loggerFactory?.CreateLogger<JsonRpcConnection>();
         _receiveTask = ReceiveLoopAsync(_shutdown.Token);
     }
 
@@ -151,6 +155,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         catch (Exception exception)
         {
             _terminalException = exception;
+            _logger?.LogDebug(exception, "The ACP connection terminated with a transport or protocol failure.");
             FailPending(exception);
         }
         finally
@@ -331,13 +336,17 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     {
         try
         {
-            if (_requestHandlerException is null)
+            if (_requestHandlerException is not null)
             {
-                Trace.TraceError("Incoming JSON-RPC request handler for '{0}' failed: {1}", method, exception);
+                _requestHandlerException(method, exception);
+            }
+            else if (_logger is not null)
+            {
+                _logger.LogWarning(exception, "Incoming JSON-RPC request handler for {Method} failed.", method);
             }
             else
             {
-                _requestHandlerException(method, exception);
+                Trace.TraceError("Incoming JSON-RPC request handler for '{0}' failed: {1}", method, exception);
             }
         }
         catch (Exception diagnosticException)

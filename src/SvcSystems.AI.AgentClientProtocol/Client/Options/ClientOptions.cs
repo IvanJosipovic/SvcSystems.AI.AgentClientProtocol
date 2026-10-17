@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
@@ -73,4 +74,9 @@ public sealed class ClientOptions
     /// <summary>Maximum number of agent requests handled concurrently by this client.</summary>
     /// <remarks>Excess requests receive a JSON-RPC server-busy error.</remarks>
     public int MaximumConcurrentIncomingRequests { get; init; } = 32;
+
+    /// <summary>Receives structured diagnostics for connection and callback failures.</summary>
+    /// <remarks>When null, diagnostics are written through <see cref="System.Diagnostics.Trace"/>, and
+    /// <see cref="RequestHandlerException"/> still takes precedence when it is set.</remarks>
+    public ILoggerFactory? LoggerFactory { get; init; }
 }
