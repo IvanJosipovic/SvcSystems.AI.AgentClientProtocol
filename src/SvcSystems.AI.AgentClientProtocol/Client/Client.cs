@@ -178,6 +178,22 @@ public sealed class Client : IClient
         session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
         if (!_sessions.TryAdd(session.Id, session))
         {
+            // The agent created a second session whose id is already live. Release the agent-side
+            // session before failing so that the duplicate does not leak agent state. The request is
+            // sent directly (rather than through CloseSessionAsync) so that the existing local session
+            // entry, which still owns that id, is left untouched. Best effort: the agent may not
+            // advertise close, in which case it answers with an error that is intentionally ignored.
+            try
+            {
+                _ = await _connection.SendRequestAsync(
+                    Methods.SessionClose,
+                    WireJson.WriteSessionIdRequest(session.Id),
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // The duplicate session id is the failure that is reported to the caller.
+            }
             throw new ProtocolException($"ACP agent returned duplicate session id '{session.Id}'.");
         }
         if (fileSystemRoots is not null) _fileSystemRoots[session.Id] = fileSystemRoots;
@@ -556,10 +572,10 @@ public sealed class Client : IClient
         foreach (var (method, handler) in notifications) _connection.RegisterNotificationHandler(method, handler);
     }
 
-    private async ValueTask HandleSessionUpdateAsync(JsonElement parameters)
+    private ValueTask HandleSessionUpdateAsync(JsonElement parameters)
     {
         var sessionId = WireJson.ReadNotificationSessionId(parameters);
-        if (!_sessions.TryGetValue(sessionId, out var session)) return;
+        if (!_sessions.TryGetValue(sessionId, out var session)) return ValueTask.CompletedTask;
         var update = WireJson.ReadSessionUpdate(parameters);
         var published = session.Publish(update);
         var suggestions = update.Value is SessionInfoUpdate sessionInfo
@@ -569,8 +585,24 @@ public sealed class Client : IClient
             _options.PromptSuggestionsChanged?.Invoke(sessionId, suggestions);
         if (!published)
         {
-            try { await CancelSessionAsync(sessionId, CancellationToken.None).ConfigureAwait(false); }
-            catch { /* The update stream already carries the failure; cancellation is best effort. */ }
+            // Notification handlers run inline on the receive loop, so this one must not await a
+            // transport send: a peer that has stopped reading its stdin would stall response
+            // processing for the whole connection. The update stream already carries the failure,
+            // so cancellation is best effort and detached from the dispatch path.
+            _ = CancelSessionBestEffortAsync(sessionId);
+        }
+        return ValueTask.CompletedTask;
+    }
+
+    private async Task CancelSessionBestEffortAsync(string sessionId)
+    {
+        try
+        {
+            await CancelSessionAsync(sessionId, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch
+        {
+            // The update stream already carries the failure; cancellation is best effort.
         }
     }
 

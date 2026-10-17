@@ -5,7 +5,12 @@ using SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Registry;
 
 /// <summary>Gets the ACP registry index over HTTP.</summary>
-/// <remarks>A supplied <see cref="HttpClient"/> remains owned by the caller. If none is supplied, this client creates and owns one.</remarks>
+/// <remarks>
+/// A supplied <see cref="HttpClient"/> remains owned by the caller and is disposed only by its owner.
+/// When none is supplied, this client creates one and disposes it. Prefer supplying a shared instance
+/// (for example from <c>IHttpClientFactory</c>) so that registry clients do not each create their own
+/// connection pool.
+/// </remarks>
 public sealed class RegistryClient : IRegistryClient
 {
     /// <summary>Gets the default latest ACP agent registry index URI.</summary>

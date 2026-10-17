@@ -15,6 +15,8 @@ public sealed class Session
     private readonly int _maximumBufferedUpdates;
     private Exception? _updateBufferFailure;
     private IReadOnlyList<string>? _promptSuggestions;
+    private SessionModeState? _modeState;
+    private IReadOnlyList<SessionConfigOption> _configOptions = Array.Empty<SessionConfigOption>();
     private readonly SemaphoreSlim _promptLock = new(1, 1);
 
     internal Session(AcpClient client, string id, int maximumBufferedUpdates = 1024)
@@ -39,10 +41,10 @@ public sealed class Session
     public JsonElement? RawPayload { get; private set; }
 
     /// <summary>The agent's initial or most recently reported mode state.</summary>
-    public SessionModeState? ModeState { get; private set; }
+    public SessionModeState? ModeState => Volatile.Read(ref _modeState);
 
     /// <summary>The agent's initial or most recently reported configuration options.</summary>
-    public IReadOnlyList<SessionConfigOption> ConfigOptions { get; private set; } = Array.Empty<SessionConfigOption>();
+    public IReadOnlyList<SessionConfigOption> ConfigOptions => Volatile.Read(ref _configOptions);
 
     /// <summary>Latest suggested next prompts, or null when no suggestions have been reported.</summary>
     public IReadOnlyList<string>? PromptSuggestions => Volatile.Read(ref _promptSuggestions);
@@ -146,7 +148,7 @@ public sealed class Session
     public async Task<IReadOnlyList<SessionConfigOption>> SetConfigOptionAsync(string configId, string valueId, CancellationToken cancellationToken = default)
     {
         var options = await _client.SetSessionConfigOptionAsync(Id, configId, new SetSessionConfigOptionRequestCase1 { Value = valueId }, cancellationToken).ConfigureAwait(false);
-        ConfigOptions = options;
+        Volatile.Write(ref _configOptions, options);
         return options;
     }
 
@@ -154,7 +156,7 @@ public sealed class Session
     public async Task<IReadOnlyList<SessionConfigOption>> SetConfigOptionAsync(string configId, bool value, CancellationToken cancellationToken = default)
     {
         var options = await _client.SetSessionConfigOptionAsync(Id, configId, new SetSessionConfigOptionRequestCase0 { Value = value }, cancellationToken).ConfigureAwait(false);
-        ConfigOptions = options;
+        Volatile.Write(ref _configOptions, options);
         return options;
     }
 
@@ -168,19 +170,19 @@ public sealed class Session
                 Volatile.Write(ref _promptSuggestions, suggestions);
                 break;
             case CurrentModeUpdate mode when ModeState is { } state:
-                ModeState = new SessionModeState
+                Volatile.Write(ref _modeState, new SessionModeState
                 {
                     CurrentModeId = mode.CurrentModeId,
                     AvailableModes = state.AvailableModes,
                     Meta = state.Meta,
                     ExtensionData = state.ExtensionData
-                };
+                });
                 break;
             case CurrentModeUpdate mode:
-                ModeState = new SessionModeState { CurrentModeId = mode.CurrentModeId, AvailableModes = [] };
+                Volatile.Write(ref _modeState, new SessionModeState { CurrentModeId = mode.CurrentModeId, AvailableModes = [] });
                 break;
             case ConfigOptionUpdate config:
-                ConfigOptions = config.ConfigOptions;
+                Volatile.Write(ref _configOptions, config.ConfigOptions);
                 break;
         }
         if (_updates.Writer.TryWrite(new SessionUpdateEvent(update))) return true;
@@ -204,8 +206,8 @@ public sealed class Session
 
     internal void SetInitialState(SessionModeState? modeState, IReadOnlyList<SessionConfigOption>? configOptions, JsonElement rawPayload)
     {
-        if (modeState is not null) ModeState = modeState;
-        if (configOptions is not null) ConfigOptions = configOptions;
+        if (modeState is not null) Volatile.Write(ref _modeState, modeState);
+        if (configOptions is not null) Volatile.Write(ref _configOptions, configOptions);
         RawPayload = rawPayload.Clone();
     }
 }

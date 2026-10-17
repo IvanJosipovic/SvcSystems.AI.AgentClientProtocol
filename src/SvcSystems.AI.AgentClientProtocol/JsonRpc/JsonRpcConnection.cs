@@ -53,6 +53,15 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         _requestHandlers.Add(method, handler);
     }
 
+    /// <summary>Registers a handler for agent-to-client notifications.</summary>
+    /// <remarks>
+    /// Handlers are awaited inline on the receive loop so that notifications reach them in wire order
+    /// and the loop keeps transport reads bounded. A handler must therefore not block: in particular it
+    /// must not await a request or notification send on this connection, because a peer that has
+    /// stopped reading its stdin would stall response processing for the whole connection (and can
+    /// deadlock stdio). Work that needs to write to the transport must be detached from the dispatch
+    /// path.
+    /// </remarks>
     public void RegisterNotificationHandler(string method, Func<JsonElement, ValueTask> handler)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
@@ -190,6 +199,9 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 }
                 else if (_notificationHandlers.TryGetValue(method, out var handler))
                 {
+                    // Awaited inline on purpose: notifications must reach handlers in wire order, and the
+                    // loop supplies the backpressure that keeps the transport buffers bounded. See
+                    // RegisterNotificationHandler for the handler contract this implies.
                     await DispatchNotificationAsync(handler, parameters).ConfigureAwait(false);
                 }
                 else

@@ -297,6 +297,74 @@ public sealed class ExtensionTests
         Assert.Empty(changes[1].Suggestions);
     }
 
+    [Fact]
+    public async Task DuplicateSessionIdsReleaseTheAgentSideSessionBeforeFailing()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+        var options = new SessionOptions { WorkingDirectory = Environment.CurrentDirectory };
+
+        var creating = client.CreateSessionAsync(options, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        _ = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+        var duplicate = client.CreateSessionAsync(options, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        using (var close = await transport.ReadSentAsync())
+        {
+            Assert.Equal("session/close", close.RootElement.GetProperty("method").GetString());
+            Assert.Equal("session", close.RootElement.GetProperty("params").GetProperty("sessionId").GetString());
+            transport.Respond(close, "{}");
+        }
+
+        var error = await Assert.ThrowsAsync<ProtocolException>(() => duplicate.WaitAsync(TimeSpan.FromSeconds(5), Token));
+        Assert.Contains("duplicate session id", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task UpdateBufferFailureCancelsWithoutStallingTheReceiveLoop()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport, new ClientOptions { MaximumBufferedSessionUpdates = 1 });
+
+        var creating = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = Environment.CurrentDirectory }, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        _ = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+        // Hold the detached session/cancel send so that a receive loop which awaited it would stall.
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        transport.SendGate = message => Encoding.UTF8.GetString(message.Span).Contains("session/cancel", StringComparison.Ordinal)
+            ? release.Task
+            : Task.CompletedTask;
+
+        try
+        {
+            // The first update fills the single buffered slot; the second fails the stream.
+            transport.Receive(SessionInfoUpdate("first"));
+            transport.Receive(SessionInfoUpdate("second"));
+
+            // The barrier only completes if the receive loop is still processing responses.
+            await BarrierAsync(client, transport);
+        }
+        finally
+        {
+            // Never leave a gated send pending: an inline (stalled) receive loop could not be disposed.
+            release.SetResult();
+        }
+
+        using var cancel = await transport.ReadSentAsync();
+        Assert.Equal("session/cancel", cancel.RootElement.GetProperty("method").GetString());
+    }
+
     [Theory]
     [InlineData("""{"authStatus":null}""")]
     [InlineData("""{"authStatus":{"kind":42,"label":"bad"}}""")]
@@ -457,6 +525,10 @@ public sealed class ExtensionTests
         }
     }
 
+    private static string SessionInfoUpdate(string text) =>
+        "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session\",\"update\":{\"sessionUpdate\":\"session_info_update\",\"_meta\":{\"promptSuggestions\":{\"suggestions\":[{\"text\":"
+            + QuoteJsonString(text) + "}]}}}}}";
+
     private static string FileSystemRequest(string id, string method, string sessionId, string path)
     {
         var parameters = method == "fs/write_text_file"
@@ -532,8 +604,13 @@ public sealed class ExtensionTests
             Receive($$$"""{"jsonrpc":"2.0","id":{{{request.RootElement.GetProperty("id").GetRawText()}}},"error":{"code":{{{code}}},"message":"{{{message}}}"}}""");
         public async Task<JsonDocument> ReadSentAsync() =>
             JsonDocument.Parse(await _sent.Reader.ReadAsync(Token).AsTask().WaitAsync(TimeSpan.FromSeconds(5), Token));
-        public ValueTask SendAsync(ReadOnlyMemory<byte> message, CancellationToken cancellationToken) =>
-            _sent.Writer.WriteAsync(message.ToArray(), cancellationToken);
+        /// <summary>Optional hook that delays individual outbound messages (used to simulate a blocked peer).</summary>
+        public Func<ReadOnlyMemory<byte>, Task>? SendGate { get; set; }
+        public async ValueTask SendAsync(ReadOnlyMemory<byte> message, CancellationToken cancellationToken)
+        {
+            if (SendGate is { } gate) await gate(message).ConfigureAwait(false);
+            await _sent.Writer.WriteAsync(message.ToArray(), cancellationToken).ConfigureAwait(false);
+        }
         public async IAsyncEnumerable<ReadOnlyMemory<byte>> ReceiveAsync(
             [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken)
         {
