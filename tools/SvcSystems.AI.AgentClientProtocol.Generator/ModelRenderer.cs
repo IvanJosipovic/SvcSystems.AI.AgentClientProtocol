@@ -19,9 +19,7 @@ internal static class ModelRenderer
     public static IReadOnlyList<GeneratedSource> RenderModels(SchemaModel model, SchemaGeneratorOptions options)
     {
         var sources = new List<GeneratedSource>(model.Types.Count + 1);
-        var modelNamespaces = model.Types.Select(type => GetModelNamespace(type, options))
-            .Distinct(StringComparer.Ordinal)
-            .ToArray();
+        var modelNamespaces = GetModelNamespaces(model, options);
         foreach (var type in model.Types)
         {
             var modelNamespace = GetModelNamespace(type, options);
@@ -48,9 +46,7 @@ internal static class ModelRenderer
         IReadOnlyList<(string Name, string Value)>? protocolMethods = null)
     {
         var sources = new List<GeneratedSource>(6);
-        var modelNamespaces = model.Types.Select(type => GetModelNamespace(type, options))
-            .Distinct(StringComparer.Ordinal)
-            .ToArray();
+        var modelNamespaces = GetModelNamespaces(model, options);
         if (modelNamespaces.Length > 1)
         {
             sources.Add(new GeneratedSource("ModelNamespaces.g.cs", RenderGlobalUsings(modelNamespaces)));
@@ -89,6 +85,28 @@ internal static class ModelRenderer
         "agent" when options.AgentNamespace is not null => options.AgentNamespace,
         _ => options.ModelNamespace
     };
+
+    /// <summary>
+    /// Orders the sibling model namespaces deterministically: shared models first, then the
+    /// role-specific namespaces, then any additional namespace discovered on a type. The per-file
+    /// <c>using</c> lists and <c>ModelNamespaces.g.cs</c> are derived from this order, so keeping it
+    /// independent of <see cref="SchemaModel.Types"/> iteration order stops a schema reorder from
+    /// rewriting every generated file.
+    /// </summary>
+    private static string[] GetModelNamespaces(SchemaModel model, SchemaGeneratorOptions options)
+    {
+        var namespaces = new List<string>(3);
+        Add(options.ModelNamespace);
+        Add(options.ClientNamespace);
+        Add(options.AgentNamespace);
+        foreach (var type in model.Types) Add(GetModelNamespace(type, options));
+        return [.. namespaces];
+
+        void Add(string? candidate)
+        {
+            if (candidate is not null && !namespaces.Contains(candidate, StringComparer.Ordinal)) namespaces.Add(candidate);
+        }
+    }
 
     private static string RenderGlobalUsings(IReadOnlyList<string> namespaces)
     {

@@ -7,16 +7,23 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 internal static class Discriminators
 {
+    internal static AuthMethodDiscriminator ParseAuthMethodDiscriminator(string? value) => value switch
+    {
+        "terminal" => AuthMethodDiscriminator.Terminal,
+        _ => AuthMethodDiscriminator.Unknown
+    };
     internal static CreateElicitationRequestDiscriminator ParseCreateElicitationRequestDiscriminator(string? value) => value switch
     {
         "form" => CreateElicitationRequestDiscriminator.Form,
         "url" => CreateElicitationRequestDiscriminator.Url,
         _ => CreateElicitationRequestDiscriminator.Unknown
     };
-    internal static MultiSelectItemsDiscriminator ParseMultiSelectItemsDiscriminator(string? value) => value switch
+    internal static CreateElicitationResponseDiscriminator ParseCreateElicitationResponseDiscriminator(string? value) => value switch
     {
-        "string" => MultiSelectItemsDiscriminator.String,
-        _ => MultiSelectItemsDiscriminator.Unknown
+        "accept" => CreateElicitationResponseDiscriminator.Accept,
+        "decline" => CreateElicitationResponseDiscriminator.Decline,
+        "cancel" => CreateElicitationResponseDiscriminator.Cancel,
+        _ => CreateElicitationResponseDiscriminator.Unknown
     };
     internal static ElicitationPropertySchemaDiscriminator ParseElicitationPropertySchemaDiscriminator(string? value) => value switch
     {
@@ -27,11 +34,6 @@ internal static class Discriminators
         "array" => ElicitationPropertySchemaDiscriminator.Array,
         _ => ElicitationPropertySchemaDiscriminator.Unknown
     };
-    internal static AuthMethodDiscriminator ParseAuthMethodDiscriminator(string? value) => value switch
-    {
-        "terminal" => AuthMethodDiscriminator.Terminal,
-        _ => AuthMethodDiscriminator.Unknown
-    };
     internal static McpServerDiscriminator ParseMcpServerDiscriminator(string? value) => value switch
     {
         "http" => McpServerDiscriminator.Http,
@@ -39,10 +41,10 @@ internal static class Discriminators
         "stdio" => McpServerDiscriminator.Stdio,
         _ => McpServerDiscriminator.Unknown
     };
-    internal static SetSessionConfigOptionRequestDiscriminator ParseSetSessionConfigOptionRequestDiscriminator(string? value) => value switch
+    internal static MultiSelectItemsDiscriminator ParseMultiSelectItemsDiscriminator(string? value) => value switch
     {
-        "boolean" => SetSessionConfigOptionRequestDiscriminator.Boolean,
-        _ => SetSessionConfigOptionRequestDiscriminator.Unknown
+        "string" => MultiSelectItemsDiscriminator.String,
+        _ => MultiSelectItemsDiscriminator.Unknown
     };
     internal static RequestPermissionOutcomeDiscriminator ParseRequestPermissionOutcomeDiscriminator(string? value) => value switch
     {
@@ -50,11 +52,9 @@ internal static class Discriminators
         "selected" => RequestPermissionOutcomeDiscriminator.Selected,
         _ => RequestPermissionOutcomeDiscriminator.Unknown
     };
-    internal static CreateElicitationResponseDiscriminator ParseCreateElicitationResponseDiscriminator(string? value) => value switch
+    internal static SetSessionConfigOptionRequestDiscriminator ParseSetSessionConfigOptionRequestDiscriminator(string? value) => value switch
     {
-        "accept" => CreateElicitationResponseDiscriminator.Accept,
-        "decline" => CreateElicitationResponseDiscriminator.Decline,
-        "cancel" => CreateElicitationResponseDiscriminator.Cancel,
-        _ => CreateElicitationResponseDiscriminator.Unknown
+        "boolean" => SetSessionConfigOptionRequestDiscriminator.Boolean,
+        _ => SetSessionConfigOptionRequestDiscriminator.Unknown
     };
 }

@@ -79,6 +79,19 @@ internal sealed class SchemaModelBuilder(
             }
         }
 
+        // The rendered aggregation files (JsonContext, Discriminators) walk the type and method
+        // lists, so emit in a stable name order. Without this an upstream reorder of the schema's
+        // $defs would reshuffle those committed files even though no type changed. Sorting runs after
+        // all lookups above, so no build behaviour depends on it.
+        _model.Types.Sort(static (left, right) => string.CompareOrdinal(left.Name, right.Name));
+        _model.Methods.Sort(static (left, right) =>
+        {
+            var byName = string.CompareOrdinal(left.Name, right.Name);
+            if (byName != 0) return byName;
+            var bySide = string.CompareOrdinal(left.Side, right.Side);
+            return bySide != 0 ? bySide : string.CompareOrdinal(left.MessageType, right.MessageType);
+        });
+
         return _model;
     }
 
