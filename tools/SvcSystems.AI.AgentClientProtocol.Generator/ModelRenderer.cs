@@ -62,10 +62,6 @@ internal static class ModelRenderer
         }
         if (model.Types.OfType<EnumModel>().Any(type => type.Name.EndsWith("Discriminator", StringComparison.Ordinal)))
             sources.Add(new GeneratedSource("Protocol.Discriminators.g.cs", AddNamespaceUsings(RenderDiscriminators(model, options.ModelNamespace), modelNamespaces, options.ModelNamespace)));
-        if (options.GenerateJsonContext && model.Methods.Any(item => item.Side == "client" && item.MessageType is "request" or "notification"))
-        {
-            sources.Add(new GeneratedSource("CallbackRoutes.g.cs", AddNamespaceUsings(RenderCallbackRoutes(model, options.ModelNamespace, options.SerializationNamespace), modelNamespaces, options.ModelNamespace)));
-        }
         return EnsureNamespaceSpacing(sources);
     }
 
@@ -139,15 +135,6 @@ internal static class ModelRenderer
                     .Append(discriminator.Name).Append('.').Append(Identifier(Pascal(value))).AppendLine(",");
             }
             code.Append("        _ => ").Append(discriminator.Name).Append('.').Append(Identifier(Pascal(discriminator.Values[0]))).AppendLine()
-                .AppendLine("    };")
-                .Append("    internal static string ToWireValue(").Append(discriminator.Name).Append(" value) => value switch").AppendLine()
-                .AppendLine("    {");
-            foreach (var value in discriminator.Values.Skip(1))
-            {
-                code.Append("        ").Append(discriminator.Name).Append('.').Append(Identifier(Pascal(value))).Append(" => ")
-                    .Append(SymbolDisplay.FormatLiteral(value, true)).AppendLine(",");
-            }
-            code.AppendLine("        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))")
                 .AppendLine("    };");
         }
         code.AppendLine("}");
@@ -171,38 +158,6 @@ internal static class ModelRenderer
         }
         code.AppendLine("}");
         return code.ToString();
-    }
-
-    private static string RenderCallbackRoutes(SchemaModel model, string modelNamespace, string serializationNamespace)
-    {
-        var code = new StringBuilder(GeneratedHeaderText())
-            .AppendLine("using System;")
-            .AppendLine("using System.Collections.Generic;")
-            .AppendLine("using System.Text.Json;")
-            .AppendLine("using System.Threading;")
-            .AppendLine("using System.Threading.Tasks;")
-            .AppendLine("using SvcSystems.AI.AgentClientProtocol.JsonRpc;")
-            .AppendLine()
-            .Append("namespace ").Append(serializationNamespace).AppendLine(";")
-            .AppendLine()
-            .AppendLine("internal static class CallbackRoutes")
-            .AppendLine("{")
-            .AppendLine("    internal static void Register(JsonRpcConnection connection,")
-            .AppendLine("        IReadOnlyDictionary<string, Func<JsonElement, CancellationToken, ValueTask<byte[]>>> requests,")
-            .AppendLine("        IReadOnlyDictionary<string, Func<JsonElement, ValueTask>> notifications)")
-            .AppendLine("    {");
-        foreach (var route in model.Methods.Where(item => item.Side == "client" && item.MessageType is "request" or "notification")
-                     .GroupBy(item => (item.Name, item.MessageType)).Select(group => group.First()))
-        {
-            var method = "global::" + modelNamespace + ".Methods." + Identifier(Pascal(route.Name));
-            if (route.MessageType == "request")
-                code.Append("        if (requests.TryGetValue(").Append(method).AppendLine(", out var requestHandler_" + Identifier(Pascal(route.Name)) + "))")
-                    .Append("            connection.RegisterRequestHandler(").Append(method).Append(", requestHandler_").Append(Identifier(Pascal(route.Name))).AppendLine(");");
-            else
-                code.Append("        if (notifications.TryGetValue(").Append(method).AppendLine(", out var notificationHandler_" + Identifier(Pascal(route.Name)) + "))")
-                    .Append("            connection.RegisterNotificationHandler(").Append(method).Append(", notificationHandler_").Append(Identifier(Pascal(route.Name))).AppendLine(");");
-        }
-        return code.AppendLine("    }").AppendLine("}").ToString();
     }
 
     private static string RenderType(TypeModel type, string modelNamespace)

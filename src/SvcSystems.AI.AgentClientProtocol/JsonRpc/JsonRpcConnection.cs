@@ -114,7 +114,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 writer.WriteNumber("id", requestId);
                 writer.WriteEndObject();
             }
-            await SendNotificationAsync("$/cancel_request", parameters.WrittenMemory, CancellationToken.None).ConfigureAwait(false);
+            await SendNotificationAsync(Methods.CancelRequest, parameters.WrittenMemory, CancellationToken.None).ConfigureAwait(false);
         }
         catch
         {

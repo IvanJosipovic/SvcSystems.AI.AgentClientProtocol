@@ -175,7 +175,7 @@ public sealed class Client : IClient
             cancellationToken).ConfigureAwait(false);
         var typedResponse = WireJson.ReadNewSessionResponse(response);
         var session = new Session(this, typedResponse.SessionId, _options.MaximumBufferedSessionUpdates);
-        WireJson.ApplySessionInitialState(session, typedResponse.Modes, typedResponse.ConfigOptions, response);
+        session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
         if (!_sessions.TryAdd(session.Id, session))
         {
             throw new ProtocolException($"ACP agent returned duplicate session id '{session.Id}'.");
@@ -210,7 +210,7 @@ public sealed class Client : IClient
             };
             var response = await _connection.SendRequestAsync(Methods.SessionLoad, WireJson.WriteLoadSessionRequest(request), cancellationToken).ConfigureAwait(false);
             var typedResponse = WireJson.ReadLoadSessionResponse(response);
-            WireJson.ApplySessionInitialState(session, typedResponse.Modes, typedResponse.ConfigOptions, response);
+            session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
             return session;
         }
         catch
@@ -269,13 +269,8 @@ public sealed class Client : IClient
     public async Task<IReadOnlyList<SessionInfo>> ListSessionsAsync(
         string? workingDirectory = null,
         string? cursor = null,
-        CancellationToken cancellationToken = default)
-    {
-        ThrowIfDisposed();
-        if (Agent.AgentCapabilities?.SessionCapabilities?.List is null) throw new NotSupportedException("The ACP agent does not advertise session listing.");
-        if (workingDirectory is not null) ValidateWorkingDirectory(workingDirectory);
-        return (await ListSessionsPageAsync(workingDirectory, cursor, cancellationToken).ConfigureAwait(false)).Sessions;
-    }
+        CancellationToken cancellationToken = default) =>
+        (await ListSessionsPageAsync(workingDirectory, cursor, cancellationToken).ConfigureAwait(false)).Sessions;
 
     /// <inheritdoc />
     public async Task<ListSessionsResponse> ListSessionsPageAsync(
@@ -321,7 +316,7 @@ public sealed class Client : IClient
         {
             var response = await _connection.SendRequestAsync(Methods.SessionResume, WireJson.WriteResumeSessionRequest(sessionId, options), cancellationToken).ConfigureAwait(false);
             var typedResponse = WireJson.ReadResumeSessionResponse(response);
-            WireJson.ApplySessionInitialState(session, typedResponse.Modes, typedResponse.ConfigOptions, response);
+            session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
             return session;
         }
         catch
@@ -367,12 +362,10 @@ public sealed class Client : IClient
     {
         ThrowIfDisposed();
         ValidatePromptContent(content);
+        // Session serializes prompts per session, so at most one is active at a time. Registering the
+        // cancellation source lets a pending permission request observe prompt cancellation.
         var permissionCancellation = new CancellationTokenSource();
-        if (!_activePromptCancellation.TryAdd(sessionId, permissionCancellation))
-        {
-            permissionCancellation.Dispose();
-            throw new InvalidOperationException($"Session '{sessionId}' already has an active prompt.");
-        }
+        _activePromptCancellation[sessionId] = permissionCancellation;
         try
         {
             var response = await _connection.SendRequestAsync(Methods.SessionPrompt, WireJson.WritePromptRequest(sessionId, content, options), cancellationToken).ConfigureAwait(false);
@@ -494,7 +487,7 @@ public sealed class Client : IClient
                 ValidateAbsolutePath(request.Path, "path");
                 ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsWriteTextFile);
                 await fileSystem.WriteTextFileAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteEmptyResponse();
+                return WireJson.WriteEmptyObject();
             };
         }
 
@@ -524,13 +517,13 @@ public sealed class Client : IClient
             {
                 var request = WireJson.ReadTerminalKillRequest(parameters);
                 await terminal.KillAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteEmptyResponse();
+                return WireJson.WriteEmptyObject();
             };
             requests[Methods.TerminalRelease] = async (parameters, cancellationToken) =>
             {
                 var request = WireJson.ReadTerminalReleaseRequest(parameters);
                 await terminal.ReleaseAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteEmptyResponse();
+                return WireJson.WriteEmptyObject();
             };
         }
 
@@ -558,7 +551,9 @@ public sealed class Client : IClient
             _options.ElicitationCompleted?.Invoke(WireJson.ReadElicitationCompleted(parameters));
             return ValueTask.CompletedTask;
         };
-        CallbackRoutes.Register(_connection, requests, notifications);
+
+        foreach (var (method, handler) in requests) _connection.RegisterRequestHandler(method, handler);
+        foreach (var (method, handler) in notifications) _connection.RegisterNotificationHandler(method, handler);
     }
 
     private async ValueTask HandleSessionUpdateAsync(JsonElement parameters)

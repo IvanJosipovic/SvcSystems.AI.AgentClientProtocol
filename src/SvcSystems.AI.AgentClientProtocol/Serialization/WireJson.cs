@@ -145,6 +145,8 @@ internal static class WireJson
 
     public static byte[] WriteSetConfigOptionRequest(string sessionId, string configId, SetSessionConfigOptionRequest value)
     {
+        // The allOf variants of the request schema only declare `value`/`type`; `sessionId` and
+        // `configId` live on the enclosing request object, so they are re-attached as extension data.
         var common = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
             ["sessionId"] = ToJsonElement(sessionId),
@@ -187,13 +189,6 @@ internal static class WireJson
     {
         return response.Deserialize(JsonContext.Default.ResumeSessionResponse)!;
     }
-
-    public static void ApplySessionInitialState(
-        Session session,
-        SessionModeState? modeState,
-        IReadOnlyList<SessionConfigOption>? configOptions,
-        JsonElement rawPayload) =>
-        session.SetInitialState(modeState, configOptions, rawPayload);
 
     public static string ReadNotificationSessionId(JsonElement parameters) =>
         ReadString(parameters, "sessionId") ?? throw new ProtocolException("ACP session notification did not include sessionId.");
@@ -246,7 +241,11 @@ internal static class WireJson
     public static byte[] WriteTextFileReadResponse(string content) =>
         JsonSerializer.SerializeToUtf8Bytes(new ReadTextFileResponse { Content = content }, JsonContext.Default.ReadTextFileResponse);
 
-    public static byte[] WriteEmptyResponse() => JsonSerializer.SerializeToUtf8Bytes(new WriteTextFileResponse(), JsonContext.Default.WriteTextFileResponse);
+    /// <summary>
+    /// Serializes the empty JSON object that ACP returns for methods with no response payload
+    /// (fs/write_text_file, terminal/kill, terminal/release).
+    /// </summary>
+    public static byte[] WriteEmptyObject() => "{}"u8.ToArray();
 
     public static byte[] WriteTerminalCreateResponse(string terminalId) =>
         JsonSerializer.SerializeToUtf8Bytes(new CreateTerminalResponse { TerminalId = terminalId }, JsonContext.Default.CreateTerminalResponse);
@@ -265,6 +264,8 @@ internal static class WireJson
 
     public static byte[] WriteElicitationResponse(ElicitationResponse response)
     {
+        // The accept variant does not declare `action` (the schema leaves it to the union
+        // discriminator), so it is re-attached as extension data.
         var extensionData = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
             ["action"] = ToJsonElement(response.Action)

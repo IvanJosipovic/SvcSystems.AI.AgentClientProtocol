@@ -332,8 +332,7 @@ public sealed class WireJsonTests
         var session = new Session(null!, "session-1");
         var typedResponse = WireJson.ReadNewSessionResponse(response.RootElement);
 
-        WireJson.ApplySessionInitialState(
-            session,
+        session.SetInitialState(
             typedResponse.Modes,
             typedResponse.ConfigOptions,
             response.RootElement);

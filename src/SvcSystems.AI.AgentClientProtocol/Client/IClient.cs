@@ -34,9 +34,10 @@ public interface IClient : IAsyncDisposable
     Task LogoutAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Lists sessions when the agent advertises session/list.</summary>
+    /// <remarks>Convenience projection of <see cref="ListSessionsPageAsync"/> that discards the pagination cursor.</remarks>
     Task<IReadOnlyList<SessionInfo>> ListSessionsAsync(string? workingDirectory = null, string? cursor = null, CancellationToken cancellationToken = default);
 
-    /// <summary>Lists sessions and returns the opaque pagination cursor when the agent provides one.</summary>
+    /// <summary>Lists one page of sessions, including the opaque cursor for the next page when the agent provides one.</summary>
     Task<ListSessionsResponse> ListSessionsPageAsync(string? workingDirectory = null, string? cursor = null, CancellationToken cancellationToken = default);
 
     /// <summary>Deletes a session when the agent advertises session/delete.</summary>

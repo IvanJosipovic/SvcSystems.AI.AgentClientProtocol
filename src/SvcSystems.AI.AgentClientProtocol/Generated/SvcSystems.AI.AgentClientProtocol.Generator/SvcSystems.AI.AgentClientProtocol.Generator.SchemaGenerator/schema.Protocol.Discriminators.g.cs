@@ -13,21 +13,10 @@ internal static class Discriminators
         "url" => CreateElicitationRequestDiscriminator.Url,
         _ => CreateElicitationRequestDiscriminator.Unknown
     };
-    internal static string ToWireValue(CreateElicitationRequestDiscriminator value) => value switch
-    {
-        CreateElicitationRequestDiscriminator.Form => "form",
-        CreateElicitationRequestDiscriminator.Url => "url",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
-    };
     internal static MultiSelectItemsDiscriminator ParseMultiSelectItemsDiscriminator(string? value) => value switch
     {
         "string" => MultiSelectItemsDiscriminator.String,
         _ => MultiSelectItemsDiscriminator.Unknown
-    };
-    internal static string ToWireValue(MultiSelectItemsDiscriminator value) => value switch
-    {
-        MultiSelectItemsDiscriminator.String => "string",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
     };
     internal static ElicitationPropertySchemaDiscriminator ParseElicitationPropertySchemaDiscriminator(string? value) => value switch
     {
@@ -38,24 +27,10 @@ internal static class Discriminators
         "array" => ElicitationPropertySchemaDiscriminator.Array,
         _ => ElicitationPropertySchemaDiscriminator.Unknown
     };
-    internal static string ToWireValue(ElicitationPropertySchemaDiscriminator value) => value switch
-    {
-        ElicitationPropertySchemaDiscriminator.String => "string",
-        ElicitationPropertySchemaDiscriminator.Number => "number",
-        ElicitationPropertySchemaDiscriminator.Integer => "integer",
-        ElicitationPropertySchemaDiscriminator.Boolean => "boolean",
-        ElicitationPropertySchemaDiscriminator.Array => "array",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
-    };
     internal static AuthMethodDiscriminator ParseAuthMethodDiscriminator(string? value) => value switch
     {
         "terminal" => AuthMethodDiscriminator.Terminal,
         _ => AuthMethodDiscriminator.Unknown
-    };
-    internal static string ToWireValue(AuthMethodDiscriminator value) => value switch
-    {
-        AuthMethodDiscriminator.Terminal => "terminal",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
     };
     internal static McpServerDiscriminator ParseMcpServerDiscriminator(string? value) => value switch
     {
@@ -64,22 +39,10 @@ internal static class Discriminators
         "stdio" => McpServerDiscriminator.Stdio,
         _ => McpServerDiscriminator.Unknown
     };
-    internal static string ToWireValue(McpServerDiscriminator value) => value switch
-    {
-        McpServerDiscriminator.Http => "http",
-        McpServerDiscriminator.Sse => "sse",
-        McpServerDiscriminator.Stdio => "stdio",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
-    };
     internal static SetSessionConfigOptionRequestDiscriminator ParseSetSessionConfigOptionRequestDiscriminator(string? value) => value switch
     {
         "boolean" => SetSessionConfigOptionRequestDiscriminator.Boolean,
         _ => SetSessionConfigOptionRequestDiscriminator.Unknown
-    };
-    internal static string ToWireValue(SetSessionConfigOptionRequestDiscriminator value) => value switch
-    {
-        SetSessionConfigOptionRequestDiscriminator.Boolean => "boolean",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
     };
     internal static RequestPermissionOutcomeDiscriminator ParseRequestPermissionOutcomeDiscriminator(string? value) => value switch
     {
@@ -87,24 +50,11 @@ internal static class Discriminators
         "selected" => RequestPermissionOutcomeDiscriminator.Selected,
         _ => RequestPermissionOutcomeDiscriminator.Unknown
     };
-    internal static string ToWireValue(RequestPermissionOutcomeDiscriminator value) => value switch
-    {
-        RequestPermissionOutcomeDiscriminator.Cancelled => "cancelled",
-        RequestPermissionOutcomeDiscriminator.Selected => "selected",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
-    };
     internal static CreateElicitationResponseDiscriminator ParseCreateElicitationResponseDiscriminator(string? value) => value switch
     {
         "accept" => CreateElicitationResponseDiscriminator.Accept,
         "decline" => CreateElicitationResponseDiscriminator.Decline,
         "cancel" => CreateElicitationResponseDiscriminator.Cancel,
         _ => CreateElicitationResponseDiscriminator.Unknown
-    };
-    internal static string ToWireValue(CreateElicitationResponseDiscriminator value) => value switch
-    {
-        CreateElicitationResponseDiscriminator.Accept => "accept",
-        CreateElicitationResponseDiscriminator.Decline => "decline",
-        CreateElicitationResponseDiscriminator.Cancel => "cancel",
-        _ => throw new global::System.ArgumentOutOfRangeException(nameof(value))
     };
 }
