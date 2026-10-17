@@ -1,0 +1,7 @@
+{
+  "commandLineOptions": {
+    "hangdump": true,
+    "hangdump-type": "Mini",
+    "hangdump-timeout": "45s"
+  }
+}
