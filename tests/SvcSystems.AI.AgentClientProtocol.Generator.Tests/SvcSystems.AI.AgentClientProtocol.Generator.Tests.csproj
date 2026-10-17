@@ -7,7 +7,9 @@
   <ItemGroup>
     <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.2" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.1" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.1" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageReference Include="Microsoft.OpenApi" Version="3.10.2" />
   </ItemGroup>
