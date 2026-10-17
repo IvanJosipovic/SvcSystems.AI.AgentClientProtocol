@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
@@ -24,11 +24,11 @@ public sealed record ElicitationRequest(
     string? RequestId,
     string? ElicitationId,
     string? Url,
-    JsonElement? RequestedSchema,
+    ElicitationSchema? RequestedSchema,
     JsonElement RawPayload);
 
 /// <summary>Host response to an elicitation request.</summary>
-public sealed record ElicitationResponse(string Action, JsonElement? Content = null);
+public sealed record ElicitationResponse(string Action, IReadOnlyDictionary<string, ElicitationContentValue>? Content = null);
 
 /// <summary>Notification that a URL elicitation completed.</summary>
 public sealed record ElicitationCompleted(string ElicitationId, JsonElement RawPayload);

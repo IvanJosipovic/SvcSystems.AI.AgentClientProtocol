@@ -1,4 +1,5 @@
-using SvcSystems.AI.AgentClientProtocol;
+﻿using SvcSystems.AI.AgentClientProtocol;
+using AcpClient = SvcSystems.AI.AgentClientProtocol.Client.Client;
 
 if (args is ["--extension-smoke-test"])
 {
@@ -19,7 +20,7 @@ var agentArguments = args.Length > 1 ? args.Skip(1).ToArray() : ["acp"];
 var prompt = Environment.GetEnvironmentVariable("ACP_PROMPT") ??
     "Explain the repository in a short, actionable summary.";
 
-await using var client = await Client.StartAsync(
+await using var client = await AcpClient.StartAsync(
     new ProcessOptions
     {
         FileName = executable,
@@ -28,7 +29,9 @@ await using var client = await Client.StartAsync(
         StandardErrorReceived = line => Console.Error.WriteLine("[agent] " + line)
     });
 
-Console.WriteLine($"Connected to {client.Agent.Name} {client.Agent.Version} (ACP v{client.Agent.ProtocolVersion}).");
+var agentInfo = client.Agent.AgentInfo;
+var agentVersion = string.IsNullOrWhiteSpace(agentInfo?.Version) ? string.Empty : $" {agentInfo.Version}";
+Console.WriteLine($"Connected to {agentInfo?.Name ?? "ACP agent"}{agentVersion} (ACP v{client.Agent.ProtocolVersion}).");
 var session = await client.CreateSessionAsync(new SessionOptions
 {
     WorkingDirectory = Directory.GetCurrentDirectory()

@@ -1,0 +1,10 @@
+﻿using SvcSystems.AI.AgentClientProtocol.Registry.Models;
+
+namespace SvcSystems.AI.AgentClientProtocol.Registry;
+
+/// <summary>Reads ACP agent listings from a registry endpoint.</summary>
+public interface IRegistryClient : IDisposable
+{
+    /// <summary>Downloads and parses the registry index.</summary>
+    Task<RegistryIndex> GetIndexAsync(CancellationToken cancellationToken = default);
+}

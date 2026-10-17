@@ -1,4 +1,4 @@
-namespace SvcSystems.AI.AgentClientProtocol.Generator;
+﻿namespace SvcSystems.AI.AgentClientProtocol.Generator;
 
 internal sealed class SchemaModel
 {
@@ -16,6 +16,9 @@ internal sealed class RpcMethodModel(string name, string side, string messageTyp
 internal abstract class TypeModel(string name)
 {
     public string Name { get; } = name;
+    public bool IsInternal { get; set; }
+    public string? Side { get; set; }
+    public string? Description { get; set; }
 }
 
 internal sealed class ClassModel(
@@ -24,18 +27,13 @@ internal sealed class ClassModel(
     string? baseType = null,
     string? discriminatorName = null,
     IReadOnlyList<DiscriminatorCase>? discriminatorCases = null,
-    bool hasExtensionData = false,
-    bool allowUnknownDiscriminator = false,
-    bool isRawPayloadVariant = false) : TypeModel(name)
+    bool hasExtensionData = false) : TypeModel(name)
 {
     public IReadOnlyList<PropertyModel> Properties { get; } = properties;
     public string? BaseType { get; } = baseType;
     public string? DiscriminatorName { get; } = discriminatorName;
     public IReadOnlyList<DiscriminatorCase> DiscriminatorCases { get; } = discriminatorCases ?? [];
     public bool HasExtensionData { get; } = hasExtensionData;
-    public bool AllowUnknownDiscriminator { get; } = allowUnknownDiscriminator;
-    public bool IsRawPayloadVariant { get; } = isRawPayloadVariant;
-    public string? UnknownVariantTypeName => AllowUnknownDiscriminator ? Name + "Unknown" : null;
 }
 
 internal sealed class EnumModel(string name, IReadOnlyList<string> values) : TypeModel(name)
@@ -43,10 +41,36 @@ internal sealed class EnumModel(string name, IReadOnlyList<string> values) : Typ
     public IReadOnlyList<string> Values { get; } = values;
 }
 
-internal sealed class UnionModel(string name, IReadOnlyList<string> cases, bool structuralClassifier) : TypeModel(name)
+internal sealed class UnionModel(
+    string name,
+    IReadOnlyList<string> cases,
+    string? defaultCaseName = null,
+    IReadOnlyList<UnionCaseModel>? caseModels = null,
+    bool allowUnknownDiscriminator = false) : TypeModel(name)
 {
     public IReadOnlyList<string> Cases { get; } = cases;
-    public bool StructuralClassifier { get; } = structuralClassifier;
+    public string? DefaultCaseName { get; } = defaultCaseName;
+    public IReadOnlyList<UnionCaseModel> CaseModels { get; } = caseModels ?? [];
+    public bool AllowUnknownDiscriminator { get; } = allowUnknownDiscriminator;
+    public bool HasGeneratedClassifier => CaseModels.Count == Cases.Count &&
+        (CaseModels.Any(item => item.ConstProperties.Count > 0) ||
+         CaseModels.Any(item => item.UniqueProperties.Count > 0) ||
+         DefaultCaseName is not null ||
+         Cases.Contains("long", StringComparer.Ordinal) && Cases.Contains("double", StringComparer.Ordinal));
+}
+
+internal sealed class UnionCaseModel(
+    string typeName,
+    IReadOnlyDictionary<string, string> constProperties,
+    IReadOnlyList<string> properties,
+    IReadOnlyList<string> requiredProperties,
+    IReadOnlyList<string> uniqueProperties)
+{
+    public string TypeName { get; } = typeName;
+    public IReadOnlyDictionary<string, string> ConstProperties { get; } = constProperties;
+    public IReadOnlyList<string> Properties { get; } = properties;
+    public IReadOnlyList<string> RequiredProperties { get; } = requiredProperties;
+    public IReadOnlyList<string> UniqueProperties { get; } = uniqueProperties;
 }
 
 internal sealed class PropertyModel(
@@ -56,7 +80,8 @@ internal sealed class PropertyModel(
     bool isRequired,
     bool isNullable,
     string? constValue = null,
-    bool isIgnored = false)
+    bool isIgnored = false,
+    string? description = null)
 {
     public string WireName { get; } = wireName;
     public string Identifier { get; } = identifier;
@@ -65,6 +90,7 @@ internal sealed class PropertyModel(
     public bool IsNullable { get; } = isNullable;
     public string? ConstValue { get; } = constValue;
     public bool IsIgnored { get; } = isIgnored;
+    public string? Description { get; } = description;
 }
 
 internal sealed class DiscriminatorCase(string typeName, string discriminatorValue)

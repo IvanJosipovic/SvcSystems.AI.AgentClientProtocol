@@ -1,24 +1,46 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace SvcSystems.AI.AgentClientProtocol.Generator;
 
 internal sealed class SchemaGeneratorOptions
 {
+    private const string DefaultModelNamespace = "SvcSystems.AI.AgentClientProtocol.Generated";
+    private const string DefaultSerializationNamespace = "SvcSystems.AI.AgentClientProtocol.Serialization";
+    private const string DefaultJsonContextName = "JsonContext";
+
     private readonly HashSet<string> _allowUnknownDiscriminators;
-    private readonly HashSet<string> _reuseAllOfVariants;
-    private readonly Dictionary<string, Dictionary<string, string>> _defaultDiscriminatorValues;
+    private readonly Dictionary<string, string> _defaultUnionCases;
 
     private SchemaGeneratorOptions(
         HashSet<string> allowUnknownDiscriminators,
-        HashSet<string> reuseAllOfVariants,
-        Dictionary<string, Dictionary<string, string>> defaultDiscriminatorValues)
+        Dictionary<string, string> defaultUnionCases,
+        string modelNamespace,
+        string? clientNamespace,
+        string? agentNamespace,
+        string serializationNamespace,
+        string jsonContextName,
+        bool generateJsonContext)
     {
         _allowUnknownDiscriminators = allowUnknownDiscriminators;
-        _reuseAllOfVariants = reuseAllOfVariants;
-        _defaultDiscriminatorValues = defaultDiscriminatorValues;
+        _defaultUnionCases = defaultUnionCases;
+        ModelNamespace = modelNamespace;
+        ClientNamespace = clientNamespace;
+        AgentNamespace = agentNamespace;
+        SerializationNamespace = serializationNamespace;
+        JsonContextName = jsonContextName;
+        GenerateJsonContext = generateJsonContext;
     }
 
-    public static SchemaGeneratorOptions Empty { get; } = new([], [], new(StringComparer.Ordinal));
+    public static SchemaGeneratorOptions Empty { get; } = new(
+        [], new(StringComparer.Ordinal),
+        DefaultModelNamespace, null, null, DefaultSerializationNamespace, DefaultJsonContextName, false);
+
+    public string ModelNamespace { get; }
+    public string? ClientNamespace { get; }
+    public string? AgentNamespace { get; }
+    public string SerializationNamespace { get; }
+    public string JsonContextName { get; }
+    public bool GenerateJsonContext { get; }
 
     public static SchemaGeneratorOptions Parse(string? json)
     {
@@ -27,33 +49,32 @@ internal sealed class SchemaGeneratorOptions
         using var document = JsonDocument.Parse(json!);
         var root = document.RootElement;
         var allowUnknown = ReadNames(root, "allowUnknownDiscriminators");
-        var reuseAllOf = ReadNames(root, "reuseAllOfVariants");
-        var defaults = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
-        if (root.TryGetProperty("defaultDiscriminatorValues", out var defaultsElement) &&
-            defaultsElement.ValueKind == JsonValueKind.Object)
+        var defaultUnionCases = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (root.TryGetProperty("defaultUnionCases", out var defaultCasesElement) &&
+            defaultCasesElement.ValueKind == JsonValueKind.Object)
         {
-            foreach (var union in defaultsElement.EnumerateObject())
+            foreach (var union in defaultCasesElement.EnumerateObject())
             {
-                if (union.Value.ValueKind != JsonValueKind.Object) continue;
-                var values = union.Value.EnumerateObject()
-                    .Where(item => item.Value.ValueKind == JsonValueKind.String)
-                    .ToDictionary(item => item.Name, item => item.Value.GetString()!, StringComparer.Ordinal);
-                defaults[union.Name] = values;
+                if (union.Value.ValueKind == JsonValueKind.String && union.Value.GetString() is { Length: > 0 } caseName)
+                    defaultUnionCases[union.Name] = caseName;
             }
         }
 
-        return new SchemaGeneratorOptions(allowUnknown, reuseAllOf, defaults);
+        return new SchemaGeneratorOptions(
+            allowUnknown,
+            defaultUnionCases,
+            ReadString(root, "namespace") ?? DefaultModelNamespace,
+            ReadString(root, "clientNamespace"),
+            ReadString(root, "agentNamespace"),
+            ReadString(root, "serializationNamespace") ?? DefaultSerializationNamespace,
+            ReadString(root, "jsonContextName") ?? DefaultJsonContextName,
+            ReadBoolean(root, "generateJsonContext"));
     }
 
     public bool AllowsUnknownDiscriminators(string unionName) => _allowUnknownDiscriminators.Contains(unionName);
 
-    public bool ReusesAllOfVariants(string unionName) => _reuseAllOfVariants.Contains(unionName);
-
-    public string? GetDefaultDiscriminatorValue(string unionName, string? branchTitle) =>
-        branchTitle is not null && _defaultDiscriminatorValues.TryGetValue(unionName, out var values) &&
-        values.TryGetValue(branchTitle, out var value)
-            ? value
-            : null;
+    public string? GetDefaultUnionCase(string unionName) =>
+        _defaultUnionCases.TryGetValue(unionName, out var caseName) ? caseName : null;
 
     private static HashSet<string> ReadNames(JsonElement root, string propertyName)
     {
@@ -65,4 +86,14 @@ internal sealed class SchemaGeneratorOptions
         }
         return names;
     }
+
+    private static string? ReadString(JsonElement root, string propertyName) =>
+        root.TryGetProperty(propertyName, out var property) &&
+        property.ValueKind == JsonValueKind.String &&
+        property.GetString() is { Length: > 0 } value
+            ? value
+            : null;
+
+    private static bool ReadBoolean(JsonElement root, string propertyName) =>
+        root.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.True;
 }

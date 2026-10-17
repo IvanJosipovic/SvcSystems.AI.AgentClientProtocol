@@ -1,7 +1,7 @@
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.CodeAnalysis;
 using Microsoft.OpenApi;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace SvcSystems.AI.AgentClientProtocol.Generator;
 
@@ -12,15 +12,23 @@ internal sealed class SchemaModelBuilder(
 {
     private readonly SchemaGeneratorOptions _options = options ?? SchemaGeneratorOptions.Empty;
     private readonly Dictionary<string, IOpenApiSchema> _definitions = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, int> _allOfUnionReferenceCounts = new(StringComparer.Ordinal);
     private readonly SchemaModel _model = new();
     private readonly HashSet<string> _emitted = new(StringComparer.Ordinal);
     private readonly HashSet<string> _building = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _reportedUnsupported = new(StringComparer.Ordinal);
 
     public SchemaModel Build(OpenApiSchema root)
     {
         foreach (var definition in root.Definitions ?? new Dictionary<string, IOpenApiSchema>())
         {
-            _definitions[definition.Key] = definition.Value;
+            var definitionName = Identifier(definition.Key);
+            if (_definitions.ContainsKey(definitionName))
+            {
+                ReportUnsupported(definitionName, "definition name collides with another generated type name");
+                continue;
+            }
+            _definitions.Add(definitionName, definition.Value);
             if (definition.Value.Extensions is { } extensions &&
                 extensions.TryGetValue("x-method", out var methodExtension) &&
                 methodExtension is JsonNodeExtension methodNode &&
@@ -40,21 +48,106 @@ internal sealed class SchemaModelBuilder(
 
         if (_definitions.Count == 0)
         {
-            AddDefinition("RootSchema", root);
+            _definitions.Add("RootSchema", root);
         }
-        else
+
+        BuildAllOfUnionReferenceCounts(root);
+        foreach (var definition in _definitions)
         {
-            foreach (var definition in _definitions)
+            var name = definition.Key;
+            var existingTypeNames = new HashSet<string>(_model.Types.Select(type => type.Name), StringComparer.Ordinal);
+            AddDefinition(name, definition.Value);
+            var side = GetSide(definition.Value);
+            if (side is "client" or "agent")
             {
-                if (!IsDocumentationEnvelope(definition.Value))
+                foreach (var type in _model.Types.Where(type =>
+                             type.Name == name || !existingTypeNames.Contains(type.Name)))
                 {
-                    AddDefinition(Identifier(definition.Key), definition.Value);
+                    type.Side = side;
+                }
+            }
+            if (IsInternalDefinition(definition.Value))
+            {
+                foreach (var type in _model.Types.Where(type =>
+                             type.Name == name ||
+                             type.Name.StartsWith(name, StringComparison.Ordinal) &&
+                             type.Name.Length > name.Length &&
+                             char.IsUpper(type.Name[name.Length])))
+                {
+                    type.IsInternal = true;
                 }
             }
         }
 
+        // The rendered aggregation files (JsonContext, Discriminators) walk the type and method
+        // lists, so emit in a stable name order. Without this an upstream reorder of the schema's
+        // $defs would reshuffle those committed files even though no type changed. Sorting runs after
+        // all lookups above, so no build behaviour depends on it.
+        //
+        // List.Sort is not stable, so the comparators must be total: type names are unique (AddDefinition
+        // dedupes via _emitted, and variant names are merged through FindIndex) and method triples are
+        // guaranteed unique by the guard above, so no two entries compare equal and the order is fully
+        // determined by the model.
+        _model.Types.Sort(static (left, right) => string.CompareOrdinal(left.Name, right.Name));
+        _model.Methods.Sort(static (left, right) =>
+        {
+            var byName = string.CompareOrdinal(left.Name, right.Name);
+            if (byName != 0) return byName;
+            var bySide = string.CompareOrdinal(left.Side, right.Side);
+            return bySide != 0 ? bySide : string.CompareOrdinal(left.MessageType, right.MessageType);
+        });
+
         return _model;
     }
+
+    private void BuildAllOfUnionReferenceCounts(OpenApiSchema root)
+    {
+        var visited = new HashSet<OpenApiSchema>();
+        Visit(root);
+        foreach (var definition in _definitions.Values)
+        {
+            Visit(Resolve(definition));
+        }
+
+        void Visit(IOpenApiSchema? candidate)
+        {
+            var schema = Resolve(candidate);
+            if (schema is null || !visited.Add(schema)) return;
+
+            var branches = schema.OneOf ?? schema.AnyOf;
+            if (branches is { Count: > 1 })
+            {
+                foreach (var branch in branches)
+                {
+                    var branchSchema = Resolve(branch);
+                    if (branchSchema is null) continue;
+
+                    if (GetSingleAllOfReferenceName(branchSchema) is { } referenceName)
+                    {
+                        _allOfUnionReferenceCounts.TryGetValue(referenceName, out var count);
+                        _allOfUnionReferenceCounts[referenceName] = count + 1;
+                    }
+
+                    Visit(branchSchema);
+                }
+            }
+
+            foreach (var property in schema.Properties?.Values ?? []) Visit(property);
+            foreach (var part in schema.AllOf ?? []) Visit(part);
+            foreach (var part in schema.AnyOf ?? []) Visit(part);
+            foreach (var part in schema.OneOf ?? []) Visit(part);
+            Visit(schema.Items);
+            Visit(schema.AdditionalProperties);
+        }
+    }
+
+    private static string? GetSide(IOpenApiSchema schema) =>
+        schema.Extensions is { } extensions &&
+        extensions.TryGetValue("x-side", out var sideExtension) &&
+        sideExtension is JsonNodeExtension sideNode &&
+        sideNode.Node.GetValueKind() == JsonValueKind.String
+            ? sideNode.Node.GetValue<string>()
+            : null;
 
     private string AddDefinition(string name, IOpenApiSchema definition)
     {
@@ -67,6 +160,9 @@ internal sealed class SchemaModelBuilder(
             return name;
         }
 
+        var originalTypeCount = _model.Types.Count;
+
+        ValidateSupportedConstructs(name, schema);
         if (OpenEnumPrimitiveType(schema) is not null)
         {
             // Extensible string/numeric enums use their primitive wire type.
@@ -83,6 +179,23 @@ internal sealed class SchemaModelBuilder(
         {
             _model.Types.Add(BuildClass(name, schema));
         }
+        else if (PrimitiveType(schema) is null &&
+            !IsNull(schema) &&
+            !IsUnconstrainedSchema(schema) &&
+            schema.Items is null &&
+            schema.OneOf is not { Count: 1 } &&
+            schema.AnyOf is not { Count: 1 } &&
+            schema.AllOf is not { Count: 1 })
+        {
+            ReportUnsupported(name, "schema definition has no supported CLR representation");
+        }
+
+        var definedType = _model.Types.Skip(originalTypeCount).FirstOrDefault(type => type.Name == name)
+            ?? _model.Types.FirstOrDefault(type => type.Name == name);
+        if (definedType is not null)
+        {
+            definedType.Description ??= schema.Description;
+        }
 
         _building.Remove(name);
         _emitted.Add(name);
@@ -98,9 +211,8 @@ internal sealed class SchemaModelBuilder(
             return;
         }
 
-        var branches = schema.AnyOf ?? schema.OneOf ?? [];
+        var branches = (schema.AnyOf ?? schema.OneOf ?? []).Where(branch => !IsNull(branch)).ToArray();
         var caseNames = branches
-            .Where(branch => !IsNull(branch))
             .Select((branch, index) => GetTypeName(name, "Case" + index, branch, nullable: false))
             .ToArray();
 
@@ -110,19 +222,116 @@ internal sealed class SchemaModelBuilder(
             return;
         }
 
-        var structuralClassifier = caseNames.All(caseName => _model.Types.OfType<ClassModel>().Any(type => type.Name == caseName));
-        _model.Types.Add(new UnionModel(name, caseNames, structuralClassifier));
+        var branchProperties = branches.Select(branch =>
+        {
+            var branchSchema = Resolve(branch);
+            return branchSchema is null
+                ? new Dictionary<string, PropertyEntry>(StringComparer.Ordinal)
+                : GetProperties(name, branchSchema, new HashSet<string>(StringComparer.Ordinal));
+        }).ToArray();
+        var classifierProperties = caseNames.Select((caseName, index) =>
+        {
+            if (!caseName.StartsWith("List<", StringComparison.Ordinal)) return branchProperties[index];
+            var itemType = caseName.Substring(5, caseName.Length - 6);
+            var itemModel = _model.Types.OfType<ClassModel>().FirstOrDefault(type => type.Name == itemType);
+            if (itemModel is null) return branchProperties[index];
+            return itemModel.Properties.ToDictionary(
+                property => property.WireName,
+                property => new PropertyEntry(
+                    new OpenApiSchema { Const = property.ConstValue },
+                    property.IsRequired),
+                StringComparer.Ordinal);
+        }).ToArray();
+        var configuredDefault = _options.GetDefaultUnionCase(name);
+        var defaultCaseIndex = configuredDefault is null
+            ? -1
+            : Array.FindIndex(branches, branch => string.Equals(Resolve(branch)?.Title, configuredDefault, StringComparison.Ordinal));
+        if (defaultCaseIndex < 0)
+            defaultCaseIndex = FindDefaultCaseWithMissingDiscriminator(classifierProperties);
+        var defaultCaseName = defaultCaseIndex >= 0 && defaultCaseIndex < caseNames.Length ? caseNames[defaultCaseIndex] : null;
+        var caseModels = caseNames.Select((caseName, index) =>
+        {
+            var properties = classifierProperties[index];
+            var constants = properties
+                .Select(property => (property.Key, Value: Resolve(property.Value.Schema)?.Const))
+                .Where(property => property.Value is not null)
+                .ToDictionary(property => property.Key, property => property.Value!, StringComparer.Ordinal);
+            var uniqueProperties = properties.Keys
+                .Where(propertyName => classifierProperties
+                    .Where((_, otherIndex) => otherIndex != index)
+                    .All(other => !other.ContainsKey(propertyName)))
+                .ToArray();
+            return new UnionCaseModel(
+                caseName,
+                constants,
+                properties.Keys.ToArray(),
+                properties.Where(property => property.Value.Required).Select(property => property.Key).ToArray(),
+                uniqueProperties);
+        }).ToArray();
+        _model.Types.Add(new UnionModel(name, caseNames, defaultCaseName, caseModels)
+        {
+            Description = schema.Description
+        });
         AddConstUnionDiscriminator(name, branches.ToArray());
+    }
+
+    private int FindDefaultCaseWithMissingDiscriminator(IReadOnlyList<Dictionary<string, PropertyEntry>> caseProperties)
+    {
+        // Infer a fallback only when one case omits a property that every other case requires as a const.
+        var inferredCases = new HashSet<int>();
+        var candidateProperties = caseProperties
+            .SelectMany(properties => properties.Keys)
+            .Distinct(StringComparer.Ordinal);
+
+        foreach (var propertyName in candidateProperties)
+        {
+            var defaultCaseIndex = -1;
+            var taggedCasesAreComplete = true;
+            for (var index = 0; index < caseProperties.Count; index++)
+            {
+                if (!caseProperties[index].TryGetValue(propertyName, out var property))
+                {
+                    if (defaultCaseIndex >= 0)
+                    {
+                        taggedCasesAreComplete = false;
+                        break;
+                    }
+
+                    defaultCaseIndex = index;
+                    continue;
+                }
+
+                if (!property.Required || Resolve(property.Schema)?.Const is null)
+                {
+                    taggedCasesAreComplete = false;
+                    break;
+                }
+            }
+
+            if (taggedCasesAreComplete && defaultCaseIndex >= 0)
+                inferredCases.Add(defaultCaseIndex);
+        }
+
+        return inferredCases.Count == 1 ? inferredCases.Single() : -1;
     }
 
     private void AddConstUnionDiscriminator(string name, IReadOnlyList<IOpenApiSchema> branches)
     {
         var branchConstants = branches
             .Where(branch => !IsNull(branch))
-            .Select(branch => GetProperties(Resolve(branch) ?? new OpenApiSchema(), new HashSet<string>(StringComparer.Ordinal))
-                .Select(property => (property.Key, Value: Resolve(property.Value.Schema)?.Const))
-                .Where(property => property.Value is not null)
-                .ToArray())
+            .Select(branch =>
+            {
+                var branchSchema = Resolve(branch);
+                if (branchSchema is null)
+                {
+                    ReportUnsupported(name, "unresolved union branch reference");
+                    return Array.Empty<(string Key, string? Value)>();
+                }
+                return GetProperties(name, branchSchema, new HashSet<string>(StringComparer.Ordinal))
+                    .Select(property => (property.Key, Value: Resolve(property.Value.Schema)?.Const))
+                    .Where(property => property.Value is not null)
+                    .ToArray();
+            })
             .Where(properties => properties.Length == 1)
             .ToArray();
         if (branchConstants.Length == 0) return;
@@ -141,7 +350,9 @@ internal sealed class SchemaModelBuilder(
     {
         var cases = new List<DiscriminatorCase>();
         var variants = new List<ClassModel>();
+        var branchVariants = new List<ClassModel>();
         var commonProperties = BuildProperties(name, schema, excludedProperties: [discriminatorName]);
+        var allowsUnknown = _options.AllowsUnknownDiscriminators(name);
         var index = 0;
 
         foreach (var branch in schema.OneOf ?? schema.AnyOf ?? [])
@@ -149,58 +360,82 @@ internal sealed class SchemaModelBuilder(
             var branchSchema = Resolve(branch);
             if (branchSchema is null)
             {
+                ReportUnsupported(name, "unresolved union branch reference");
                 index++;
                 continue;
             }
 
-            var properties = GetProperties(branchSchema, new HashSet<string>(StringComparer.Ordinal));
+            var properties = GetProperties(name, branchSchema, new HashSet<string>(StringComparer.Ordinal));
             var discriminatorValue = properties.TryGetValue(discriminatorName, out var discriminatorProperty)
                 ? Resolve(discriminatorProperty.Schema)?.Const
                 : null;
-            discriminatorValue ??= _options.GetDefaultDiscriminatorValue(name, branchSchema.Title);
+            discriminatorValue ??= InferDiscriminatorValueFromVariantTitle(name, schema, branchSchema, discriminatorName);
+            var caseDefinition = GetReferenceDefinitionName(branch) ?? branchSchema.Title ?? "Variant" + index;
             if (string.IsNullOrEmpty(discriminatorValue))
             {
+                // Skipping the branch would silently drop a case from the generated union, so report it instead.
+                ReportUnsupported(name, "union branch '" + caseDefinition + "' has no '" + discriminatorName + "' discriminator value");
                 index++;
                 continue;
             }
-            var caseDefinition = GetReferenceDefinitionName(branch) ?? branchSchema.Title ?? "Variant" + index;
-            var referencedVariantName = _options.ReusesAllOfVariants(name)
-                ? GetSingleAllOfReferenceName(branchSchema)
-                : null;
+            var referencedVariantName = GetReusableAllOfReferenceName(schema, branchSchema);
             if (referencedVariantName is not null && _definitions.TryGetValue(referencedVariantName, out var referencedDefinition))
             {
                 AddDefinition(referencedVariantName, referencedDefinition);
             }
             var variantName = referencedVariantName ?? Identifier(name + Pascal(caseDefinition) + Pascal(discriminatorValue!));
             var variantProperties = commonProperties
-                .Concat(BuildProperties(variantName, branchSchema, excludedProperties: [discriminatorName]))
+                .Concat(BuildProperties(variantName, branchSchema, excludedProperties: allowsUnknown ? [] : [discriminatorName]))
                 .GroupBy(property => property.WireName, StringComparer.Ordinal)
                 .Select(group => group.First())
                 .ToArray();
             var existingIndex = _model.Types.FindIndex(type => type.Name == variantName);
             var existing = existingIndex >= 0 ? _model.Types[existingIndex] as ClassModel : null;
+            var effectiveVariantProperties = existing is null
+                ? variantProperties
+                : existing.Properties.Concat(variantProperties)
+                    .GroupBy(property => property.WireName, StringComparer.Ordinal)
+                    .Select(group => group.First())
+                    .ToArray();
             var variant = new ClassModel(
                 variantName,
-                existing?.Properties ?? variantProperties,
-                baseType: name,
-                hasExtensionData: existing?.HasExtensionData ?? (branchSchema.AdditionalPropertiesAllowed && branchSchema.AdditionalProperties is null));
+                effectiveVariantProperties,
+                baseType: allowsUnknown ? null : name,
+                hasExtensionData: existing?.HasExtensionData ?? (branchSchema.AdditionalPropertiesAllowed && branchSchema.AdditionalProperties is null))
+            {
+                Description = branchSchema.Description
+            };
             if (existingIndex >= 0) _model.Types[existingIndex] = variant;
             else variants.Add(variant);
+            branchVariants.Add(variant);
             cases.Add(new DiscriminatorCase(variantName, discriminatorValue!));
             index++;
         }
 
-        var allowsUnknown = _options.AllowsUnknownDiscriminators(name);
-        _model.Types.Add(new ClassModel(name, [], discriminatorName: discriminatorName, discriminatorCases: cases, allowUnknownDiscriminator: allowsUnknown));
-        _model.Types.AddRange(variants);
         if (allowsUnknown)
         {
-            _model.Types.Add(new ClassModel(
-                name + "Unknown",
-                [new PropertyModel("RawPayload", "RawPayload", "JsonElement", isRequired: true, isNullable: false, isIgnored: true)],
-                baseType: name,
-                isRawPayloadVariant: true));
+            var caseModels = branchVariants.Select(variant => new UnionCaseModel(
+                variant.Name,
+                variant.Properties
+                    .Where(property => property.ConstValue is not null)
+                    .ToDictionary(property => property.WireName, property => property.ConstValue!, StringComparer.Ordinal),
+                variant.Properties.Select(property => property.WireName).ToArray(),
+                variant.Properties.Where(property => property.IsRequired).Select(property => property.WireName).ToArray(),
+                [])).Append(new UnionCaseModel("JsonElement", new Dictionary<string, string>(StringComparer.Ordinal), [], [], [])).ToArray();
+            _model.Types.AddRange(variants);
+            _model.Types.Add(new UnionModel(
+                name,
+                [.. cases.Select(item => item.TypeName), "JsonElement"],
+                caseModels: caseModels,
+                allowUnknownDiscriminator: true));
+            return;
         }
+
+        _model.Types.Add(new ClassModel(name, [], discriminatorName: discriminatorName, discriminatorCases: cases)
+        {
+            Description = schema.Description
+        });
+        _model.Types.AddRange(variants);
         var discriminatorEnumName = name + "Discriminator";
         if (_model.Types.All(type => !string.Equals(type.Name, discriminatorEnumName, StringComparison.Ordinal)))
         {
@@ -216,7 +451,10 @@ internal sealed class SchemaModelBuilder(
         return new ClassModel(
             name,
             properties,
-            hasExtensionData: schema.Properties is { Count: > 0 } && schema.AdditionalPropertiesAllowed && schema.AdditionalProperties is null);
+            hasExtensionData: schema.Properties is { Count: > 0 } && schema.AdditionalPropertiesAllowed && schema.AdditionalProperties is null)
+        {
+            Description = schema.Description
+        };
     }
 
     private IReadOnlyList<PropertyModel> BuildProperties(
@@ -224,7 +462,8 @@ internal sealed class SchemaModelBuilder(
         OpenApiSchema schema,
         IReadOnlyCollection<string> excludedProperties)
     {
-        var properties = GetProperties(schema, new HashSet<string>(StringComparer.Ordinal));
+        ValidateSupportedConstructs(ownerName, schema);
+        var properties = GetProperties(ownerName, schema, new HashSet<string>(StringComparer.Ordinal));
         var results = new List<PropertyModel>();
         foreach (var property in properties)
         {
@@ -236,7 +475,14 @@ internal sealed class SchemaModelBuilder(
             var typeName = GetTypeName(ownerName, property.Key, property.Value.Schema, nullable);
             var identifier = Identifier(Pascal(property.Key));
             if (string.Equals(identifier, ownerName, StringComparison.Ordinal)) identifier += "Value";
-            results.Add(new PropertyModel(property.Key, identifier, typeName, required, nullable, resolved?.Const));
+            results.Add(new PropertyModel(
+                property.Key,
+                identifier,
+                typeName,
+                required,
+                nullable,
+                resolved?.Const,
+                description: property.Value.Schema.Description ?? resolved?.Description));
         }
         return results;
     }
@@ -246,12 +492,28 @@ internal sealed class SchemaModelBuilder(
         if (schema is OpenApiSchemaReference reference)
         {
             var name = GetReferenceDefinitionName(reference);
-            if (name is null) return "JsonElement" + (nullable ? "?" : string.Empty);
-            if (!_definitions.TryGetValue(name, out var definition))
+            if (name is null)
+            {
+                ReportUnsupported(owner, $"reference '{reference.Reference?.Id ?? "(unknown)"}' has no definition name");
                 return "JsonElement" + (nullable ? "?" : string.Empty);
+            }
+            if (!_definitions.TryGetValue(name, out var definition))
+            {
+                ReportUnsupported(owner, $"unresolved schema reference '{reference.Reference?.Id ?? name}'");
+                return "JsonElement" + (nullable ? "?" : string.Empty);
+            }
             var resolvedDefinition = Resolve(definition);
-            if (resolvedDefinition is null) return "JsonElement" + (nullable ? "?" : string.Empty);
+            if (resolvedDefinition is null)
+            {
+                ReportUnsupported(owner, $"unresolved schema definition '{name}'");
+                return "JsonElement" + (nullable ? "?" : string.Empty);
+            }
+            ValidateSupportedConstructs(owner, resolvedDefinition);
             var referenceNullable = nullable || resolvedDefinition.Type?.HasFlag(JsonSchemaType.Null) == true || HasNullCase(resolvedDefinition);
+            if (resolvedDefinition.AllOf is { Count: 1 })
+            {
+                return GetTypeName(owner, property, resolvedDefinition.AllOf[0], referenceNullable);
+            }
             if (resolvedDefinition.OneOf is { Count: 1 })
             {
                 return GetTypeName(owner, property, resolvedDefinition.OneOf[0], referenceNullable);
@@ -260,22 +522,29 @@ internal sealed class SchemaModelBuilder(
             {
                 return GetTypeName(owner, property, resolvedDefinition.AnyOf[0], referenceNullable);
             }
-            if (resolvedDefinition.AllOf is { Count: 1 })
-            {
-                return GetTypeName(owner, property, resolvedDefinition.AllOf[0], referenceNullable);
-            }
             if (resolvedDefinition.Type?.HasFlag(JsonSchemaType.Array) == true)
             {
                 return GetTypeName(owner, property, resolvedDefinition, referenceNullable);
             }
+            if (IsUnconstrainedSchema(resolvedDefinition))
+            {
+                // ACP extension request/response/notification payloads are intentionally
+                // unconstrained by the schema. Preserve their arbitrary JSON value.
+                return ApplyNullability("JsonElement", referenceNullable);
+            }
             var typeName = PrimitiveType(resolvedDefinition)
                 ?? OpenEnumPrimitiveType(resolvedDefinition)
-                ?? AddDefinition(Identifier(name), definition);
+                ?? AddDefinition(name, definition);
             return ApplyNullability(typeName, referenceNullable);
         }
 
         var concrete = Resolve(schema);
-        if (concrete is null) return "JsonElement" + (nullable ? "?" : string.Empty);
+        if (concrete is null)
+        {
+            ReportUnsupported(owner, $"unresolved schema reference for property '{property}'");
+            return "JsonElement" + (nullable ? "?" : string.Empty);
+        }
+        ValidateSupportedConstructs(owner, concrete);
         var hasNull = nullable || HasNullCase(concrete) || concrete.Type?.HasFlag(JsonSchemaType.Null) == true;
 
         var nonNullAlternatives = (concrete.AnyOf ?? concrete.OneOf)?.Where(alternative => !IsNull(alternative)).ToArray();
@@ -288,6 +557,14 @@ internal sealed class SchemaModelBuilder(
         {
             return GetTypeName(owner, property, concrete.AllOf[0], hasNull);
         }
+        if (concrete.OneOf is { Count: 1 })
+        {
+            return GetTypeName(owner, property, concrete.OneOf[0], hasNull);
+        }
+        if (concrete.AnyOf is { Count: 1 })
+        {
+            return GetTypeName(owner, property, concrete.AnyOf[0], hasNull);
+        }
 
         var openEnum = OpenEnumPrimitiveType(concrete);
         if (openEnum is not null)
@@ -298,7 +575,7 @@ internal sealed class SchemaModelBuilder(
         if (TryGetClosedStringEnum(concrete, out var enumValues))
         {
             var enumName = Identifier(owner + Pascal(property) + "Enum");
-            AddModelOnce(enumName, () => new EnumModel(enumName, enumValues));
+            AddModelOnce(enumName, () => new EnumModel(enumName, enumValues) { Description = concrete.Description });
             return ApplyNullability(enumName, hasNull);
         }
 
@@ -309,6 +586,8 @@ internal sealed class SchemaModelBuilder(
             {
                 _building.Add(unionName);
                 AddUnion(unionName, concrete);
+                if (_model.Types.LastOrDefault(type => type.Name == unionName) is { } unionType)
+                    unionType.Description ??= concrete.Description;
                 _building.Remove(unionName);
                 _emitted.Add(unionName);
             }
@@ -341,11 +620,19 @@ internal sealed class SchemaModelBuilder(
             return ApplyNullability(inlineName, hasNull);
         }
 
-        var primitive = PrimitiveType(concrete) ?? "JsonElement";
+        var primitive = PrimitiveType(concrete);
+        if (primitive is null && !IsUnconstrainedSchema(concrete) && !IsNull(concrete))
+        {
+            ReportUnsupported(owner, $"property '{property}' uses a schema construct with no supported CLR representation");
+        }
+        primitive ??= "JsonElement";
         return ApplyNullability(primitive, hasNull);
     }
 
-    private Dictionary<string, PropertyEntry> GetProperties(OpenApiSchema schema, HashSet<string> visitedDefinitions)
+    private Dictionary<string, PropertyEntry> GetProperties(
+        string ownerName,
+        OpenApiSchema schema,
+        HashSet<string> visitedDefinitions)
     {
         var properties = new Dictionary<string, PropertyEntry>(StringComparer.Ordinal);
         if (schema.Properties is not null)
@@ -359,14 +646,20 @@ internal sealed class SchemaModelBuilder(
         foreach (var parent in schema.AllOf ?? [])
         {
             var target = Resolve(parent);
-            if (target is null) continue;
+            if (target is null)
+            {
+                var referenceName = GetReferenceDefinitionName(parent);
+                ReportUnsupported(ownerName, $"unresolved allOf reference '{referenceName ?? "(unknown)"}'");
+                continue;
+            }
+            ValidateSupportedConstructs(ownerName, target);
             if (parent is OpenApiSchemaReference reference)
             {
                 var definitionName = GetReferenceDefinitionName(reference);
                 if (definitionName is not null && !visitedDefinitions.Add(definitionName)) continue;
             }
 
-            foreach (var inherited in GetProperties(target, visitedDefinitions))
+            foreach (var inherited in GetProperties(ownerName, target, visitedDefinitions))
             {
                 properties[inherited.Key] = inherited.Value;
             }
@@ -393,20 +686,104 @@ internal sealed class SchemaModelBuilder(
         var explicitDiscriminator = schema.Discriminator?.PropertyName;
         if (!string.IsNullOrWhiteSpace(explicitDiscriminator)) return explicitDiscriminator;
 
-        string? commonProperty = null;
-        foreach (var branch in schema.OneOf ?? schema.AnyOf ?? [])
+        var branches = (schema.OneOf ?? schema.AnyOf ?? [])
+            .Select(branch => Resolve(branch))
+            .ToArray();
+        if (branches.Any(branch => branch is null))
         {
-            var properties = GetProperties(Resolve(branch) ?? new OpenApiSchema(), new HashSet<string>(StringComparer.Ordinal));
-            var constants = properties
+            ReportUnsupported(unionName, "unresolved union branch reference");
+            return null;
+        }
+
+        var branchConstants = branches
+            .Select(branch => GetProperties(unionName, branch!, new HashSet<string>(StringComparer.Ordinal))
                 .Where(property => Resolve(property.Value.Schema)?.Const is not null)
                 .Select(property => (property.Key, Value: Resolve(property.Value.Schema)!.Const!))
-                .ToArray();
-            if (constants.Length == 0 && _options.GetDefaultDiscriminatorValue(unionName, Resolve(branch)?.Title) is not null) continue;
-            if (constants.Length != 1) return null;
+                .ToArray())
+            .ToArray();
+        if (branchConstants.Any(constants => constants.Length > 1)) return null;
+
+        string? commonProperty = null;
+        foreach (var constants in branchConstants.Where(constants => constants.Length == 1))
+        {
             if (commonProperty is not null && !string.Equals(commonProperty, constants[0].Key, StringComparison.Ordinal)) return null;
             commonProperty = constants[0].Key;
         }
+
+        if (commonProperty is null) return null;
+
+        for (var index = 0; index < branches.Length; index++)
+        {
+            if (branchConstants[index].Length == 1) continue;
+            var branch = branches[index]!;
+            if (InferDiscriminatorValueFromVariantTitle(unionName, schema, branch, commonProperty) is not null)
+            {
+                continue;
+            }
+
+            return null;
+        }
+
         return commonProperty;
+    }
+
+    private string? InferDiscriminatorValueFromVariantTitle(
+        string unionName,
+        OpenApiSchema unionSchema,
+        OpenApiSchema branchSchema,
+        string discriminatorName)
+    {
+        // A reused variant hierarchy needs a tag for each concrete subtype. Accept a branch title only
+        // when every sibling already defines a distinct, required tag in the schema.
+        if (string.IsNullOrWhiteSpace(branchSchema.Title) ||
+            GetReusableAllOfReferenceName(unionSchema, branchSchema) is null)
+        {
+            return null;
+        }
+
+        var branchProperties = GetProperties(unionName, branchSchema, new HashSet<string>(StringComparer.Ordinal));
+        if (branchProperties.ContainsKey(discriminatorName)) return null;
+
+        var siblingValues = new HashSet<string>(StringComparer.Ordinal);
+        var siblingCount = 0;
+        foreach (var sibling in unionSchema.OneOf ?? unionSchema.AnyOf ?? [])
+        {
+            var siblingSchema = Resolve(sibling);
+            if (siblingSchema is null || ReferenceEquals(siblingSchema, branchSchema)) continue;
+
+            siblingCount++;
+            var properties = GetProperties(unionName, siblingSchema, new HashSet<string>(StringComparer.Ordinal));
+            if (!properties.TryGetValue(discriminatorName, out var property) ||
+                !property.Required ||
+                Resolve(property.Schema)?.Const is not { } value ||
+                !siblingValues.Add(value))
+            {
+                return null;
+            }
+        }
+
+        return siblingCount >= 2 && !siblingValues.Contains(branchSchema.Title!)
+            ? branchSchema.Title
+            : null;
+    }
+
+    private string? GetReusableAllOfReferenceName(OpenApiSchema unionSchema, OpenApiSchema schema)
+    {
+        var name = GetSingleAllOfReferenceName(schema);
+        if (name is null || !_definitions.TryGetValue(name, out var definition)) return null;
+
+        var matchingBranches = (unionSchema.OneOf ?? unionSchema.AnyOf ?? [])
+            .Select(Resolve)
+            .Count(branch => branch is not null && GetSingleAllOfReferenceName(branch) == name);
+        if (matchingBranches != 1 ||
+            !_allOfUnionReferenceCounts.TryGetValue(name, out var unionReferenceCount) ||
+            unionReferenceCount != 1)
+        {
+            return null;
+        }
+
+        var target = Resolve(definition);
+        return target is not null && IsObject(target) && !IsUnion(target) ? name : null;
     }
 
     private string? GetSingleAllOfReferenceName(OpenApiSchema schema)
@@ -434,10 +811,43 @@ internal sealed class SchemaModelBuilder(
     private static bool IsObject(OpenApiSchema schema) =>
         schema.Properties is { Count: > 0 } || schema.Type?.HasFlag(JsonSchemaType.Object) == true || schema.AllOf is { Count: > 0 };
 
+    private static bool IsUnconstrainedSchema(OpenApiSchema schema) =>
+        schema.Type is null &&
+        schema.Properties is not { Count: > 0 } &&
+        schema.AnyOf is not { Count: > 0 } &&
+        schema.OneOf is not { Count: > 0 } &&
+        schema.AllOf is not { Count: > 0 } &&
+        schema.Items is null &&
+        schema.AdditionalProperties is null;
+
+    private void ValidateSupportedConstructs(string name, OpenApiSchema schema)
+    {
+        if (schema.PatternProperties is { Count: > 0 })
+        {
+            ReportUnsupported(name, "patternProperties are not supported");
+        }
+        if (schema.DependentSchemas is { Count: > 0 })
+        {
+            ReportUnsupported(name, "dependentSchemas are not supported");
+        }
+        if (schema.Extensions?.ContainsKey("prefixItems") == true)
+        {
+            ReportUnsupported(name, "tuple arrays using prefixItems are not supported");
+        }
+        if (schema.Type is { } type)
+        {
+            var nonNullTypes = (int)(type & ~JsonSchemaType.Null);
+            if (nonNullTypes != 0 && (nonNullTypes & (nonNullTypes - 1)) != 0)
+            {
+                ReportUnsupported(name, "type arrays containing multiple non-null types are not supported");
+            }
+        }
+    }
+
     private static bool IsUnion(OpenApiSchema schema) =>
         schema.OneOf is { Count: > 1 } || schema.AnyOf is { Count: > 1 };
 
-    private bool IsDocumentationEnvelope(IOpenApiSchema definition)
+    private bool IsInternalDefinition(IOpenApiSchema definition)
     {
         var schema = Resolve(definition);
         if (schema?.Extensions is null || !schema.Extensions.TryGetValue("x-docs-ignore", out var extension)) return false;
@@ -490,7 +900,10 @@ internal sealed class SchemaModelBuilder(
         if (type.HasFlag(JsonSchemaType.Boolean)) return "bool";
         if (type.HasFlag(JsonSchemaType.Integer)) return schema.Format switch
         {
-            "uint32" => "uint", "uint64" => "ulong", "int32" => "int", _ => "long"
+            "uint32" => "uint",
+            "uint64" => "ulong",
+            "int32" => "int",
+            _ => "long"
         };
         if (type.HasFlag(JsonSchemaType.Number)) return schema.Format == "float" ? "float" : "double";
         if (type.HasFlag(JsonSchemaType.Array)) return "List<JsonElement>";
@@ -517,8 +930,11 @@ internal sealed class SchemaModelBuilder(
         if (_emitted.Add(name)) _model.Types.Add(create());
     }
 
-    private void ReportUnsupported(string name, string detail) =>
-        reportDiagnostic?.Invoke(Diagnostic.Create(unsupportedSchema, Location.None, name, detail));
+    private void ReportUnsupported(string name, string detail)
+    {
+        if (reportDiagnostic is null || !_reportedUnsupported.Add(name + "\0" + detail)) return;
+        reportDiagnostic(Diagnostic.Create(unsupportedSchema, Location.None, name, detail));
+    }
 
     private static string ApplyNullability(string type, bool nullable) =>
         !nullable || type.EndsWith("?", StringComparison.Ordinal) ? type : type + "?";

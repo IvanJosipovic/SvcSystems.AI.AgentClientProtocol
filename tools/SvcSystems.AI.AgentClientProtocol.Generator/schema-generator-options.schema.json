@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Schema generator options",
+  "description": "Configures how the source generator turns a paired *.schema.json file or upstream schema.json asset into C# models and protocol support code. Place this file beside the schema and use the same base name with the .generator.json suffix. For example, schema.json is configured by schema.generator.json. Options are scoped to that schema file.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "URL or path to the JSON Schema document that describes this options file. Editors use it to provide validation and completion; the source generator ignores this property.",
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "namespace": {
+      "description": "Namespace for generated shared models and protocol constants. Models not assigned to a client or agent namespace use this value. This is also the namespace used by generated protocol method and discriminator helpers. Defaults to SvcSystems.AI.AgentClientProtocol.Generated.",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$"
+    },
+    "clientNamespace": {
+      "description": "Optional namespace for schema types marked as belonging to the client (x-side: client). If omitted, those types use namespace. This lets client-facing request and notification models live separately from shared protocol models.",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$"
+    },
+    "agentNamespace": {
+      "description": "Optional namespace for schema types marked as belonging to the agent (x-side: agent). If omitted, those types use namespace. This lets agent-facing request and notification models live separately from shared protocol models.",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$"
+    },
+    "serializationNamespace": {
+      "description": "Namespace for generated System.Text.Json serialization support, including the JsonSerializerContext when enabled and generated callback route helpers. Defaults to SvcSystems.AI.AgentClientProtocol.Serialization.",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$"
+    },
+    "jsonContextName": {
+      "description": "Name of the generated JsonSerializerContext class. It is used only when generateJsonContext is true. Defaults to JsonContext.",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "generateJsonContext": {
+      "description": "When true, generate a System.Text.Json source-generation context for the schema's model types. When the schema also defines client-side request or notification methods, generate callback route support alongside the context. When false or omitted, these files are not generated.",
+      "type": "boolean",
+      "default": false
+    },
+    "allowUnknownDiscriminators": {
+      "description": "Names of discriminated union definitions that should accept an unrecognized discriminator value. For each listed union, generated JSON handling preserves an unknown case so newer protocol variants can be received without failing deserialization. Names must match definitions in the paired schema.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "description": "Exact name of a discriminated union definition in the paired JSON Schema." },
+      "uniqueItems": true
+    },
+    "defaultUnionCases": {
+      "description": "Selects which generated case represents the default value of a union. Each property name is a union definition name and its value is the generated case name. The selected case is initialized when the union is default-constructed; it does not affect which case is chosen when JSON is deserialized.",
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1, "description": "Name of the generated union case to use as that union's default value." }
+    }
+  },
+  "propertyNames": {
+    "description": "Option names are fixed. Unknown names are rejected so misspelled configuration does not silently have no effect.",
+    "type": "string"
+  },
+  "additionalProperties": false
+}

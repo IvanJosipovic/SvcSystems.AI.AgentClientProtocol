@@ -1,4 +1,4 @@
-namespace SvcSystems.AI.AgentClientProtocol;
+﻿namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Options for starting an ACP agent as a child process.</summary>
 public sealed class ProcessOptions

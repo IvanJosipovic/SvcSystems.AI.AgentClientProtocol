@@ -1,0 +1,387 @@
+using System.Collections.Concurrent;
+using System.Text.Json;
+using Xunit;
+
+namespace SvcSystems.AI.AgentClientProtocol.IntegrationTests;
+
+[Trait("Category", "Tck")]
+public sealed class AcpTckIntegrationTests
+{
+    [Theory]
+    [InlineData("conforming")]
+    [InlineData("router_requires_info")]
+    [InlineData("supports_v1_and_v2")]
+    [InlineData("rejects_second_initialize")]
+    public async Task NegotiatesV1AndCompletesUnicodePrompt(string fixture)
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process(fixture), cancellationToken: timeout.Token);
+        Assert.Equal(1, client.Agent.ProtocolVersion);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        var updates = await PromptAsync(session, "Unicode: \u03bb \ud83d\ude80\nsecond line", timeout.Token);
+        Assert.Equal("Unicode: \u03bb \ud83d\ude80\nsecond line", Text(Assert.Single(AgentMessageUpdates(updates))));
+        Assert.Equal("end_turn", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.IsType<Completed>(updates[^1]);
+    }
+
+    [Fact]
+    public async Task DraftV2IsRejectedDuringInitialization()
+    {
+        using var timeout = Timeout();
+        var process = AcpTckFixture.Process("v2_only_honest", protocolVersion: 2);
+        var exception = await Assert.ThrowsAsync<ProtocolException>(async () =>
+        {
+            await using var client = await AcpClient.StartAsync(process, cancellationToken: timeout.Token);
+        });
+        Assert.Contains("version", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task MissingAgentCapabilitiesPreventOptionalRequests()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("conforming"), cancellationToken: timeout.Token);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        await Assert.ThrowsAsync<NotSupportedException>(() => client.LoadSessionAsync(session.Id, Options(), timeout.Token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => client.ResumeSessionAsync(session.Id, Options(), timeout.Token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => client.ListSessionsAsync(cancellationToken: timeout.Token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => client.DeleteSessionAsync(session.Id, timeout.Token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => client.CloseSessionAsync(session.Id, timeout.Token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => client.LogoutAsync(timeout.Token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => client.CreateSessionAsync(new SessionOptions
+        {
+            WorkingDirectory = Path.GetTempPath(),
+            AdditionalDirectories = [Path.GetTempPath()],
+        }, timeout.Token));
+        await PromptAsync(session, "capability-checks-did-not-break-the-connection", timeout.Token);
+    }
+
+    [Fact]
+    public async Task FullCapabilitiesCoverSessionLifecycleModesAndConfig()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("conforming_full"), cancellationToken: timeout.Token);
+        var capabilities = client.Agent.AgentCapabilities!;
+        Assert.True(capabilities.LoadSession);
+        Assert.NotNull(capabilities.SessionCapabilities?.Resume);
+        Assert.NotNull(capabilities.SessionCapabilities?.List);
+        Assert.NotNull(capabilities.SessionCapabilities?.Delete);
+        Assert.NotNull(capabilities.SessionCapabilities?.Close);
+        Assert.NotNull(capabilities.SessionCapabilities?.AdditionalDirectories);
+        Assert.NotNull(capabilities.Auth?.Logout);
+        Assert.True(capabilities.PromptCapabilities?.Image);
+        Assert.True(capabilities.PromptCapabilities?.Audio);
+        Assert.True(capabilities.PromptCapabilities?.EmbeddedContext);
+        Assert.Equal("tck", Assert.IsType<AuthMethodAgent>(Assert.Single(client.Agent.AuthMethods!).Value).Id);
+        await client.AuthenticateAsync("tck", timeout.Token);
+
+        var directory = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
+        var first = await client.CreateSessionAsync(new SessionOptions
+        {
+            WorkingDirectory = directory,
+            AdditionalDirectories = [directory],
+        }, timeout.Token);
+        var second = await client.CreateSessionAsync(Options(), timeout.Token);
+        Assert.NotEqual(first.Id, second.Id);
+        Assert.Equal("default", first.ModeState?.CurrentModeId);
+        Assert.Equal(["default", "yolo"], first.ModeState!.AvailableModes.Select(mode => mode.Id));
+        Assert.Single(ConfigOptions<SessionConfigSelect>((IEnumerable<SessionConfigOption>)first.ConfigOptions));
+        Assert.Single(ConfigOptions<SessionConfigBoolean>((IEnumerable<SessionConfigOption>)first.ConfigOptions));
+        await first.SetModeAsync("yolo", timeout.Token);
+        var config = await first.SetConfigOptionAsync("model", "slow", timeout.Token);
+        Assert.Equal("slow", Assert.Single(ConfigOptions<SessionConfigSelect>((IEnumerable<SessionConfigOption>)config)).CurrentValue);
+        Assert.Single(ConfigOptions<SessionConfigBoolean>((IEnumerable<SessionConfigOption>)config));
+        config = await first.SetConfigOptionAsync("verbose", true, timeout.Token);
+        Assert.True(Assert.Single(ConfigOptions<SessionConfigBoolean>((IEnumerable<SessionConfigOption>)config)).CurrentValue);
+        Assert.Single(ConfigOptions<SessionConfigSelect>((IEnumerable<SessionConfigOption>)config));
+
+        var listed = await client.ListSessionsAsync(directory, cancellationToken: timeout.Token);
+        Assert.Contains(listed, session => session.SessionId == first.Id && session.Cwd == directory);
+        var filtered = await client.ListSessionsAsync(Path.Combine(directory, "tck-no-such-cwd"), cancellationToken: timeout.Token);
+        Assert.Empty(filtered);
+
+        await client.CloseSessionAsync(first.Id, timeout.Token);
+        await client.DeleteSessionAsync(first.Id, timeout.Token);
+        await client.DeleteSessionAsync(first.Id, timeout.Token);
+        listed = await client.ListSessionsAsync(cancellationToken: timeout.Token);
+        Assert.DoesNotContain(listed, session => session.SessionId == first.Id);
+        await client.LogoutAsync(timeout.Token);
+    }
+
+    [Fact]
+    public async Task BooleanConfigIsHiddenWithoutClientAdvertisement()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(
+            AcpTckFixture.Process("conforming_full"),
+            new ClientOptions { SupportsBooleanSessionConfigOptions = false }, timeout.Token);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        Assert.Empty(ConfigOptions<SessionConfigBoolean>((IEnumerable<SessionConfigOption>)session.ConfigOptions));
+        var changed = await session.SetConfigOptionAsync("model", "slow", timeout.Token);
+        Assert.Empty(ConfigOptions<SessionConfigBoolean>((IEnumerable<SessionConfigOption>)changed));
+        Assert.Single(ConfigOptions<SessionConfigSelect>((IEnumerable<SessionConfigOption>)changed));
+    }
+
+    [Fact]
+    public async Task LoadReplaysHistoryBeforeNextTurnAndResumeDoesNot()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("conforming_full"), cancellationToken: timeout.Token);
+        var options = Options();
+        var created = await client.CreateSessionAsync(options, timeout.Token);
+        await PromptAsync(created, "history", timeout.Token);
+        var loaded = await client.LoadSessionAsync(created.Id, options, timeout.Token);
+        var replay = await PromptAsync(loaded, "after-load", timeout.Token);
+        Assert.Equal(["history", "after-load"], AgentMessageUpdates(replay).Select(Text));
+        var resumed = await client.ResumeSessionAsync(created.Id, options, timeout.Token);
+        var fresh = await PromptAsync(resumed, "after-resume", timeout.Token);
+        Assert.Equal("after-resume", Text(Assert.Single(AgentMessageUpdates(fresh))));
+    }
+
+    [Fact]
+    public async Task MultimodalPromptAndRequestMetadataAreAccepted()
+    {
+        using var timeout = Timeout();
+        var metadata = new Dictionary<string, JsonElement>
+        {
+            ["traceparent"] = Json("\"00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01\""),
+            ["tck"] = Json("true"),
+        };
+        await using var client = await AcpClient.StartAsync(
+            AcpTckFixture.Process("conforming_full"),
+            new ClientOptions { Metadata = metadata, CapabilityMetadata = metadata }, timeout.Token);
+        var session = await client.CreateSessionAsync(new SessionOptions
+        {
+            WorkingDirectory = Path.GetTempPath(),
+            Metadata = metadata,
+        }, timeout.Token);
+        ContentBlock[] content =
+        [
+            new TextContent { Text = "multimodal" },
+            new ImageContent { Data = "aW1hZ2U=", MimeType = "image/png" },
+            new AudioContent { Data = "YXVkaW8=", MimeType = "audio/wav" },
+            new ResourceLink { Name = "context", Uri = "https://example.invalid/context" },
+            new EmbeddedResource { Resource = new TextResourceContents { Uri = "file:///context.txt", Text = "context", MimeType = "text/plain" } },
+        ];
+        var updates = new List<SessionEvent>();
+        await foreach (var update in session.PromptAsync(content, timeout.Token, new PromptOptions { Metadata = metadata }))
+        {
+            updates.Add(update);
+        }
+        Assert.Equal("multimodal", Text(Assert.Single(AgentMessageUpdates(updates))));
+        Assert.Equal("end_turn", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+    }
+
+    [Fact]
+    public async Task CancelCompletesPendingTurnAndAllowsAnotherTurn()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("conforming"), cancellationToken: timeout.Token);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        var updates = new List<SessionEvent>();
+        await foreach (var update in session.PromptAsync("__hang__", timeout.Token))
+        {
+            updates.Add(update);
+            if (IsAgentMessage(update))
+            {
+                await session.CancelAsync(timeout.Token);
+            }
+        }
+        Assert.Equal("cancelled", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.Equal("end_turn", Assert.Single((await PromptAsync(session, "next", timeout.Token)).OfType<Completed>()).Response.StopReason);
+    }
+
+    [Fact]
+    public async Task CloseCancelsAnActiveTurn()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("conforming_full"), cancellationToken: timeout.Token);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        var updates = new List<SessionEvent>();
+        await foreach (var update in session.PromptAsync("__hang__", timeout.Token))
+        {
+            updates.Add(update);
+            if (IsAgentMessage(update))
+            {
+                await client.CloseSessionAsync(session.Id, timeout.Token);
+            }
+        }
+        Assert.Equal("cancelled", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+    }
+
+    [Fact]
+    public async Task AuthenticationErrorsAreSurfacedAndAuthenticationUnlocksSessions()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("gated_by_auth"), cancellationToken: timeout.Token);
+        var gated = await Assert.ThrowsAsync<RpcException>(() => client.CreateSessionAsync(Options(), timeout.Token));
+        Assert.Equal(-32000, gated.Code);
+        await Assert.ThrowsAsync<ArgumentException>(() => client.AuthenticateAsync("not-advertised", timeout.Token));
+        var invalid = await Assert.ThrowsAsync<RpcException>(() => client.SendExtensionRequestAsync("authenticate", Json("{\"methodId\":\"not-advertised\"}"), timeout.Token));
+        Assert.Equal(-32602, invalid.Code);
+        await client.AuthenticateAsync("tck", timeout.Token);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        Assert.Equal("end_turn", Assert.Single((await PromptAsync(session, "authenticated", timeout.Token)).OfType<Completed>()).Response.StopReason);
+    }
+
+    [Theory]
+    [InlineData("calls_fs_unadvertised")]
+    [InlineData("calls_terminal_unadvertised")]
+    [InlineData("calls_elicitation_unadvertised")]
+    public async Task UnadvertisedCallbacksReceiveAResponseWithoutHanging(string fixture)
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process(fixture), cancellationToken: timeout.Token);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        var updates = await PromptAsync(session, "probe", timeout.Token);
+        Assert.Equal("end_turn", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+    }
+
+    [Theory]
+    [InlineData(false, "end_turn")]
+    [InlineData(true, "cancelled")]
+    public async Task PermissionCallbacksCanSelectOrCancel(bool cancel, string stopReason)
+    {
+        using var timeout = Timeout();
+        var handler = new PermissionHandler(cancel);
+        await using var client = await AcpClient.StartAsync(
+            AcpTckFixture.Process("asks_permission"), new ClientOptions { PermissionHandler = handler }, timeout.Token);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        var updates = await PromptAsync(session, "permission", timeout.Token);
+        Assert.Equal(1, handler.Calls);
+        Assert.Equal(stopReason, Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+    }
+
+    [Fact]
+    public async Task ExtensionNotificationsRequestsEnvironmentAndUnknownMethods()
+    {
+        using var timeout = Timeout();
+        var notifications = new ConcurrentQueue<ExtensionNotification>();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("pushes_status_notifications"),
+            new ClientOptions { ExtensionNotificationReceived = notifications.Enqueue }, timeout.Token);
+        await client.SendExtensionNotificationAsync("_tck/no_reply", Json("{}"), timeout.Token);
+        var environment = await client.SendExtensionRequestAsync("_tck/env", Json("{\"name\":\"ACP_TCK_CLIENT_PROBE\"}"), timeout.Token);
+        Assert.Equal("stdio-environment", environment.GetProperty("value").GetString());
+        var unknown = await Assert.ThrowsAsync<RpcException>(
+            () => client.SendExtensionRequestAsync("_tck/unknown", Json("{}"), timeout.Token));
+        Assert.Equal(-32601, unknown.Code);
+        Assert.All(notifications, notification =>
+        {
+            Assert.Equal("_fixture/status_update", notification.Method);
+            Assert.Equal("ready", notification.Parameters.GetProperty("status").GetString());
+        });
+        Assert.NotEmpty(notifications);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        await PromptAsync(session, "still-alive", timeout.Token);
+        var unknownSession = await Assert.ThrowsAsync<RpcException>(() => client.SendExtensionRequestAsync(
+            "session/prompt", Json("{\"sessionId\":\"does-not-exist\",\"prompt\":[{\"type\":\"text\",\"text\":\"probe\"}]}"), timeout.Token));
+        Assert.Equal(-32602, unknownSession.Code);
+    }
+
+    [Fact]
+    public async Task StderrDoesNotContaminateProtocolAndLargeFramesStayIntact()
+    {
+        using var timeout = Timeout();
+        var stderr = new ConcurrentQueue<string>();
+        await using var client = await AcpClient.StartAsync(AcpTckFixture.Process("stderr_chatter", stderr.Enqueue), cancellationToken: timeout.Token);
+        var large = await client.SendExtensionRequestAsync("_tck/big", Json("{\"size\":131072}"), timeout.Token);
+        Assert.Equal(131072, large.GetProperty("value").GetString()!.Length);
+        var session = await client.CreateSessionAsync(Options(), timeout.Token);
+        await PromptAsync(session, "after-large-frame", timeout.Token);
+        await client.DisposeAsync();
+        Assert.Contains(stderr, line => line.Contains("stderr_chatter received:", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task OversizedAgentFramesFailPendingRequestsExplicitly()
+    {
+        using var timeout = Timeout();
+        await using var client = await AcpClient.StartAsync(
+            AcpTckFixture.Process("conforming", maximumMessageBytes: 4096), cancellationToken: timeout.Token);
+        var exception = await Assert.ThrowsAsync<ProtocolException>(
+            () => client.SendExtensionRequestAsync("_tck/big", Json("{\"size\":131072}"), timeout.Token));
+        Assert.Contains("4096 byte limit", exception.Message, StringComparison.Ordinal);
+        Assert.IsType<ProtocolException>(await client.Completion.WaitAsync(timeout.Token));
+    }
+
+    [Theory]
+    [InlineData("banner_on_stdout")]
+    [InlineData("invalid_utf8")]
+    [InlineData("result_and_error")]
+    [InlineData("exits_immediately")]
+    public async Task BrokenHandshakeFailsExplicitly(string fixture)
+    {
+        using var timeout = Timeout();
+        var process = AcpTckFixture.Process(fixture);
+        await Assert.ThrowsAnyAsync<AgentException>(async () =>
+        {
+            await using var client = await AcpClient.StartAsync(process, cancellationToken: timeout.Token);
+        });
+        Assert.False(timeout.IsCancellationRequested, "A broken handshake must fail, not hang until the test deadline.");
+    }
+
+    [Theory]
+    [InlineData("never_responds")]
+    [InlineData("wrong_id_echo")]
+    public async Task UnansweredHandshakeCanBeCancelledWithinShutdownDeadline(string fixture)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(2));
+        var process = AcpTckFixture.Process(fixture);
+        var elapsed = System.Diagnostics.Stopwatch.StartNew();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+        {
+            await using var client = await AcpClient.StartAsync(process, cancellationToken: timeout.Token);
+        });
+        Assert.True(elapsed.Elapsed < TimeSpan.FromSeconds(8), $"Cancelled startup took {elapsed.Elapsed}.");
+    }
+
+    private static SessionOptions Options() => new() { WorkingDirectory = Path.GetTempPath() };
+
+    private static JsonElement Json(string text)
+    {
+        using var document = JsonDocument.Parse(text);
+        return document.RootElement.Clone();
+    }
+
+    private static CancellationTokenSource Timeout()
+    {
+        var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(20));
+        return timeout;
+    }
+
+    private static IEnumerable<SessionUpdateVariant1AgentMessageChunk> AgentMessageUpdates(IEnumerable<SessionEvent> updates) =>
+        updates.OfType<SessionUpdateEvent>().Select(update => update.Update.Value).OfType<SessionUpdateVariant1AgentMessageChunk>();
+
+    private static IEnumerable<T> ConfigOptions<T>(IEnumerable<SessionConfigOption> options) where T : class =>
+        options.Select(option => option.Value).OfType<T>();
+
+    private static bool IsAgentMessage(SessionEvent update) =>
+        update is SessionUpdateEvent { Update.Value: SessionUpdateVariant1AgentMessageChunk };
+
+    private static string Text(SessionUpdateVariant1AgentMessageChunk update) =>
+        Assert.IsType<TextContent>(update.Content.Value).Text;
+
+    private static async Task<List<SessionEvent>> PromptAsync(Session session, string text, CancellationToken cancellationToken)
+    {
+        var updates = new List<SessionEvent>();
+        await foreach (var update in session.PromptAsync(text, cancellationToken))
+        {
+            updates.Add(update);
+        }
+        return updates;
+    }
+
+    private sealed class PermissionHandler(bool cancel) : IPermissionHandler
+    {
+        public int Calls { get; private set; }
+
+        public ValueTask<PermissionDecision> RequestPermissionAsync(RequestPermissionRequest request, CancellationToken cancellationToken = default)
+        {
+            Calls++;
+            Assert.Contains(request.Options, option => option.OptionId == "allow-once");
+            return ValueTask.FromResult(cancel ? PermissionDecision.Cancel() : PermissionDecision.Select("allow-once"));
+        }
+    }
+}

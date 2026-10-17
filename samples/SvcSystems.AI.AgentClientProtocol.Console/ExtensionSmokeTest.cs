@@ -1,8 +1,9 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
 using SvcSystems.AI.AgentClientProtocol;
 using SvcSystems.AI.AgentClientProtocol.Transport;
+using AcpClient = SvcSystems.AI.AgentClientProtocol.Client.Client;
 
 internal static class ExtensionSmokeTest
 {
@@ -14,7 +15,7 @@ internal static class ExtensionSmokeTest
         var notifications = 0;
         var statuses = 0;
         await using var transport = new SmokeTransport();
-        await using var client = await Client.ConnectAsync(transport, new ClientOptions
+        await using var client = await AcpClient.ConnectAsync(transport, new ClientOptions
         {
             Metadata = values,
             CapabilityMetadata = values,

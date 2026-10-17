@@ -1,0 +1,39 @@
+# Normalize line endings. Text files are stored with LF in the repository and
+# checked out with the working-tree ending declared below. This keeps diffs
+# renderable as text and stable across platforms.
+
+* text=auto
+
+# Repository metadata and legal text are always LF.
+/.gitattributes text eol=lf
+/.gitignore    text eol=lf
+/.editorconfig text eol=lf
+/LICENSE       text eol=lf
+
+# C# sources and project/build files: CRLF working tree (see .editorconfig).
+*.cs      text eol=crlf
+*.csx     text eol=crlf
+*.csproj  text eol=crlf
+*.props   text eol=crlf
+*.targets text eol=crlf
+*.slnx    text eol=crlf
+*.ps1     text eol=crlf
+*.psm1    text eol=crlf
+*.cmd     text eol=crlf
+*.bat     text eol=crlf
+
+# Data and documentation: LF working tree.
+*.json    text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.md      text eol=lf
+
+# First-party generated code is committed deliberately for review. Mark it as
+# generated so review UIs collapse it by default, but keep it diffable
+# (intentionally not `-diff`).
+src/**/Generated/** linguist-generated=true
+
+# Binary assets must never be line-ending converted.
+*.png  binary
+*.ico  binary
+*.snk  binary

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
@@ -12,7 +12,7 @@ public sealed class SessionOptions
     public IReadOnlyList<string> AdditionalDirectories { get; init; } = [];
 
     /// <summary>MCP servers configured for this session.</summary>
-    public IReadOnlyList<McpServerOptions> McpServers { get; init; } = [];
+    public IReadOnlyList<McpServer> McpServers { get; init; } = [];
 
     /// <summary>ACP _meta attached to session/new, session/load, or session/resume.</summary>
     public IReadOnlyDictionary<string, JsonElement>? Metadata { get; init; }
