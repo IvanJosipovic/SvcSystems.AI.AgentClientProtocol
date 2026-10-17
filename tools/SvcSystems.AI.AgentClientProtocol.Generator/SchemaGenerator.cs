@@ -170,7 +170,9 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         ImmutableArray<GeneratorOptionsInput> options,
         ImmutableArray<ProtocolMetadataInput> metadata)
     {
-        foreach (var schema in schemas.Where(schema => !IsRegistryAgentSchema(schema, schemas)))
+        // Sort by path so the emission/hint order does not depend on the AdditionalFiles enumeration order.
+        foreach (var schema in schemas.Where(schema => !IsRegistryAgentSchema(schema, schemas))
+                     .OrderBy(schema => schema.Path, StringComparer.OrdinalIgnoreCase))
         {
             var matches = options.Where(option => string.Equals(option.PairKey, schema.PairKey, StringComparison.OrdinalIgnoreCase)).ToArray();
             if (matches.Length > 1)
@@ -305,7 +307,9 @@ public sealed class SchemaGenerator : IIncrementalGenerator
         var agentRoot = JsonNode.Parse(agentSchema.Text)?.AsObject()
             ?? throw new InvalidOperationException($"Agent schema '{agentSchema.Path}' must have an object root.");
 
-        agentRoot = JsonNode.Parse(agentRoot.ToJsonString().Replace("#/definitions/", "#/$defs/"))!.AsObject();
+        // The agent schema is draft-07 and points at "#/definitions/...", but the merged document
+        // uses "$defs". Rewrite the references in the JSON tree instead of re-serializing the text.
+        RewriteDefinitionsRefs(agentRoot);
         var defs = agentRoot["definitions"]?.DeepClone() as JsonObject ?? new JsonObject();
 
         var agentDefinition = (JsonObject)agentRoot.DeepClone();
@@ -332,6 +336,29 @@ public sealed class SchemaGenerator : IIncrementalGenerator
             ["$defs"] = defs
         };
         return mergedSchema.ToJsonString();
+    }
+
+    /// <summary>Rewrites draft-07 <c>#/definitions/...</c> references to <c>#/$defs/...</c> in place.</summary>
+    private static void RewriteDefinitionsRefs(JsonNode? node)
+    {
+        const string prefix = "#/definitions/";
+
+        switch (node)
+        {
+            case JsonObject obj:
+                if (obj["$ref"] is JsonValue referenceValue &&
+                    referenceValue.TryGetValue<string>(out var reference) &&
+                    reference.StartsWith(prefix, StringComparison.Ordinal))
+                {
+                    obj["$ref"] = "#/$defs/" + reference.Substring(prefix.Length);
+                }
+                // Materialize the properties so assigning above cannot invalidate the enumeration.
+                foreach (var property in obj.ToArray()) RewriteDefinitionsRefs(property.Value);
+                break;
+            case JsonArray array:
+                foreach (var item in array.ToArray()) RewriteDefinitionsRefs(item);
+                break;
+        }
     }
 
     private static bool IsSchemaPath(string path) =>

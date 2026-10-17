@@ -27,19 +27,19 @@ internal static class ModelRenderer
             var modelNamespace = GetModelNamespace(type, options);
             sources.Add(new GeneratedSource(
                 type.Name + ".g.cs",
-                AddNamespaceUsings(RenderType(type, modelNamespace), modelNamespaces, modelNamespace)));
+                RenderType(type, modelNamespace, modelNamespaces)));
             if (type is UnionModel union && union.HasGeneratedClassifier)
             {
                 sources.Add(new GeneratedSource(
                     type.Name + ".JsonTypeClassifier.g.cs",
-                    AddNamespaceUsings(RenderUnionClassifier(union, modelNamespace), modelNamespaces, modelNamespace)));
+                    RenderUnionClassifier(union, modelNamespace, modelNamespaces)));
             }
         }
         if (options.GenerateJsonContext)
         {
             sources.Add(new GeneratedSource(options.JsonContextName + ".g.cs", RenderJsonContext(model, options, options.SerializationNamespace, options.JsonContextName)));
         }
-        return EnsureNamespaceSpacing(sources);
+        return sources;
     }
 
     public static IReadOnlyList<GeneratedSource> RenderInfrastructure(
@@ -61,13 +61,9 @@ internal static class ModelRenderer
             sources.Add(new GeneratedSource("Protocol.Methods.g.cs", RenderMethods(methods, options.ModelNamespace)));
         }
         if (model.Types.OfType<EnumModel>().Any(type => type.Name.EndsWith("Discriminator", StringComparison.Ordinal)))
-            sources.Add(new GeneratedSource("Protocol.Discriminators.g.cs", AddNamespaceUsings(RenderDiscriminators(model, options.ModelNamespace), modelNamespaces, options.ModelNamespace)));
-        return EnsureNamespaceSpacing(sources);
+            sources.Add(new GeneratedSource("Protocol.Discriminators.g.cs", RenderDiscriminators(model, options.ModelNamespace, modelNamespaces)));
+        return sources;
     }
-
-    private static IReadOnlyList<GeneratedSource> EnsureNamespaceSpacing(IEnumerable<GeneratedSource> sources) =>
-        sources.Select(source => new GeneratedSource(source.HintName, EnsureBlankLineAfterNamespace(source.Text)))
-            .ToArray();
 
     private static string RenderJsonContext(SchemaModel model, SchemaGeneratorOptions options, string serializationNamespace, string jsonContextName)
     {
@@ -104,24 +100,28 @@ internal static class ModelRenderer
         return code.ToString();
     }
 
-    private static string AddNamespaceUsings(string source, IReadOnlyList<string> namespaces, string currentNamespace)
+    /// <summary>
+    /// Emits the file-level usings that import the sibling model namespaces into a file-scoped
+    /// namespace declaration. These usings are required in the generated sources: the model types are
+    /// referenced unqualified across namespaces, and every generated file imports the sibling
+    /// namespaces as well as the compilation-wide <c>global using</c> aliases emitted by
+    /// <see cref="RenderGlobalUsings"/>. Emitting them here (rather than post-processing rendered
+    /// text) keeps the import list part of the file's own structure.
+    /// </summary>
+    private static void AppendNamespaceUsings(StringBuilder code, IReadOnlyList<string> namespaces, string currentNamespace)
     {
-        var usings = namespaces.Where(modelNamespace => modelNamespace != currentNamespace)
-            .Select(modelNamespace => "using global::" + modelNamespace + ";\n")
-            .ToArray();
-        if (usings.Length == 0) return source;
-
-        const string nullableDirective = "#nullable enable\n";
-        var insertionPoint = source.IndexOf(nullableDirective, StringComparison.Ordinal);
-        return insertionPoint < 0
-            ? source
-            : source.Insert(insertionPoint + nullableDirective.Length, string.Concat(usings));
+        foreach (var modelNamespace in namespaces)
+        {
+            if (modelNamespace == currentNamespace) continue;
+            code.Append("using global::").Append(modelNamespace).Append(';').Append('\n');
+        }
     }
 
-    private static string RenderDiscriminators(SchemaModel model, string modelNamespace)
+    private static string RenderDiscriminators(SchemaModel model, string modelNamespace, IReadOnlyList<string> namespaces)
     {
-        var code = new StringBuilder(GeneratedHeaderText())
-            .Append("namespace ").Append(modelNamespace).AppendLine(";")
+        var code = new StringBuilder(GeneratedHeaderText());
+        AppendNamespaceUsings(code, namespaces, modelNamespace);
+        code.Append("namespace ").Append(modelNamespace).AppendLine(";")
             .AppendLine()
             .AppendLine("internal static class Discriminators")
             .AppendLine("{");
@@ -160,9 +160,9 @@ internal static class ModelRenderer
         return code.ToString();
     }
 
-    private static string RenderType(TypeModel type, string modelNamespace)
+    private static string RenderType(TypeModel type, string modelNamespace, IReadOnlyList<string> namespaces)
     {
-        if (type is UnionModel union) return RenderUnion(union, modelNamespace);
+        if (type is UnionModel union) return RenderUnion(union, modelNamespace, namespaces);
 
         var member = type switch
         {
@@ -171,36 +171,29 @@ internal static class ModelRenderer
             _ => throw new InvalidOperationException("Unknown protocol model: " + type.GetType().Name)
         };
 
-        var unit = SyntaxFactory.CompilationUnit()
+        var unit = SyntaxFactory.CompilationUnit();
+        foreach (var namespaceName in namespaces)
+        {
+            if (namespaceName == modelNamespace) continue;
+            unit = unit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("global::" + namespaceName)));
+        }
+        unit = unit
             .AddUsings(
                 SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Collections.Generic")),
                 SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Text.Json")),
                 SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System.Text.Json.Serialization")))
             .AddMembers(SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.ParseName(modelNamespace)).AddMembers(member));
-        return GeneratedHeaderText() + unit.NormalizeWhitespace(eol: "\n").ToFullString();
-    }
 
-    private static string EnsureBlankLineAfterNamespace(string source)
-    {
-        var namespaceStart = source.IndexOf("\nnamespace ", StringComparison.Ordinal);
-        if (namespaceStart < 0) return source;
-
-        var declarationEnd = source.IndexOf(';', namespaceStart);
-        if (declarationEnd < 0) return source;
-
-        var lineEnd = declarationEnd + 1;
-        if (source.AsSpan(lineEnd).StartsWith("\r\n\r\n".AsSpan(), StringComparison.Ordinal) ||
-            source.AsSpan(lineEnd).StartsWith("\n\n".AsSpan(), StringComparison.Ordinal))
-        {
-            return source;
-        }
-
-        if (source.AsSpan(lineEnd).StartsWith("\r\n".AsSpan(), StringComparison.Ordinal))
-            return source.Insert(lineEnd + 2, "\r\n");
-        if (source.AsSpan(lineEnd).StartsWith("\n".AsSpan(), StringComparison.Ordinal))
-            return source.Insert(lineEnd + 1, "\n");
-
-        return source;
+        var normalized = unit.NormalizeWhitespace(eol: "\n");
+        // NormalizeWhitespace collapses the blank line that conventionally follows a file-scoped
+        // namespace declaration, so restore it as explicit trivia on the namespace semicolon.
+        var namespaceDeclaration = normalized.Members.OfType<FileScopedNamespaceDeclarationSyntax>().Single();
+        var semicolon = namespaceDeclaration.SemicolonToken;
+        normalized = (CompilationUnitSyntax)normalized.ReplaceNode(
+            (SyntaxNode)namespaceDeclaration,
+            namespaceDeclaration.WithSemicolonToken(
+                semicolon.WithTrailingTrivia(semicolon.TrailingTrivia.Add(SyntaxFactory.EndOfLine("\n")))));
+        return GeneratedHeaderText() + normalized.ToFullString();
     }
 
     private static MemberDeclarationSyntax RenderClass(ClassModel model)
@@ -299,9 +292,10 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
-    private static string RenderUnion(UnionModel model, string modelNamespace)
+    private static string RenderUnion(UnionModel model, string modelNamespace, IReadOnlyList<string> namespaces)
     {
         var code = new StringBuilder(GeneratedHeaderText());
+        AppendNamespaceUsings(code, namespaces, modelNamespace);
         if (model.Cases.Contains("JsonElement", StringComparer.Ordinal))
             code.AppendLine("using System.Text.Json;");
         code.AppendLine("using System.Text.Json.Serialization;")
@@ -317,10 +311,10 @@ internal static class ModelRenderer
         return code.ToString();
     }
 
-    private static string RenderUnionClassifier(UnionModel model, string modelNamespace)
+    private static string RenderUnionClassifier(UnionModel model, string modelNamespace, IReadOnlyList<string> namespaces)
     {
         if (model.Cases.All(item => item.StartsWith("List<", StringComparison.Ordinal)))
-            return RenderArrayUnionClassifier(model, modelNamespace);
+            return RenderArrayUnionClassifier(model, modelNamespace, namespaces);
 
         var discriminatorProperty = model.CaseModels
             .SelectMany(item => item.ConstProperties.Keys)
@@ -350,8 +344,9 @@ internal static class ModelRenderer
                 item.RequiredProperties.Contains(discriminatorProperty.Property, StringComparer.Ordinal)));
         var needsStructuralFallback = !model.AllowUnknownDiscriminator && !discriminatorIsComplete;
 
-        var code = new StringBuilder(GeneratedHeaderText())
-            .AppendLine("using System.Text.Json;")
+        var code = new StringBuilder(GeneratedHeaderText());
+        AppendNamespaceUsings(code, namespaces, modelNamespace);
+        code.AppendLine("using System.Text.Json;")
             .AppendLine("using System.Text.Json.Serialization;")
             .AppendLine()
             .Append("namespace ").Append(modelNamespace).AppendLine(";")
@@ -475,10 +470,11 @@ internal static class ModelRenderer
         return code.ToString();
     }
 
-    private static string RenderArrayUnionClassifier(UnionModel model, string modelNamespace)
+    private static string RenderArrayUnionClassifier(UnionModel model, string modelNamespace, IReadOnlyList<string> namespaces)
     {
-        var code = new StringBuilder(GeneratedHeaderText())
-            .AppendLine("using System.Text.Json;")
+        var code = new StringBuilder(GeneratedHeaderText());
+        AppendNamespaceUsings(code, namespaces, modelNamespace);
+        code.AppendLine("using System.Text.Json;")
             .AppendLine("using System.Text.Json.Serialization;")
             .AppendLine()
             .Append("namespace ").Append(modelNamespace).AppendLine(";")
