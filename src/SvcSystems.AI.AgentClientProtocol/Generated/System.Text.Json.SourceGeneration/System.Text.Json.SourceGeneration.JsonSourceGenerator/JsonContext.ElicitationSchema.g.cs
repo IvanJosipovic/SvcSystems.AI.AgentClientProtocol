@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema>? _ElicitationSchema;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema>? _ElicitationSchema;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema> ElicitationSchema
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema> ElicitationSchema
         #nullable enable annotations
         {
-            get => _ElicitationSchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema));
+            get => _ElicitationSchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema> Create_ElicitationSchema(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema> Create_ElicitationSchema(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema>
                 {
-                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema(),
+                    ObjectCreator = () => new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema(),
                     ObjectWithParameterizedConstructorCreator = null,
                     PropertyMetadataInitializer = _ => ElicitationSchemaPropInit(options),
                     ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj).Type,
-                Setter = static (obj, value) => __set_ElicitationSchema_Type((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj).Type,
+                Setter = static (obj, value) => __set_ElicitationSchema_Type((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Type",
                 JsonPropertyName = "type",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetProperty("Type", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetProperty("Type", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -75,57 +75,57 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj).Title,
-                Setter = static (obj, value) => __set_ElicitationSchema_Title((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj).Title,
+                Setter = static (obj, value) => __set_ElicitationSchema_Title((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Title",
                 JsonPropertyName = "title",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetProperty("Title", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
 
-            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>>
+            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj).Properties,
-                Setter = static (obj, value) => __set_ElicitationSchema_Properties((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj).Properties,
+                Setter = static (obj, value) => __set_ElicitationSchema_Properties((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Properties",
                 JsonPropertyName = "properties",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetProperty("Properties", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetProperty("Properties", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>>(options, info2);
+            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>>(options, info2);
 
             var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<string>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj).Required,
-                Setter = static (obj, value) => __set_ElicitationSchema_Required((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj).Required,
+                Setter = static (obj, value) => __set_ElicitationSchema_Required((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Required",
                 JsonPropertyName = "required",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetProperty("Required", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetProperty("Required", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<string>>(options, info3);
@@ -135,17 +135,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj).Description,
-                Setter = static (obj, value) => __set_ElicitationSchema_Description((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj).Description,
+                Setter = static (obj, value) => __set_ElicitationSchema_Description((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Description",
                 JsonPropertyName = "description",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetProperty("Description", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetProperty("Description", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info4);
@@ -155,17 +155,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj).Meta,
-                Setter = static (obj, value) => __set_ElicitationSchema_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj).Meta,
+                Setter = static (obj, value) => __set_ElicitationSchema_Meta((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info5);
@@ -175,17 +175,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ElicitationSchema_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ElicitationSchema_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[6] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info6);
@@ -194,18 +194,18 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         }
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Type")]
-        private static extern void __set_ElicitationSchema_Type(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema obj, string value);
+        private static extern void __set_ElicitationSchema_Type(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Title")]
-        private static extern void __set_ElicitationSchema_Title(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema obj, string value);
+        private static extern void __set_ElicitationSchema_Title(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Properties")]
-        private static extern void __set_ElicitationSchema_Properties(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema obj, global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema> value);
+        private static extern void __set_ElicitationSchema_Properties(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema obj, global::System.Collections.Generic.Dictionary<string, global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Required")]
-        private static extern void __set_ElicitationSchema_Required(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema obj, global::System.Collections.Generic.List<string> value);
+        private static extern void __set_ElicitationSchema_Required(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema obj, global::System.Collections.Generic.List<string> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Description")]
-        private static extern void __set_ElicitationSchema_Description(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema obj, string value);
+        private static extern void __set_ElicitationSchema_Description(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ElicitationSchema_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ElicitationSchema_Meta(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ElicitationSchema_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationSchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ElicitationSchema_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationSchema obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

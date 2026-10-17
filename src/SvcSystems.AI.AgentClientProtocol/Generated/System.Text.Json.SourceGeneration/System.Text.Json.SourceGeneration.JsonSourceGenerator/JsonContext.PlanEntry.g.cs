@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>? _PlanEntry;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry>? _PlanEntry;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry> PlanEntry
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry> PlanEntry
         #nullable enable annotations
         {
-            get => _PlanEntry ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry));
+            get => _PlanEntry ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry> Create_PlanEntry(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry> Create_PlanEntry(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry(){ Content = (string)args[0], Priority = (string)args[1], Status = (string)args[2] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry(){ Content = (string)args[0], Priority = (string)args[1], Status = (string)args[2] },
                     PropertyMetadataInitializer = _ => PlanEntryPropInit(options),
                     ConstructorParameterMetadataInitializer = PlanEntryCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj).Content,
-                Setter = static (obj, value) => __set_PlanEntry_Content((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj).Content,
+                Setter = static (obj, value) => __set_PlanEntry_Content((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Content",
                 JsonPropertyName = "content",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry).GetProperty("Content", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry).GetProperty("Content", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj).Priority,
-                Setter = static (obj, value) => __set_PlanEntry_Priority((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj).Priority,
+                Setter = static (obj, value) => __set_PlanEntry_Priority((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Priority",
                 JsonPropertyName = "priority",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry).GetProperty("Priority", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry).GetProperty("Priority", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -101,17 +101,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj).Status,
-                Setter = static (obj, value) => __set_PlanEntry_Status((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj).Status,
+                Setter = static (obj, value) => __set_PlanEntry_Status((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Status",
                 JsonPropertyName = "status",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry).GetProperty("Status", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry).GetProperty("Status", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info2);
@@ -124,17 +124,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj).Meta,
-                Setter = static (obj, value) => __set_PlanEntry_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj).Meta,
+                Setter = static (obj, value) => __set_PlanEntry_Meta((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
@@ -144,17 +144,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj).ExtensionData,
-                Setter = static (obj, value) => __set_PlanEntry_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj).ExtensionData,
+                Setter = static (obj, value) => __set_PlanEntry_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -193,14 +193,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Content")]
-        private static extern void __set_PlanEntry_Content(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry obj, string value);
+        private static extern void __set_PlanEntry_Content(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Priority")]
-        private static extern void __set_PlanEntry_Priority(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry obj, string value);
+        private static extern void __set_PlanEntry_Priority(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Status")]
-        private static extern void __set_PlanEntry_Status(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry obj, string value);
+        private static extern void __set_PlanEntry_Status(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_PlanEntry_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_PlanEntry_Meta(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_PlanEntry_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.PlanEntry obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_PlanEntry_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Models.PlanEntry obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

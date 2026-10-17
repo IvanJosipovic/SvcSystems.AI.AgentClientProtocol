@@ -10,45 +10,45 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource>? _EmbeddedResourceResource;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource>? _EmbeddedResourceResource;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource> EmbeddedResourceResource
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource> EmbeddedResourceResource
         #nullable enable annotations
         {
-            get => _EmbeddedResourceResource ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource));
+            get => _EmbeddedResourceResource ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource> Create_EmbeddedResourceResource(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource> Create_EmbeddedResourceResource(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource> jsonTypeInfo))
             {
-                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.TextResourceContents)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.TextResourceContents)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.TextResourceContents caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.TextResourceContents caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource(caseValue1),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
-                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource value) =>
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource value) =>
                     {
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.TextResourceContents caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.TextResourceContents), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.TextResourceContents caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.TextResourceContents), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents), (object?)caseValue1),
                         };
                     },
                     TypeClassifier = null,
-                    TypeClassifierFactory = new global::System.Text.Json.Serialization.JsonUnionTypeStructuralClassifier(),
+                    TypeClassifierFactory = new global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResourceJsonTypeClassifier(),
                 };
 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource>(options, unionInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

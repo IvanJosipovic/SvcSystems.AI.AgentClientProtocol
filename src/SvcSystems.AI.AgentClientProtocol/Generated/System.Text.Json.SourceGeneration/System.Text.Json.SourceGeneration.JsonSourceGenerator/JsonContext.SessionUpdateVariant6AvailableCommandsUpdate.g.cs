@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate>? _SessionUpdateVariant6AvailableCommandsUpdate;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate>? _SessionUpdateVariant6AvailableCommandsUpdate;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate> SessionUpdateVariant6AvailableCommandsUpdate
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate> SessionUpdateVariant6AvailableCommandsUpdate
         #nullable enable annotations
         {
-            get => _SessionUpdateVariant6AvailableCommandsUpdate ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate));
+            get => _SessionUpdateVariant6AvailableCommandsUpdate ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate> Create_SessionUpdateVariant6AvailableCommandsUpdate(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate> Create_SessionUpdateVariant6AvailableCommandsUpdate(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate(){ AvailableCommands = (global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AvailableCommand>)args[0] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate(){ AvailableCommands = (global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.AvailableCommand>)args[0] },
                     PropertyMetadataInitializer = _ => SessionUpdateVariant6AvailableCommandsUpdatePropInit(options),
                     ConstructorParameterMetadataInitializer = SessionUpdateVariant6AvailableCommandsUpdateCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -48,70 +48,91 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 
         private static global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[] SessionUpdateVariant6AvailableCommandsUpdatePropInit(global::System.Text.Json.JsonSerializerOptions options)
         {
-            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[3];
+            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[4];
 
-            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AvailableCommand>>
+            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<string>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate)obj).AvailableCommands,
-                Setter = static (obj, value) => __set_SessionUpdateVariant6AvailableCommandsUpdate_AvailableCommands((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)obj).SessionUpdate,
+                Setter = null,
+                IgnoreCondition = null,
+                HasJsonInclude = false,
+                IsExtensionData = false,
+                NumberHandling = null,
+                PropertyName = "SessionUpdate",
+                JsonPropertyName = "sessionUpdate",
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate).GetProperty("SessionUpdate", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+            };
+            
+            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
+            properties[0].IsGetNullable = false;
+
+            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.AvailableCommand>>
+            {
+                IsProperty = true,
+                IsPublic = true,
+                IsVirtual = false,
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate),
+                Converter = null,
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)obj).AvailableCommands,
+                Setter = static (obj, value) => __set_SessionUpdateVariant6AvailableCommandsUpdate_AvailableCommands((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "AvailableCommands",
                 JsonPropertyName = "availableCommands",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate).GetProperty("AvailableCommands", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AvailableCommand>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate).GetProperty("AvailableCommands", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.AvailableCommand>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AvailableCommand>>(options, info0);
-            properties[0].IsRequired = true;
-            properties[0].IsGetNullable = false;
-            properties[0].IsSetNullable = false;
-
-            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
-            {
-                IsProperty = true,
-                IsPublic = true,
-                IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate),
-                Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate)obj).Meta,
-                Setter = static (obj, value) => __set_SessionUpdateVariant6AvailableCommandsUpdate_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate)obj, value!),
-                IgnoreCondition = null,
-                HasJsonInclude = false,
-                IsExtensionData = false,
-                NumberHandling = null,
-                PropertyName = "Meta",
-                JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
-            };
-            
-            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info1);
+            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.AvailableCommand>>(options, info1);
+            properties[1].IsRequired = true;
+            properties[1].IsGetNullable = false;
+            properties[1].IsSetNullable = false;
 
             var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate)obj).ExtensionData,
-                Setter = static (obj, value) => __set_SessionUpdateVariant6AvailableCommandsUpdate_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)obj).Meta,
+                Setter = static (obj, value) => __set_SessionUpdateVariant6AvailableCommandsUpdate_Meta((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)obj, value!),
+                IgnoreCondition = null,
+                HasJsonInclude = false,
+                IsExtensionData = false,
+                NumberHandling = null,
+                PropertyName = "Meta",
+                JsonPropertyName = "_meta",
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+            };
+            
+            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info2);
+
+            var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
+            {
+                IsProperty = true,
+                IsPublic = true,
+                IsVirtual = false,
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate),
+                Converter = null,
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)obj).ExtensionData,
+                Setter = static (obj, value) => __set_SessionUpdateVariant6AvailableCommandsUpdate_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info2);
+            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
 
             return properties;
         }
@@ -121,7 +142,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             new()
             {
                 Name = "AvailableCommands",
-                ParameterType = typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AvailableCommand>),
+                ParameterType = typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.AvailableCommand>),
                 Position = 0,
                 IsNullable = false,
                 IsMemberInitializer = true,
@@ -129,10 +150,10 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_AvailableCommands")]
-        private static extern void __set_SessionUpdateVariant6AvailableCommandsUpdate_AvailableCommands(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.AvailableCommand> value);
+        private static extern void __set_SessionUpdateVariant6AvailableCommandsUpdate_AvailableCommands(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.AvailableCommand> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_SessionUpdateVariant6AvailableCommandsUpdate_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_SessionUpdateVariant6AvailableCommandsUpdate_Meta(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_SessionUpdateVariant6AvailableCommandsUpdate_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_SessionUpdateVariant6AvailableCommandsUpdate_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

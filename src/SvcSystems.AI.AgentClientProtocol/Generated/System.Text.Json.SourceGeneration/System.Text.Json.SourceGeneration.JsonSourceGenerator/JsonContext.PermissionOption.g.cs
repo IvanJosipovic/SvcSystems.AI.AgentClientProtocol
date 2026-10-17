@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption>? _PermissionOption;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption>? _PermissionOption;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption> PermissionOption
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption> PermissionOption
         #nullable enable annotations
         {
-            get => _PermissionOption ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption));
+            get => _PermissionOption ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption> Create_PermissionOption(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption> Create_PermissionOption(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption(){ OptionId = (string)args[0], Name = (string)args[1], Kind = (string)args[2] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption(){ OptionId = (string)args[0], Name = (string)args[1], Kind = (string)args[2] },
                     PropertyMetadataInitializer = _ => PermissionOptionPropInit(options),
                     ConstructorParameterMetadataInitializer = PermissionOptionCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj).OptionId,
-                Setter = static (obj, value) => __set_PermissionOption_OptionId((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj).OptionId,
+                Setter = static (obj, value) => __set_PermissionOption_OptionId((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "OptionId",
                 JsonPropertyName = "optionId",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption).GetProperty("OptionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption).GetProperty("OptionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj).Name,
-                Setter = static (obj, value) => __set_PermissionOption_Name((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj).Name,
+                Setter = static (obj, value) => __set_PermissionOption_Name((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Name",
                 JsonPropertyName = "name",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption).GetProperty("Name", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption).GetProperty("Name", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -101,17 +101,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj).Kind,
-                Setter = static (obj, value) => __set_PermissionOption_Kind((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj).Kind,
+                Setter = static (obj, value) => __set_PermissionOption_Kind((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Kind",
                 JsonPropertyName = "kind",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption).GetProperty("Kind", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption).GetProperty("Kind", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info2);
@@ -124,17 +124,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj).Meta,
-                Setter = static (obj, value) => __set_PermissionOption_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj).Meta,
+                Setter = static (obj, value) => __set_PermissionOption_Meta((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
@@ -144,17 +144,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj).ExtensionData,
-                Setter = static (obj, value) => __set_PermissionOption_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj).ExtensionData,
+                Setter = static (obj, value) => __set_PermissionOption_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -193,14 +193,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_OptionId")]
-        private static extern void __set_PermissionOption_OptionId(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption obj, string value);
+        private static extern void __set_PermissionOption_OptionId(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Name")]
-        private static extern void __set_PermissionOption_Name(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption obj, string value);
+        private static extern void __set_PermissionOption_Name(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Kind")]
-        private static extern void __set_PermissionOption_Kind(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption obj, string value);
+        private static extern void __set_PermissionOption_Kind(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_PermissionOption_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_PermissionOption_Meta(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_PermissionOption_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.PermissionOption obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_PermissionOption_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Models.PermissionOption obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

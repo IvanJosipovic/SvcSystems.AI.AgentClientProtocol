@@ -1,4 +1,4 @@
-﻿# SvcSystems.AI.AgentClientProtocol
+# SvcSystems.AI.AgentClientProtocol
 
 [![NuGet](https://img.shields.io/nuget/v/SvcSystems.AI.AgentClientProtocol)](https://www.nuget.org/packages/SvcSystems.AI.AgentClientProtocol)
 
@@ -9,7 +9,10 @@ Targets `net11.0`. The library is trim-analyzed and NativeAOT compatible. Reflec
 ## Quick start
 
 ```csharp
-await using var client = await Client.StartAsync(
+using SvcSystems.AI.AgentClientProtocol;
+using AcpClient = SvcSystems.AI.AgentClientProtocol.Client.Client;
+
+await using var client = await AcpClient.StartAsync(
     new ProcessOptions
     {
         FileName = "opencode",
@@ -52,6 +55,8 @@ var clientOptions = new ClientOptions
 
 The client advertises only the capabilities supported by these configured handlers. `Session` exposes prompt streaming, cancellation, mode changes, and session configuration. `IClient` exposes create/load/list/resume/delete/close, authentication, and logout operations, with optional operations gated by the agent's negotiated capabilities.
 
+ACP model types are generated from the checked-in schema and exposed directly: `Client.Agent` is an `InitializeResponse`, and MCP servers, prompt content, session updates, and config options use their generated wire models. Prompt streams yield `SessionUpdateEvent` values containing the generated `SessionUpdate` union and `Completed` values containing the generated `PromptResponse`; unknown update, content, and config-option variants remain available as `JsonElement`.
+
 ## Adapter extensions and metadata
 
 Use the generic extension APIs for adapter-specific methods. They preserve trim safety; capability
@@ -89,6 +94,19 @@ parameters. Incoming raw payloads retain metadata and unknown fields.
 The incremental Roslyn generator builds typed wire models and trim-safe JSON writers from the
 checked-in ACP v1 schema. Open payloads such as `_meta` remain `JsonElement`-based; the library
 does not use reflection-based `JsonSerializer` overloads.
+
+## ACP Registry
+
+`RegistryClient` fetches the registry index using a caller-managed `HttpClient`; pass an
+alternate absolute URI to read from a mirror or test server. The registry wire models and JSON
+metadata are generated from `schema/registry/v1`.
+
+```csharp
+using SvcSystems.AI.AgentClientProtocol.Registry;
+
+var registry = new RegistryClient(httpClient);
+var index = await registry.GetIndexAsync(cancellationToken);
+```
 
 ## Trimming and NativeAOT
 

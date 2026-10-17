@@ -10,53 +10,53 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>? _ElicitationPropertySchema;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>? _ElicitationPropertySchema;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema> ElicitationPropertySchema
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema> ElicitationPropertySchema
         #nullable enable annotations
         {
-            get => _ElicitationPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema));
+            get => _ElicitationPropertySchema ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema> Create_ElicitationPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema> Create_ElicitationPropertySchema(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema> jsonTypeInfo))
             {
-                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.StringPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.IntegerPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BooleanPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchemaCase5)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.StringPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.NumberPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.IntegerPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BooleanPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectPropertySchema)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchemaCase5)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.StringPropertySchema caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema(caseValue1),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.IntegerPropertySchema caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema(caseValue2),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.BooleanPropertySchema caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema(caseValue3),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema caseValue4 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema(caseValue4),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchemaCase5 caseValue5 => new global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema(caseValue5),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.StringPropertySchema caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.NumberPropertySchema caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.IntegerPropertySchema caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema(caseValue2),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.BooleanPropertySchema caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema(caseValue3),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectPropertySchema caseValue4 => new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema(caseValue4),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchemaCase5 caseValue5 => new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema(caseValue5),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
-                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema value) =>
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema value) =>
                     {
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.StringPropertySchema caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.StringPropertySchema), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.NumberPropertySchema), (object?)caseValue1),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.IntegerPropertySchema caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.IntegerPropertySchema), (object?)caseValue2),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.BooleanPropertySchema caseValue3 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BooleanPropertySchema), (object?)caseValue3),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema caseValue4 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectPropertySchema), (object?)caseValue4),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchemaCase5 caseValue5 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchemaCase5), (object?)caseValue5),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.StringPropertySchema caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.StringPropertySchema), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.NumberPropertySchema caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.NumberPropertySchema), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.IntegerPropertySchema caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.IntegerPropertySchema), (object?)caseValue2),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.BooleanPropertySchema caseValue3 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BooleanPropertySchema), (object?)caseValue3),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectPropertySchema caseValue4 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectPropertySchema), (object?)caseValue4),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchemaCase5 caseValue5 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchemaCase5), (object?)caseValue5),
                         };
                     },
                     TypeClassifier = null,
-                    TypeClassifierFactory = new global::System.Text.Json.Serialization.JsonUnionTypeStructuralClassifier(),
+                    TypeClassifierFactory = new global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchemaJsonTypeClassifier(),
                 };
 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ElicitationPropertySchema>(options, unionInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ElicitationPropertySchema>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

@@ -10,57 +10,52 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>? _SessionConfigOption;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption>? _SessionConfigOption;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption> SessionConfigOption
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption> SessionConfigOption
         #nullable enable annotations
         {
-            get => _SessionConfigOption ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption));
+            get => _SessionConfigOption ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption> Create_SessionConfigOption(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption> Create_SessionConfigOption(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption>
                 {
-                    ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = null,
-                    PropertyMetadataInitializer = _ => SessionConfigOptionPropInit(options),
-                    ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = null,
-                    SerializeHandler = null,
-                    PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions
-                {
-                    IgnoreUnrecognizedTypeDiscriminators = false,
-                    TypeDiscriminatorPropertyName = "type",
-                    UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
-                    DerivedTypes =
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
+                    UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOptionVariant0Select), "select"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOptionVariant1Boolean), "boolean"),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue1),
+                        global::System.Text.Json.JsonElement caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption(caseValue2),
+                        _ => throw new global::System.Text.Json.JsonException(),
                     },
-                },
-                    TypeClassifierFactory = null,
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption value) =>
+                    {
+                        return value switch
+                        {
+                            null => ((global::System.Type?)null, (object?)null),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant0Select), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionVariant1Boolean), (object?)caseValue1),
+                            global::System.Text.Json.JsonElement caseValue2 => (typeof(global::System.Text.Json.JsonElement), (object?)caseValue2),
+                        };
+                    },
+                    TypeClassifier = null,
+                    TypeClassifierFactory = new global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionJsonTypeClassifier(),
                 };
-                
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionConfigOption>(options, objectInfo);
+
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
             jsonTypeInfo.OriginatingResolver = this;
             return jsonTypeInfo;
-        }
-
-        private static global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[] SessionConfigOptionPropInit(global::System.Text.Json.JsonSerializerOptions options)
-        {
-            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[0];
-
-            return properties;
         }
     }
 }

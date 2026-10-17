@@ -10,69 +10,76 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate>? _SessionUpdate;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate>? _SessionUpdate;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate> SessionUpdate
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate> SessionUpdate
         #nullable enable annotations
         {
-            get => _SessionUpdate ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate));
+            get => _SessionUpdate ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate> Create_SessionUpdate(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate> Create_SessionUpdate(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate>
                 {
-                    ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = null,
-                    PropertyMetadataInitializer = _ => SessionUpdatePropInit(options),
-                    ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = null,
-                    SerializeHandler = null,
-                    PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions
-                {
-                    IgnoreUnrecognizedTypeDiscriminators = false,
-                    TypeDiscriminatorPropertyName = "sessionUpdate",
-                    UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
-                    DerivedTypes =
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant0UserMessageChunk)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant2AgentThoughtChunk)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant3ToolCall)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant4ToolCallUpdate)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant5Plan)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant7CurrentModeUpdate)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant8ConfigOptionUpdate)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant9SessionInfoUpdate)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant10UsageUpdate)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant11Notice)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant12CompactionUpdate)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant13CompactionSummaryChunk)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
+                    UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant0UserMessageChunk), "user_message_chunk"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk), "agent_message_chunk"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant2AgentThoughtChunk), "agent_thought_chunk"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant3ToolCall), "tool_call"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant4ToolCallUpdate), "tool_call_update"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant5Plan), "plan"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant6AvailableCommandsUpdate), "available_commands_update"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant7CurrentModeUpdate), "current_mode_update"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant8ConfigOptionUpdate), "config_option_update"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant9SessionInfoUpdate), "session_info_update"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant10UsageUpdate), "usage_update"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant11Notice), "notice"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant12CompactionUpdate), "compaction_update"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant13CompactionSummaryChunk), "compaction_summary_chunk"),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant0UserMessageChunk caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant2AgentThoughtChunk caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue2),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant3ToolCall caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue3),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant4ToolCallUpdate caseValue4 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue4),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant5Plan caseValue5 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue5),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate caseValue6 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue6),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant7CurrentModeUpdate caseValue7 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue7),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant8ConfigOptionUpdate caseValue8 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue8),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant9SessionInfoUpdate caseValue9 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue9),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant10UsageUpdate caseValue10 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue10),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant11Notice caseValue11 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue11),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant12CompactionUpdate caseValue12 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue12),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant13CompactionSummaryChunk caseValue13 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue13),
+                        global::System.Text.Json.JsonElement caseValue14 => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate(caseValue14),
+                        _ => throw new global::System.Text.Json.JsonException(),
                     },
-                },
-                    TypeClassifierFactory = null,
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate value) =>
+                    {
+                        return value switch
+                        {
+                            null => ((global::System.Type?)null, (object?)null),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant0UserMessageChunk caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant0UserMessageChunk), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant2AgentThoughtChunk caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant2AgentThoughtChunk), (object?)caseValue2),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant3ToolCall caseValue3 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant3ToolCall), (object?)caseValue3),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant4ToolCallUpdate caseValue4 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant4ToolCallUpdate), (object?)caseValue4),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant5Plan caseValue5 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant5Plan), (object?)caseValue5),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate caseValue6 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant6AvailableCommandsUpdate), (object?)caseValue6),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant7CurrentModeUpdate caseValue7 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant7CurrentModeUpdate), (object?)caseValue7),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant8ConfigOptionUpdate caseValue8 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant8ConfigOptionUpdate), (object?)caseValue8),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant9SessionInfoUpdate caseValue9 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant9SessionInfoUpdate), (object?)caseValue9),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant10UsageUpdate caseValue10 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant10UsageUpdate), (object?)caseValue10),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant11Notice caseValue11 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant11Notice), (object?)caseValue11),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant12CompactionUpdate caseValue12 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant12CompactionUpdate), (object?)caseValue12),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant13CompactionSummaryChunk caseValue13 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant13CompactionSummaryChunk), (object?)caseValue13),
+                            global::System.Text.Json.JsonElement caseValue14 => (typeof(global::System.Text.Json.JsonElement), (object?)caseValue14),
+                        };
+                    },
+                    TypeClassifier = null,
+                    TypeClassifierFactory = new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateJsonTypeClassifier(),
                 };
-                
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdate>(options, objectInfo);
+
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
             jsonTypeInfo.OriginatingResolver = this;
             return jsonTypeInfo;
-        }
-
-        private static global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[] SessionUpdatePropInit(global::System.Text.Json.JsonSerializerOptions options)
-        {
-            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[0];
-
-            return properties;
         }
     }
 }

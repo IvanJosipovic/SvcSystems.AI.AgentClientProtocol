@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest>? _ResumeSessionRequest;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest>? _ResumeSessionRequest;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest> ResumeSessionRequest
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest> ResumeSessionRequest
         #nullable enable annotations
         {
-            get => _ResumeSessionRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest));
+            get => _ResumeSessionRequest ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest> Create_ResumeSessionRequest(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest> Create_ResumeSessionRequest(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest(){ SessionId = (string)args[0], Cwd = (string)args[1] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest(){ SessionId = (string)args[0], Cwd = (string)args[1] },
                     PropertyMetadataInitializer = _ => ResumeSessionRequestPropInit(options),
                     ConstructorParameterMetadataInitializer = ResumeSessionRequestCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj).SessionId,
-                Setter = static (obj, value) => __set_ResumeSessionRequest_SessionId((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj).SessionId,
+                Setter = static (obj, value) => __set_ResumeSessionRequest_SessionId((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "SessionId",
                 JsonPropertyName = "sessionId",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest).GetProperty("SessionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest).GetProperty("SessionId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj).Cwd,
-                Setter = static (obj, value) => __set_ResumeSessionRequest_Cwd((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj).Cwd,
+                Setter = static (obj, value) => __set_ResumeSessionRequest_Cwd((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Cwd",
                 JsonPropertyName = "cwd",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest).GetProperty("Cwd", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest).GetProperty("Cwd", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -101,57 +101,57 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj).AdditionalDirectories,
-                Setter = static (obj, value) => __set_ResumeSessionRequest_AdditionalDirectories((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj).AdditionalDirectories,
+                Setter = static (obj, value) => __set_ResumeSessionRequest_AdditionalDirectories((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "AdditionalDirectories",
                 JsonPropertyName = "additionalDirectories",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest).GetProperty("AdditionalDirectories", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest).GetProperty("AdditionalDirectories", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<string>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<string>>(options, info2);
 
-            var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>>
+            var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.McpServer>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj).McpServers,
-                Setter = static (obj, value) => __set_ResumeSessionRequest_McpServers((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj).McpServers,
+                Setter = static (obj, value) => __set_ResumeSessionRequest_McpServers((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "McpServers",
                 JsonPropertyName = "mcpServers",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest).GetProperty("McpServers", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest).GetProperty("McpServers", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.McpServer>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer>>(options, info3);
+            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.McpServer>>(options, info3);
 
             var info4 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj).Meta,
-                Setter = static (obj, value) => __set_ResumeSessionRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj).Meta,
+                Setter = static (obj, value) => __set_ResumeSessionRequest_Meta((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -161,17 +161,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ResumeSessionRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ResumeSessionRequest_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[5] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info5);
@@ -201,16 +201,16 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_SessionId")]
-        private static extern void __set_ResumeSessionRequest_SessionId(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest obj, string value);
+        private static extern void __set_ResumeSessionRequest_SessionId(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Cwd")]
-        private static extern void __set_ResumeSessionRequest_Cwd(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest obj, string value);
+        private static extern void __set_ResumeSessionRequest_Cwd(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_AdditionalDirectories")]
-        private static extern void __set_ResumeSessionRequest_AdditionalDirectories(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest obj, global::System.Collections.Generic.List<string> value);
+        private static extern void __set_ResumeSessionRequest_AdditionalDirectories(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest obj, global::System.Collections.Generic.List<string> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_McpServers")]
-        private static extern void __set_ResumeSessionRequest_McpServers(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Generated.McpServer> value);
+        private static extern void __set_ResumeSessionRequest_McpServers(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest obj, global::System.Collections.Generic.List<global::SvcSystems.AI.AgentClientProtocol.Models.McpServer> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ResumeSessionRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ResumeSessionRequest_Meta(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ResumeSessionRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ResumeSessionRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ResumeSessionRequest_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Agent.Models.ResumeSessionRequest obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

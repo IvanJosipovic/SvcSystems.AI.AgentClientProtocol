@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../tools/SvcSystems.AI.AgentClientProtocol.Generator/schema-generator-options.schema.json",
+  "namespace": "SvcSystems.AI.AgentClientProtocol.Registry.Models",
+  "serializationNamespace": "SvcSystems.AI.AgentClientProtocol.Registry.Serialization",
+  "jsonContextName": "RegistryJsonContext",
+  "generateJsonContext": true
+}

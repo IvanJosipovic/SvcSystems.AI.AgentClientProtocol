@@ -10,58 +10,54 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>? _ToolCallContent;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent>? _ToolCallContent;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent> ToolCallContent
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent> ToolCallContent
         #nullable enable annotations
         {
-            get => _ToolCallContent ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent));
+            get => _ToolCallContent ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent> Create_ToolCallContent(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent> Create_ToolCallContent(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent>
                 {
-                    ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = null,
-                    PropertyMetadataInitializer = _ => ToolCallContentPropInit(options),
-                    ConstructorParameterMetadataInitializer = null,
-                    ConstructorAttributeProviderFactory = null,
-                    SerializeHandler = null,
-                    PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions
-                {
-                    IgnoreUnrecognizedTypeDiscriminators = false,
-                    TypeDiscriminatorPropertyName = "type",
-                    UnknownDerivedTypeHandling = global::System.Text.Json.Serialization.JsonUnknownDerivedTypeHandling.FailSerialization,
-                    DerivedTypes =
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::System.Text.Json.JsonElement)) { IsNullable = false } },
+                    UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant0Content), "content"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant1Diff), "diff"),
-                        new global::System.Text.Json.Serialization.Metadata.JsonDerivedType(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContentVariant2Terminal), "terminal"),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue2),
+                        global::System.Text.Json.JsonElement caseValue3 => new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent(caseValue3),
+                        _ => throw new global::System.Text.Json.JsonException(),
                     },
-                },
-                    TypeClassifierFactory = null,
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent value) =>
+                    {
+                        return value switch
+                        {
+                            null => ((global::System.Type?)null, (object?)null),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant0Content), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant1Diff), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentVariant2Terminal), (object?)caseValue2),
+                            global::System.Text.Json.JsonElement caseValue3 => (typeof(global::System.Text.Json.JsonElement), (object?)caseValue3),
+                        };
+                    },
+                    TypeClassifier = null,
+                    TypeClassifierFactory = new global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentJsonTypeClassifier(),
                 };
-                
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ToolCallContent>(options, objectInfo);
+
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
             jsonTypeInfo.OriginatingResolver = this;
             return jsonTypeInfo;
-        }
-
-        private static global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[] ToolCallContentPropInit(global::System.Text.Json.JsonSerializerOptions options)
-        {
-            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[0];
-
-            return properties;
         }
     }
 }

@@ -10,47 +10,47 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems>? _MultiSelectItems;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems>? _MultiSelectItems;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems> MultiSelectItems
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems> MultiSelectItems
         #nullable enable annotations
         {
-            get => _MultiSelectItems ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems));
+            get => _MultiSelectItems ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems> Create_MultiSelectItems(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems> Create_MultiSelectItems(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems> jsonTypeInfo))
             {
-                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems>
+                var unionInfo = new global::System.Text.Json.Serialization.Metadata.JsonUnionInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems>
                 {
-                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.StringMultiSelectItems)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItemsCase1)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.TitledMultiSelectItems)) { IsNullable = false } },
+                    UnionCases = new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo[] { new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.StringMultiSelectItems)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItemsCase1)) { IsNullable = false }, new global::System.Text.Json.Serialization.Metadata.JsonUnionCaseInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.TitledMultiSelectItems)) { IsNullable = false } },
                     UnionConstructor = static (global::System.Type _, object? value) => value switch
                     {
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.StringMultiSelectItems caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems(caseValue0),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItemsCase1 caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems(caseValue1),
-                        global::SvcSystems.AI.AgentClientProtocol.Generated.TitledMultiSelectItems caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems(caseValue2),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.StringMultiSelectItems caseValue0 => new global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems(caseValue0),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItemsCase1 caseValue1 => new global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems(caseValue1),
+                        global::SvcSystems.AI.AgentClientProtocol.Models.TitledMultiSelectItems caseValue2 => new global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems(caseValue2),
                         _ => throw new global::System.Text.Json.JsonException(),
                     },
-                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems value) =>
+                    UnionDeconstructor = static (global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems value) =>
                     {
                         return value switch
                         {
                             null => ((global::System.Type?)null, (object?)null),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.StringMultiSelectItems caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.StringMultiSelectItems), (object?)caseValue0),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItemsCase1 caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItemsCase1), (object?)caseValue1),
-                            global::SvcSystems.AI.AgentClientProtocol.Generated.TitledMultiSelectItems caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.TitledMultiSelectItems), (object?)caseValue2),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.StringMultiSelectItems caseValue0 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.StringMultiSelectItems), (object?)caseValue0),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItemsCase1 caseValue1 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItemsCase1), (object?)caseValue1),
+                            global::SvcSystems.AI.AgentClientProtocol.Models.TitledMultiSelectItems caseValue2 => (typeof(global::SvcSystems.AI.AgentClientProtocol.Models.TitledMultiSelectItems), (object?)caseValue2),
                         };
                     },
                     TypeClassifier = null,
-                    TypeClassifierFactory = new global::System.Text.Json.Serialization.JsonUnionTypeStructuralClassifier(),
+                    TypeClassifierFactory = new global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItemsJsonTypeClassifier(),
                 };
 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.MultiSelectItems>(options, unionInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateUnionInfo<global::SvcSystems.AI.AgentClientProtocol.Models.MultiSelectItems>(options, unionInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         

@@ -1,18 +1,1 @@
-namespace SvcSystems.AI.AgentClientProtocol;
-
-using SvcSystems.AI.AgentClientProtocol.Generated;
-
-/// <summary>Host-provided filesystem operations that an ACP agent may request.</summary>
-/// <remarks>
-/// The client rejects paths outside the active session's working directory and configured additional directories,
-/// including paths that resolve through symbolic links or reparse points outside those roots. Implementations should
-/// still enforce their own authorization and protect filesystem operations against concurrent path changes.
-/// </remarks>
-public interface IFileSystemHandler
-{
-    /// <summary>Reads text from an absolute path in the host's permitted workspace.</summary>
-    ValueTask<string> ReadTextFileAsync(ReadTextFileRequest request, CancellationToken cancellationToken = default);
-
-    /// <summary>Writes text to an absolute path in the host's permitted workspace.</summary>
-    ValueTask WriteTextFileAsync(WriteTextFileRequest request, CancellationToken cancellationToken = default);
-}
+﻿namespace SvcSystems.AI.AgentClientProtocol;/// <summary>Host-provided filesystem operations that an ACP agent may request.</summary>/// <remarks>/// The client rejects paths outside the active session's working directory and configured additional directories,/// including paths that resolve through symbolic links or reparse points outside those roots. Implementations should/// still enforce their own authorization and protect filesystem operations against concurrent path changes./// </remarks>public interface IFileSystemHandler{    /// <summary>Reads text from an absolute path in the host's permitted workspace.</summary>    ValueTask<string> ReadTextFileAsync(ReadTextFileRequest request, CancellationToken cancellationToken = default);    /// <summary>Writes text to an absolute path in the host's permitted workspace.</summary>    ValueTask WriteTextFileAsync(WriteTextFileRequest request, CancellationToken cancellationToken = default);}

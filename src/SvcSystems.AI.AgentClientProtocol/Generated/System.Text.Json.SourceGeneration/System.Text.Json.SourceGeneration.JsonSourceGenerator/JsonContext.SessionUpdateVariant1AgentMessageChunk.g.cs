@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk>? _SessionUpdateVariant1AgentMessageChunk;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk>? _SessionUpdateVariant1AgentMessageChunk;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk> SessionUpdateVariant1AgentMessageChunk
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk> SessionUpdateVariant1AgentMessageChunk
         #nullable enable annotations
         {
-            get => _SessionUpdateVariant1AgentMessageChunk ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk));
+            get => _SessionUpdateVariant1AgentMessageChunk ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk> Create_SessionUpdateVariant1AgentMessageChunk(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk> Create_SessionUpdateVariant1AgentMessageChunk(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk(){ Content = (global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock)args[0] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk(){ Content = (global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock)args[0] },
                     PropertyMetadataInitializer = _ => SessionUpdateVariant1AgentMessageChunkPropInit(options),
                     ConstructorParameterMetadataInitializer = SessionUpdateVariant1AgentMessageChunkCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -48,90 +48,109 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 
         private static global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[] SessionUpdateVariant1AgentMessageChunkPropInit(global::System.Text.Json.JsonSerializerOptions options)
         {
-            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[4];
+            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[5];
 
-            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock>
+            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<string>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj).Content,
-                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_Content((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj).SessionUpdate,
+                Setter = null,
+                IgnoreCondition = null,
+                HasJsonInclude = false,
+                IsExtensionData = false,
+                NumberHandling = null,
+                PropertyName = "SessionUpdate",
+                JsonPropertyName = "sessionUpdate",
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk).GetProperty("SessionUpdate", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+            };
+            
+            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
+            properties[0].IsGetNullable = false;
+
+            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock>
+            {
+                IsProperty = true,
+                IsPublic = true,
+                IsVirtual = false,
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk),
+                Converter = null,
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj).Content,
+                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_Content((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Content",
                 JsonPropertyName = "content",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk).GetProperty("Content", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk).GetProperty("Content", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock>(options, info0);
-            properties[0].IsRequired = true;
-            properties[0].IsGetNullable = false;
-            properties[0].IsSetNullable = false;
+            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock>(options, info1);
+            properties[1].IsRequired = true;
 
-            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<string>
+            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<string>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj).MessageId,
-                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_MessageId((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj).MessageId,
+                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_MessageId((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "MessageId",
                 JsonPropertyName = "messageId",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk).GetProperty("MessageId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk).GetProperty("MessageId", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
-
-            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
-            {
-                IsProperty = true,
-                IsPublic = true,
-                IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk),
-                Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj).Meta,
-                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj, value!),
-                IgnoreCondition = null,
-                HasJsonInclude = false,
-                IsExtensionData = false,
-                NumberHandling = null,
-                PropertyName = "Meta",
-                JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
-            };
-            
-            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info2);
+            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info2);
 
             var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj).ExtensionData,
-                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj).Meta,
+                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_Meta((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj, value!),
+                IgnoreCondition = null,
+                HasJsonInclude = false,
+                IsExtensionData = false,
+                NumberHandling = null,
+                PropertyName = "Meta",
+                JsonPropertyName = "_meta",
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+            };
+            
+            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
+
+            var info4 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
+            {
+                IsProperty = true,
+                IsPublic = true,
+                IsVirtual = false,
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk),
+                Converter = null,
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj).ExtensionData,
+                Setter = static (obj, value) => __set_SessionUpdateVariant1AgentMessageChunk_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
+            properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
 
             return properties;
         }
@@ -141,7 +160,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             new()
             {
                 Name = "Content",
-                ParameterType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock),
+                ParameterType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock),
                 Position = 0,
                 IsNullable = false,
                 IsMemberInitializer = true,
@@ -149,12 +168,12 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Content")]
-        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_Content(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk obj, global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlock value);
+        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_Content(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk obj, global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_MessageId")]
-        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_MessageId(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk obj, string value);
+        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_MessageId(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_Meta(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.SessionUpdateVariant1AgentMessageChunk obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_SessionUpdateVariant1AgentMessageChunk_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

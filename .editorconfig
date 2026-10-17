@@ -1,8 +1,8 @@
-root = true
+﻿root = true
 
 [*]
 charset = utf-8-bom
-end_of_line = crlf
+end_of_line = cr
 insert_final_newline = true
 indent_style = space
 indent_size = 4
@@ -16,7 +16,12 @@ dotnet_style_qualification_for_method = false:suggestion
 dotnet_style_qualification_for_event = false:suggestion
 csharp_style_namespace_declarations = file_scoped:warning
 csharp_style_prefer_primary_constructors = false:suggestion
-dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0005.severity = error
 
 [*.{json,yml,yaml,md}]
 insert_final_newline = true
+
+[*.{csproj,props}]
+insert_final_newline = true
+indent_style = space
+indent_size = 2

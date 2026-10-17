@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents>? _BlobResourceContents;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents>? _BlobResourceContents;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents> BlobResourceContents
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents> BlobResourceContents
         #nullable enable annotations
         {
-            get => _BlobResourceContents ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents));
+            get => _BlobResourceContents ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents> Create_BlobResourceContents(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents> Create_BlobResourceContents(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents(){ Blob = (string)args[0], Uri = (string)args[1] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents(){ Blob = (string)args[0], Uri = (string)args[1] },
                     PropertyMetadataInitializer = _ => BlobResourceContentsPropInit(options),
                     ConstructorParameterMetadataInitializer = BlobResourceContentsCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -55,17 +55,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj).Blob,
-                Setter = static (obj, value) => __set_BlobResourceContents_Blob((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj).Blob,
+                Setter = static (obj, value) => __set_BlobResourceContents_Blob((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Blob",
                 JsonPropertyName = "blob",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents).GetProperty("Blob", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents).GetProperty("Blob", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
@@ -78,17 +78,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj).MimeType,
-                Setter = static (obj, value) => __set_BlobResourceContents_MimeType((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj).MimeType,
+                Setter = static (obj, value) => __set_BlobResourceContents_MimeType((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "MimeType",
                 JsonPropertyName = "mimeType",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents).GetProperty("MimeType", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents).GetProperty("MimeType", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info1);
@@ -98,17 +98,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj).Uri,
-                Setter = static (obj, value) => __set_BlobResourceContents_Uri((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj).Uri,
+                Setter = static (obj, value) => __set_BlobResourceContents_Uri((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Uri",
                 JsonPropertyName = "uri",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents).GetProperty("Uri", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents).GetProperty("Uri", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info2);
@@ -121,17 +121,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj).Meta,
-                Setter = static (obj, value) => __set_BlobResourceContents_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj).Meta,
+                Setter = static (obj, value) => __set_BlobResourceContents_Meta((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Meta",
                 JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
@@ -141,17 +141,17 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj).ExtensionData,
-                Setter = static (obj, value) => __set_BlobResourceContents_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj).ExtensionData,
+                Setter = static (obj, value) => __set_BlobResourceContents_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
             properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
@@ -181,14 +181,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Blob")]
-        private static extern void __set_BlobResourceContents_Blob(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents obj, string value);
+        private static extern void __set_BlobResourceContents_Blob(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_MimeType")]
-        private static extern void __set_BlobResourceContents_MimeType(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents obj, string value);
+        private static extern void __set_BlobResourceContents_MimeType(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Uri")]
-        private static extern void __set_BlobResourceContents_Uri(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents obj, string value);
+        private static extern void __set_BlobResourceContents_Uri(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents obj, string value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_BlobResourceContents_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_BlobResourceContents_Meta(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_BlobResourceContents_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.BlobResourceContents obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_BlobResourceContents_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Models.BlobResourceContents obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

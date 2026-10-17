@@ -19,20 +19,24 @@
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
-        <DefineConstants>$(DefineConstants);ACP_STJ_SOURCE_GEN;ACP_CLIENT_ADAPTERS</DefineConstants>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
-    </PropertyGroup>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <!-- Exclude the output of source generators from the compilation -->
-        <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <!-- Exclude the output of source generators from the compilation -->
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <InternalsVisibleTo Include="SvcSystems.AI.AgentClientProtocol.Tests" />
-    <AdditionalFiles Include="..\..\schema\v1\schema.json" />
-    <AdditionalFiles Include="..\..\schema\v1\schema.generator.json" />
+    <AdditionalFiles Include="..\..\schema\**\*.schema.json" />
+    <AdditionalFiles Include="..\..\schema\**\schema.json" />
+    <AdditionalFiles Include="..\..\schema\**\*.generator.json" />
+    <AdditionalFiles Include="..\..\schema\**\*.meta.json" />
+    <AdditionalFiles Include="..\..\schema\**\meta.json" />
     <ProjectReference Include="..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\SvcSystems.AI.AgentClientProtocol.Generator.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"

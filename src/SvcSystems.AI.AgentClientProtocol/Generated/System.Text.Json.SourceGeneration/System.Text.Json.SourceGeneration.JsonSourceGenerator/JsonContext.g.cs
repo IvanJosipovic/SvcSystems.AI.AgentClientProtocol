@@ -13,6 +13,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
     {
         private readonly static global::System.Text.Json.JsonSerializerOptions s_defaultOptions = new()
         {
+            AllowOutOfOrderMetadataProperties = true,
             DefaultIgnoreCondition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
         };
         

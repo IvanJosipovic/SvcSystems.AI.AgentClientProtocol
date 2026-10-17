@@ -10,35 +10,35 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 {
     internal partial class JsonContext
     {
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource>? _ContentBlockVariant4Resource;
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource>? _ContentBlockVariant4Resource;
         
         /// <summary>
         /// Defines the source generated JSON serialization contract metadata for a given type.
         /// </summary>
         #nullable disable annotations // Marking the property type as nullable-oblivious.
-        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource> ContentBlockVariant4Resource
+        public global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource> ContentBlockVariant4Resource
         #nullable enable annotations
         {
-            get => _ContentBlockVariant4Resource ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource));
+            get => _ContentBlockVariant4Resource ??= (global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource>)Options.GetTypeInfo(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource));
         }
         
-        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource> Create_ContentBlockVariant4Resource(global::System.Text.Json.JsonSerializerOptions options)
+        private global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource> Create_ContentBlockVariant4Resource(global::System.Text.Json.JsonSerializerOptions options)
         {
-            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource> jsonTypeInfo))
+            if (!TryGetTypeInfoForRuntimeCustomConverter<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource>(options, out global::System.Text.Json.Serialization.Metadata.JsonTypeInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource> jsonTypeInfo))
             {
-                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource>
+                var objectInfo = new global::System.Text.Json.Serialization.Metadata.JsonObjectInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource>
                 {
                     ObjectCreator = null,
-                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource(){ Resource = (global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource)args[0] },
+                    ObjectWithParameterizedConstructorCreator = static args => new global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource(){ Resource = (global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource)args[0] },
                     PropertyMetadataInitializer = _ => ContentBlockVariant4ResourcePropInit(options),
                     ConstructorParameterMetadataInitializer = ContentBlockVariant4ResourceCtorParamInit,
-                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
+                    ConstructorAttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource).GetConstructor(InstanceMemberBindingFlags, binder: null, global::System.Array.Empty<global::System.Type>(), modifiers: null),
                     SerializeHandler = null,
                     PolymorphismOptions = new global::System.Text.Json.Serialization.Metadata.JsonPolymorphismOptions(),
                     TypeClassifierFactory = null,
                 };
                 
-                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource>(options, objectInfo);
+                jsonTypeInfo = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreateObjectInfo<global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource>(options, objectInfo);
                 jsonTypeInfo.NumberHandling = null;
             }
         
@@ -48,88 +48,109 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
 
         private static global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[] ContentBlockVariant4ResourcePropInit(global::System.Text.Json.JsonSerializerOptions options)
         {
-            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[4];
+            var properties = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfo[5];
 
-            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations>
+            var info0 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<string>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj).Annotations,
-                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_Annotations((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj).Type,
+                Setter = null,
+                IgnoreCondition = null,
+                HasJsonInclude = false,
+                IsExtensionData = false,
+                NumberHandling = null,
+                PropertyName = "Type",
+                JsonPropertyName = "type",
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource).GetProperty("Type", InstanceMemberBindingFlags, null, typeof(string), global::System.Array.Empty<global::System.Type>(), null),
+            };
+            
+            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<string>(options, info0);
+            properties[0].IsGetNullable = false;
+
+            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.Annotations>
+            {
+                IsProperty = true,
+                IsPublic = true,
+                IsVirtual = false,
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource),
+                Converter = null,
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj).Annotations,
+                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_Annotations((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Annotations",
                 JsonPropertyName = "annotations",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource).GetProperty("Annotations", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource).GetProperty("Annotations", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Annotations), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[0] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations>(options, info0);
+            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Models.Annotations>(options, info1);
 
-            var info1 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource>
+            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj).Resource,
-                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_Resource((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj).Resource,
+                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_Resource((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = false,
                 NumberHandling = null,
                 PropertyName = "Resource",
                 JsonPropertyName = "resource",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource).GetProperty("Resource", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource).GetProperty("Resource", InstanceMemberBindingFlags, null, typeof(global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[1] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource>(options, info1);
-            properties[1].IsRequired = true;
-
-            var info2 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
-            {
-                IsProperty = true,
-                IsPublic = true,
-                IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource),
-                Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj).Meta,
-                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_Meta((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj, value!),
-                IgnoreCondition = null,
-                HasJsonInclude = false,
-                IsExtensionData = false,
-                NumberHandling = null,
-                PropertyName = "Meta",
-                JsonPropertyName = "_meta",
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
-            };
-            
-            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info2);
+            properties[2] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource>(options, info2);
+            properties[2].IsRequired = true;
 
             var info3 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
             {
                 IsProperty = true,
                 IsPublic = true,
                 IsVirtual = false,
-                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource),
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource),
                 Converter = null,
-                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj).ExtensionData,
-                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource)obj, value!),
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj).Meta,
+                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_Meta((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj, value!),
+                IgnoreCondition = null,
+                HasJsonInclude = false,
+                IsExtensionData = false,
+                NumberHandling = null,
+                PropertyName = "Meta",
+                JsonPropertyName = "_meta",
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource).GetProperty("Meta", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+            };
+            
+            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
+
+            var info4 = new global::System.Text.Json.Serialization.Metadata.JsonPropertyInfoValues<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>
+            {
+                IsProperty = true,
+                IsPublic = true,
+                IsVirtual = false,
+                DeclaringType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource),
+                Converter = null,
+                Getter = static obj => ((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj).ExtensionData,
+                Setter = static (obj, value) => __set_ContentBlockVariant4Resource_ExtensionData((global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource)obj, value!),
                 IgnoreCondition = null,
                 HasJsonInclude = false,
                 IsExtensionData = true,
                 NumberHandling = null,
                 PropertyName = "ExtensionData",
                 JsonPropertyName = null,
-                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
+                AttributeProviderFactory = static () => typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource).GetProperty("ExtensionData", InstanceMemberBindingFlags, null, typeof(global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>), global::System.Array.Empty<global::System.Type>(), null),
             };
             
-            properties[3] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info3);
+            properties[4] = global::System.Text.Json.Serialization.Metadata.JsonMetadataServices.CreatePropertyInfo<global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement>>(options, info4);
 
             return properties;
         }
@@ -139,7 +160,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
             new()
             {
                 Name = "Resource",
-                ParameterType = typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource),
+                ParameterType = typeof(global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource),
                 Position = 0,
                 IsNullable = false,
                 IsMemberInitializer = true,
@@ -147,12 +168,12 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization
         };
 
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Annotations")]
-        private static extern void __set_ContentBlockVariant4Resource_Annotations(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource obj, global::SvcSystems.AI.AgentClientProtocol.Generated.Annotations value);
+        private static extern void __set_ContentBlockVariant4Resource_Annotations(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource obj, global::SvcSystems.AI.AgentClientProtocol.Models.Annotations value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Resource")]
-        private static extern void __set_ContentBlockVariant4Resource_Resource(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource obj, global::SvcSystems.AI.AgentClientProtocol.Generated.EmbeddedResourceResource value);
+        private static extern void __set_ContentBlockVariant4Resource_Resource(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource obj, global::SvcSystems.AI.AgentClientProtocol.Models.EmbeddedResourceResource value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Meta")]
-        private static extern void __set_ContentBlockVariant4Resource_Meta(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ContentBlockVariant4Resource_Meta(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
         [global::System.Runtime.CompilerServices.UnsafeAccessorAttribute(global::System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_ExtensionData")]
-        private static extern void __set_ContentBlockVariant4Resource_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Generated.ContentBlockVariant4Resource obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
+        private static extern void __set_ContentBlockVariant4Resource_ExtensionData(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockVariant4Resource obj, global::System.Collections.Generic.Dictionary<string, global::System.Text.Json.JsonElement> value);
     }
 }

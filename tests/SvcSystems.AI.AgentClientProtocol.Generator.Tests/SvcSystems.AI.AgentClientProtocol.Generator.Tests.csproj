@@ -16,8 +16,8 @@
     <ProjectReference Include="..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\SvcSystems.AI.AgentClientProtocol.Generator.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\schema\v1\schema.json" Link="acp-v1.schema.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\..\schema\v1\schema.generator.json" Link="acp-v1.generator.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\schema\acp\v1\schema.json" Link="acp-v1.schema.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\schema\acp\v1\schema.generator.json" Link="acp-v1.generator.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
 
