@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/SvcSystems.AI.AgentClientProtocol)](https://www.nuget.org/packages/SvcSystems.AI.AgentClientProtocol)
 
-A small .NET client library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/). It launches an ACP agent over stdio and gives applications a session-oriented API rather than exposing JSON-RPC or process plumbing.
+A .NET library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/). The core package provides a session-oriented client; the separate `SvcSystems.AI.AgentClientProtocol.Agent` package hosts ACP agents over stdio.
 
 Targets `net11.0`. The library is trim-analyzed and NativeAOT compatible. Reflection-based `System.Text.Json` serialization is disabled in the project.
 
@@ -36,6 +36,42 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 ```
 
 `Client.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
+
+## Hosting an agent
+
+Reference the `SvcSystems.AI.AgentClientProtocol.Agent` package, implement `IAcpAgentHandler`,
+and run `AcpAgent`. If no transport is supplied, the host uses the current process's stdin and
+stdout. Prompt callbacks receive an `IAcpAgentContext` for sending updates and making requests to
+the client; `session/cancel` cancels the prompt callback's token.
+
+```csharp
+using SvcSystems.AI.AgentClientProtocol.Agent;
+
+await using var agent = new AcpAgent(new MyAgentHandler());
+await agent.RunAsync(cancellationToken);
+```
+
+The agent host shares the core library's bounded JSON-RPC dispatch and source-generated wire models.
+Client requests are processed concurrently with active prompts so cancellation and reverse callbacks
+can continue to flow while a prompt handler is running.
+
+## Hosting an agent
+
+Reference the `SvcSystems.AI.AgentClientProtocol.Agent` package and implement `IAcpAgentHandler` for
+initialize, session creation, and prompt handling. `AcpAgent` uses the current process's stdin/stdout
+by default, or accepts a custom `ITransport` for embedding and tests.
+
+```csharp
+using SvcSystems.AI.AgentClientProtocol.Agent;
+
+await using var agent = new AcpAgent(new MyAgentHandler());
+await agent.RunAsync(cancellationToken);
+```
+
+Prompt handlers receive an `IAcpAgentContext` to stream `session/update` events and send requests or
+notifications back to the client. Session cancellation is delivered through the prompt handler's
+`CancellationToken`; inbound requests are dispatched concurrently within the configured bound so
+`session/cancel` can be processed while a prompt is running.
 
 A dropped transport or protocol failure completes `Completion` with the failure and raises `TransportFaulted` once; a clean shutdown completes with `null` and raises nothing. `TransportFaulted` is a member of `IClient`, so external implementers of the interface must add it.
 

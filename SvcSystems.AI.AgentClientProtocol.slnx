@@ -1,7 +1,9 @@
 <Solution>
   <Project Path="src/SvcSystems.AI.AgentClientProtocol/SvcSystems.AI.AgentClientProtocol.csproj" />
+  <Project Path="src/SvcSystems.AI.AgentClientProtocol.Agent/SvcSystems.AI.AgentClientProtocol.Agent.csproj" />
   <Project Path="tools/SvcSystems.AI.AgentClientProtocol.Generator/SvcSystems.AI.AgentClientProtocol.Generator.csproj" />
   <Project Path="tests/SvcSystems.AI.AgentClientProtocol.Tests/SvcSystems.AI.AgentClientProtocol.Tests.csproj" />
+  <Project Path="tests/SvcSystems.AI.AgentClientProtocol.Agent.Tests/SvcSystems.AI.AgentClientProtocol.Agent.Tests.csproj" />
   <Project Path="tests/SvcSystems.AI.AgentClientProtocol.Generator.Tests/SvcSystems.AI.AgentClientProtocol.Generator.Tests.csproj" />
   <Project Path="tests/SvcSystems.AI.AgentClientProtocol.IntegrationTests/SvcSystems.AI.AgentClientProtocol.IntegrationTests.csproj" />
   <Project Path="samples/SvcSystems.AI.AgentClientProtocol.Console/SvcSystems.AI.AgentClientProtocol.Console.csproj" />

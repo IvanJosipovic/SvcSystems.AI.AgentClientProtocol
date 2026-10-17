@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageId>SvcSystems.AI.AgentClientProtocol.Agent</PackageId>
+    <Authors>SVCSystems</Authors>
+    <Description>A NativeAOT-compatible ACP agent host built on SvcSystems.AI.AgentClientProtocol.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SvcSystems.AI.AgentClientProtocol\SvcSystems.AI.AgentClientProtocol.csproj" />
+  </ItemGroup>
+</Project>

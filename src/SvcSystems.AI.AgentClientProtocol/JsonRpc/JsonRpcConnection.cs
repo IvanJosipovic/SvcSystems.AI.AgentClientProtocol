@@ -15,6 +15,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     private readonly SemaphoreSlim _incomingRequestSlots;
     private readonly Action<string, Exception>? _requestHandlerException;
     private readonly ILogger? _logger;
+    private readonly bool _treatTransportEndAsClean;
     private readonly object _incomingRequestsLock = new();
     private readonly HashSet<Task> _incomingRequests = [];
     private readonly ConcurrentDictionary<long, TaskCompletionSource<JsonElement>> _pendingRequests = new();
@@ -32,7 +33,8 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         ITransport transport,
         int maximumConcurrentIncomingRequests = 32,
         Action<string, Exception>? requestHandlerException = null,
-        ILoggerFactory? loggerFactory = null)
+        ILoggerFactory? loggerFactory = null,
+        bool treatTransportEndAsClean = false)
     {
         ArgumentNullException.ThrowIfNull(transport);
         if (maximumConcurrentIncomingRequests <= 0)
@@ -43,6 +45,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         _incomingRequestSlots = new SemaphoreSlim(maximumConcurrentIncomingRequests);
         _requestHandlerException = requestHandlerException;
         _logger = loggerFactory?.CreateLogger<JsonRpcConnection>();
+        _treatTransportEndAsClean = treatTransportEndAsClean;
         _receiveTask = ReceiveLoopAsync(_shutdown.Token);
     }
 
@@ -144,7 +147,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 await ProcessMessageAsync(frame).ConfigureAwait(false);
             }
 
-            if (!cancellationToken.IsCancellationRequested)
+            if (!cancellationToken.IsCancellationRequested && !_treatTransportEndAsClean)
             {
                 throw new ProcessException("The ACP agent closed stdout while the connection was active.");
             }

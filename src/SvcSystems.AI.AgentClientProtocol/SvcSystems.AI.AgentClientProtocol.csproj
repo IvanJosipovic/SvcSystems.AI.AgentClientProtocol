@@ -30,6 +30,7 @@
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <InternalsVisibleTo Include="SvcSystems.AI.AgentClientProtocol.Tests" />
+    <InternalsVisibleTo Include="SvcSystems.AI.AgentClientProtocol.Agent" />
     <AdditionalFiles Include="..\..\schema\**\*.schema.json" />
     <AdditionalFiles Include="..\..\schema\**\schema.json" />
     <AdditionalFiles Include="..\..\schema\**\*.generator.json" />
