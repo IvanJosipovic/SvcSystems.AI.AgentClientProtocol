@@ -320,6 +320,74 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void ReportsMissingSchemaWhenNoSchemaInputIsProvided()
+    {
+        var diagnostics = RunGeneratorWithAdditionalTexts([]);
+
+        var diagnostic = Assert.Single(diagnostics.Where(item => item.Id == "ACPGEN001"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+    }
+
+    [Fact]
+    public void ReportsGeneratorOptionsWithoutMatchingSchema()
+    {
+        var diagnostics = RunGeneratorWithAdditionalTexts([
+            new TestAdditionalText("paired.schema.json", MinimalSchema),
+            new TestAdditionalText("orphan.generator.json", "{ \"generateJsonContext\": true }")]);
+
+        var diagnostic = Assert.Single(diagnostics.Where(item => item.Id == "ACPGEN004"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+    }
+
+    [Fact]
+    public void ReportsMultipleGeneratorOptionsMatchingSchema()
+    {
+        // The pair keys only differ by case, so both options match the schema and the ambiguity is reported.
+        var diagnostics = RunGeneratorWithAdditionalTexts([
+            new TestAdditionalText("dup.schema.json", MinimalSchema),
+            new TestAdditionalText("dup.generator.json", "{ \"generateJsonContext\": true }"),
+            new TestAdditionalText("DUP.generator.json", "{ \"generateJsonContext\": true }")]);
+
+        var diagnostic = Assert.Single(diagnostics.Where(item => item.Id == "ACPGEN005"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+    }
+
+    [Fact]
+    public void ReportsInvalidGeneratorOptions()
+    {
+        var diagnostics = RunGeneratorWithAdditionalTexts([
+            new TestAdditionalText("bad-options.schema.json", MinimalSchema),
+            new TestAdditionalText("bad-options.generator.json", "{ not json")]);
+
+        var diagnostic = Assert.Single(diagnostics.Where(item => item.Id == "ACPGEN006"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+    }
+
+    [Fact]
+    public void ReportsMultipleProtocolMetadataFilesMatchingSchema()
+    {
+        // The pair keys only differ by case, so both metadata files match the schema and the ambiguity is reported.
+        var diagnostics = RunGeneratorWithAdditionalTexts([
+            new TestAdditionalText("dup-meta.schema.json", MinimalSchema),
+            new TestAdditionalText("dup-meta.meta.json", "{}"),
+            new TestAdditionalText("DUP-META.meta.json", "{}")]);
+
+        var diagnostic = Assert.Single(diagnostics.Where(item => item.Id == "ACPGEN007"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+    }
+
+    [Fact]
+    public void ReportsInvalidProtocolMetadata()
+    {
+        var diagnostics = RunGeneratorWithAdditionalTexts([
+            new TestAdditionalText("bad-meta.schema.json", MinimalSchema),
+            new TestAdditionalText("bad-meta.meta.json", "{ not json")]);
+
+        var diagnostic = Assert.Single(diagnostics.Where(item => item.Id == "ACPGEN008"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+    }
+
+    [Fact]
     public void ReportsUnresolvedSchemaReferencesAsErrors()
     {
         const string schema = """
@@ -612,6 +680,13 @@ public sealed class JsonSchemaSourceGeneratorTests
             .Select(result => result.SourceText.ToString())
             .ToImmutableArray();
         return (sources, diagnostics.AddRange(outputCompilation.GetDiagnostics()));
+    }
+
+    private static ImmutableArray<Diagnostic> RunGeneratorWithAdditionalTexts(ImmutableArray<AdditionalText> additionalTexts)
+    {
+        var driver = CreateDriver(additionalTexts);
+        driver.RunGeneratorsAndUpdateCompilation(CreateCompilation(), out _, out var diagnostics, TestContext.Current.CancellationToken);
+        return diagnostics;
     }
 
     private static bool ContainsType(string source, string name) =>
