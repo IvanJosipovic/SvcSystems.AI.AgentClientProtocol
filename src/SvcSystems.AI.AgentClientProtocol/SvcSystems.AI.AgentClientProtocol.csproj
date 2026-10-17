@@ -48,4 +48,21 @@
                 Exclude="$(MSBuildProjectDirectory)\..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\bin\$(Configuration)\netstandard2.0\SvcSystems.AI.AgentClientProtocol.Generator.dll;$(MSBuildProjectDirectory)\..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\bin\$(Configuration)\netstandard2.0\Microsoft.CodeAnalysis*.dll" />
     </ItemGroup>
   </Target>
+
+  <!--
+    EmitCompilerGeneratedFiles persists every generator's output into $(CompilerGeneratedFilesOutputPath).
+    We only commit this project's own generator output; framework output (e.g. the System.Text.Json
+    source generator) is pruned so the committed tree stays review-sized. The exclusion below keys off
+    *our* generator's folder so an SDK/inbox generator rename cannot reintroduce framework files.
+  -->
+  <Target Name="PruneFrameworkGeneratedFiles" AfterTargets="CoreCompile">
+    <ItemGroup>
+      <_FirstPartyGenerated Include="$(CompilerGeneratedFilesOutputPath)\SvcSystems.AI.AgentClientProtocol.Generator\**\*.cs" />
+      <_FrameworkGenerated Include="$(CompilerGeneratedFilesOutputPath)\**\*.cs"
+                           Exclude="@(_FirstPartyGenerated)" />
+    </ItemGroup>
+    <Delete Files="@(_FrameworkGenerated)" />
+    <RemoveDir Directories="$(CompilerGeneratedFilesOutputPath)\System.Text.Json.SourceGeneration"
+               Condition="Exists('$(CompilerGeneratedFilesOutputPath)\System.Text.Json.SourceGeneration')" />
+  </Target>
 </Project>
