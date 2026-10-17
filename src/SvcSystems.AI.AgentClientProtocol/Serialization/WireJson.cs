@@ -119,17 +119,6 @@ internal static class WireJson
             Meta = CopyMetadata(options?.Metadata)
         }, JsonContext.Default.PromptRequest);
 
-    public static byte[] WriteCancelNotification(CancelNotification notification) => JsonSerializer.SerializeToUtf8Bytes(notification, JsonContext.Default.CancelNotification);
-
-    public static byte[] WriteAuthenticateRequest(string methodId) => JsonSerializer.SerializeToUtf8Bytes(new AuthenticateRequest { MethodId = methodId }, JsonContext.Default.AuthenticateRequest);
-
-    public static byte[] WriteLogoutRequest() => JsonSerializer.SerializeToUtf8Bytes(new LogoutRequest(), JsonContext.Default.LogoutRequest);
-
-    public static byte[] WriteListSessionsRequest(string? workingDirectory, string? cursor) =>
-        JsonSerializer.SerializeToUtf8Bytes(new ListSessionsRequest { Cwd = workingDirectory, Cursor = cursor }, JsonContext.Default.ListSessionsRequest);
-
-    public static byte[] WriteSessionIdRequest(string sessionId) => JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = sessionId }, JsonContext.Default.DeleteSessionRequest);
-
     public static byte[] WriteResumeSessionRequest(string sessionId, SessionOptions options) =>
         JsonSerializer.SerializeToUtf8Bytes(new ResumeSessionRequest
         {
@@ -140,17 +129,14 @@ internal static class WireJson
             Meta = CopyMetadata(options.Metadata)
         }, JsonContext.Default.ResumeSessionRequest);
 
-    public static byte[] WriteSetModeRequest(string sessionId, string modeId) =>
-        JsonSerializer.SerializeToUtf8Bytes(new SetSessionModeRequest { SessionId = sessionId, ModeId = modeId }, JsonContext.Default.SetSessionModeRequest);
-
     public static byte[] WriteSetConfigOptionRequest(string sessionId, string configId, SetSessionConfigOptionRequest value)
     {
         // The allOf variants of the request schema only declare `value`/`type`; `sessionId` and
         // `configId` live on the enclosing request object, so they are re-attached as extension data.
         var common = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
-            ["sessionId"] = ToJsonElement(sessionId),
-            ["configId"] = ToJsonElement(configId)
+            ["sessionId"] = JsonSerializer.SerializeToElement(sessionId, JsonContext.Default.String),
+            ["configId"] = JsonSerializer.SerializeToElement(configId, JsonContext.Default.String)
         };
         return value.Value switch
         {
@@ -172,50 +158,8 @@ internal static class WireJson
                 : new SelectedPermissionOutcome { OptionId = decision.SelectedOptionId! }
         }, JsonContext.Default.RequestPermissionResponse);
 
-    public static ListSessionsResponse ReadSessionListPage(JsonElement response) =>
-        response.Deserialize(JsonContext.Default.ListSessionsResponse)!;
-
-    public static NewSessionResponse ReadNewSessionResponse(JsonElement response)
-    {
-        return response.Deserialize(JsonContext.Default.NewSessionResponse)!;
-    }
-
-    public static LoadSessionResponse ReadLoadSessionResponse(JsonElement response)
-    {
-        return response.Deserialize(JsonContext.Default.LoadSessionResponse)!;
-    }
-
-    public static ResumeSessionResponse ReadResumeSessionResponse(JsonElement response)
-    {
-        return response.Deserialize(JsonContext.Default.ResumeSessionResponse)!;
-    }
-
     public static string ReadNotificationSessionId(JsonElement parameters) =>
         ReadString(parameters, "sessionId") ?? throw new ProtocolException("ACP session notification did not include sessionId.");
-
-    public static RequestPermissionRequest ReadPermissionRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.RequestPermissionRequest)!;
-
-    public static ReadTextFileRequest ReadTextFileReadRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.ReadTextFileRequest)!;
-
-    public static WriteTextFileRequest ReadTextFileWriteRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.WriteTextFileRequest)!;
-
-    public static CreateTerminalRequest ReadTerminalCreateRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.CreateTerminalRequest)!;
-
-    public static TerminalOutputRequest ReadTerminalOutputRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.TerminalOutputRequest)!;
-
-    public static WaitForTerminalExitRequest ReadTerminalExitRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.WaitForTerminalExitRequest)!;
-
-    public static KillTerminalRequest ReadTerminalKillRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.KillTerminalRequest)!;
-
-    public static ReleaseTerminalRequest ReadTerminalReleaseRequest(JsonElement parameters) =>
-        parameters.Deserialize(JsonContext.Default.ReleaseTerminalRequest)!;
 
     public static ElicitationRequest ReadElicitationRequest(JsonElement parameters)
     {
@@ -238,20 +182,11 @@ internal static class WireJson
     public static ElicitationCompleted ReadElicitationCompleted(JsonElement parameters) =>
         new(parameters.Deserialize(JsonContext.Default.CompleteElicitationNotification)!.ElicitationId, parameters.Clone());
 
-    public static byte[] WriteTextFileReadResponse(string content) =>
-        JsonSerializer.SerializeToUtf8Bytes(new ReadTextFileResponse { Content = content }, JsonContext.Default.ReadTextFileResponse);
-
     /// <summary>
     /// Serializes the empty JSON object that ACP returns for methods with no response payload
     /// (fs/write_text_file, terminal/kill, terminal/release).
     /// </summary>
     public static byte[] WriteEmptyObject() => "{}"u8.ToArray();
-
-    public static byte[] WriteTerminalCreateResponse(string terminalId) =>
-        JsonSerializer.SerializeToUtf8Bytes(new CreateTerminalResponse { TerminalId = terminalId }, JsonContext.Default.CreateTerminalResponse);
-
-    public static byte[] WriteTerminalOutputResponse(TerminalOutputResponse output) =>
-        JsonSerializer.SerializeToUtf8Bytes(output, JsonContext.Default.TerminalOutputResponse);
 
     public static byte[] WriteTerminalExitStatusResponse(TerminalExitStatus status) =>
         JsonSerializer.SerializeToUtf8Bytes(new TerminalExitStatus
@@ -268,7 +203,7 @@ internal static class WireJson
         // discriminator), so it is re-attached as extension data.
         var extensionData = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
-            ["action"] = ToJsonElement(response.Action)
+            ["action"] = JsonSerializer.SerializeToElement(response.Action, JsonContext.Default.String)
         };
 
         CreateElicitationResponse model = Discriminators.ParseCreateElicitationResponseDiscriminator(response.Action) switch
@@ -320,17 +255,8 @@ internal static class WireJson
         return result;
     }
 
-    private static JsonElement ToJsonElement(string value) =>
-        JsonDocument.Parse($"\"{JsonEncodedText.Encode(value)}\"").RootElement.Clone();
-
     private static string? ReadString(JsonElement element, string propertyName) =>
         element.ValueKind == JsonValueKind.Object && element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()
             : null;
-
-    private static string? ReadString(IReadOnlyDictionary<string, JsonElement>? element, string propertyName) =>
-        element is not null && element.TryGetValue(propertyName, out var value) && value.ValueKind == JsonValueKind.String
-            ? value.GetString()
-            : null;
-
 }

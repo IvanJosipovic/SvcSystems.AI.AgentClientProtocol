@@ -173,7 +173,7 @@ public sealed class Client : IClient
             Methods.SessionNew,
             WireJson.WriteNewSessionRequest(request),
             cancellationToken).ConfigureAwait(false);
-        var typedResponse = WireJson.ReadNewSessionResponse(response);
+        var typedResponse = response.Deserialize(JsonContext.Default.NewSessionResponse)!;
         var session = new Session(this, typedResponse.SessionId, _options.MaximumBufferedSessionUpdates);
         session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
         if (!_sessions.TryAdd(session.Id, session))
@@ -187,7 +187,7 @@ public sealed class Client : IClient
             {
                 _ = await _connection.SendRequestAsync(
                     Methods.SessionClose,
-                    WireJson.WriteSessionIdRequest(session.Id),
+                    JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = session.Id }, JsonContext.Default.DeleteSessionRequest),
                     cancellationToken).ConfigureAwait(false);
             }
             catch
@@ -225,7 +225,7 @@ public sealed class Client : IClient
                 Meta = WireJson.CopyMetadata(options.Metadata)
             };
             var response = await _connection.SendRequestAsync(Methods.SessionLoad, WireJson.WriteLoadSessionRequest(request), cancellationToken).ConfigureAwait(false);
-            var typedResponse = WireJson.ReadLoadSessionResponse(response);
+            var typedResponse = response.Deserialize(JsonContext.Default.LoadSessionResponse)!;
             session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
             return session;
         }
@@ -270,7 +270,10 @@ public sealed class Client : IClient
             if (exitCode != 0) throw new ProcessException($"Terminal authentication exited with code {exitCode}.");
             return;
         }
-        _ = await _connection.SendRequestAsync(Methods.Authenticate, WireJson.WriteAuthenticateRequest(methodId), cancellationToken).ConfigureAwait(false);
+        _ = await _connection.SendRequestAsync(
+            Methods.Authenticate,
+            JsonSerializer.SerializeToUtf8Bytes(new AuthenticateRequest { MethodId = methodId }, JsonContext.Default.AuthenticateRequest),
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -278,7 +281,7 @@ public sealed class Client : IClient
     {
         ThrowIfDisposed();
         if (Agent.AgentCapabilities?.Auth?.Logout is null) throw new NotSupportedException("The ACP agent does not advertise logout support.");
-        _ = await _connection.SendRequestAsync(Methods.Logout, WireJson.WriteLogoutRequest(), cancellationToken).ConfigureAwait(false);
+        _ = await _connection.SendRequestAsync(Methods.Logout, JsonSerializer.SerializeToUtf8Bytes(new LogoutRequest(), JsonContext.Default.LogoutRequest), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -299,9 +302,9 @@ public sealed class Client : IClient
         if (workingDirectory is not null) ValidateWorkingDirectory(workingDirectory);
         var response = await _connection.SendRequestAsync(
             Methods.SessionList,
-            WireJson.WriteListSessionsRequest(workingDirectory, cursor),
+            JsonSerializer.SerializeToUtf8Bytes(new ListSessionsRequest { Cwd = workingDirectory, Cursor = cursor }, JsonContext.Default.ListSessionsRequest),
             cancellationToken).ConfigureAwait(false);
-        return WireJson.ReadSessionListPage(response);
+        return response.Deserialize(JsonContext.Default.ListSessionsResponse)!;
     }
 
     /// <inheritdoc />
@@ -310,7 +313,10 @@ public sealed class Client : IClient
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
         if (Agent.AgentCapabilities?.SessionCapabilities?.Delete is null) throw new NotSupportedException("The ACP agent does not advertise session deletion.");
-        _ = await _connection.SendRequestAsync(Methods.SessionDelete, WireJson.WriteSessionIdRequest(sessionId), cancellationToken).ConfigureAwait(false);
+        _ = await _connection.SendRequestAsync(
+            Methods.SessionDelete,
+            JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = sessionId }, JsonContext.Default.DeleteSessionRequest),
+            cancellationToken).ConfigureAwait(false);
         _sessions.TryRemove(sessionId, out _);
         _fileSystemRoots.TryRemove(sessionId, out _);
     }
@@ -331,7 +337,7 @@ public sealed class Client : IClient
         try
         {
             var response = await _connection.SendRequestAsync(Methods.SessionResume, WireJson.WriteResumeSessionRequest(sessionId, options), cancellationToken).ConfigureAwait(false);
-            var typedResponse = WireJson.ReadResumeSessionResponse(response);
+            var typedResponse = response.Deserialize(JsonContext.Default.ResumeSessionResponse)!;
             session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
             return session;
         }
@@ -352,7 +358,10 @@ public sealed class Client : IClient
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
         if (Agent.AgentCapabilities?.SessionCapabilities?.Close is null) throw new NotSupportedException("The ACP agent does not advertise session close.");
-        _ = await _connection.SendRequestAsync(Methods.SessionClose, WireJson.WriteSessionIdRequest(sessionId), cancellationToken).ConfigureAwait(false);
+        _ = await _connection.SendRequestAsync(
+            Methods.SessionClose,
+            JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = sessionId }, JsonContext.Default.DeleteSessionRequest),
+            cancellationToken).ConfigureAwait(false);
         _sessions.TryRemove(sessionId, out _);
         _fileSystemRoots.TryRemove(sessionId, out _);
     }
@@ -361,7 +370,10 @@ public sealed class Client : IClient
     {
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(modeId);
-        _ = await _connection.SendRequestAsync(Methods.SessionSetMode, WireJson.WriteSetModeRequest(sessionId, modeId), cancellationToken).ConfigureAwait(false);
+        _ = await _connection.SendRequestAsync(
+            Methods.SessionSetMode,
+            JsonSerializer.SerializeToUtf8Bytes(new SetSessionModeRequest { SessionId = sessionId, ModeId = modeId }, JsonContext.Default.SetSessionModeRequest),
+            cancellationToken).ConfigureAwait(false);
     }
 
     internal async Task<IReadOnlyList<SessionConfigOption>> SetSessionConfigOptionAsync(string sessionId, string configId, SetSessionConfigOptionRequest value, CancellationToken cancellationToken)
@@ -403,7 +415,7 @@ public sealed class Client : IClient
             catch (ObjectDisposedException) { }
         }
         var notification = new CancelNotification { SessionId = sessionId };
-        await _connection.SendNotificationAsync(Methods.SessionCancel, WireJson.WriteCancelNotification(notification), cancellationToken).ConfigureAwait(false);
+        await _connection.SendNotificationAsync(Methods.SessionCancel, JsonSerializer.SerializeToUtf8Bytes(notification, JsonContext.Default.CancelNotification), cancellationToken).ConfigureAwait(false);
     }
 
     private async Task InitializeAsync(CancellationToken cancellationToken)
@@ -436,7 +448,7 @@ public sealed class Client : IClient
 
     private async ValueTask<byte[]> HandlePermissionRequestAsync(JsonElement parameters, CancellationToken cancellationToken)
     {
-        var request = WireJson.ReadPermissionRequest(parameters);
+        var request = parameters.Deserialize(JsonContext.Default.RequestPermissionRequest)!;
         PermissionDecision decision;
         var promptCancellation = _activePromptCancellation.TryGetValue(request.SessionId, out var activeCancellation)
             ? activeCancellation.Token
@@ -491,15 +503,15 @@ public sealed class Client : IClient
         {
             requests[Methods.FsReadTextFile] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTextFileReadRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.ReadTextFileRequest)!;
                 ValidateAbsolutePath(request.Path, "path");
                 ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsReadTextFile);
                 var content = await fileSystem.ReadTextFileAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteTextFileReadResponse(content);
+                return JsonSerializer.SerializeToUtf8Bytes(new ReadTextFileResponse { Content = content }, JsonContext.Default.ReadTextFileResponse);
             };
             requests[Methods.FsWriteTextFile] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTextFileWriteRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.WriteTextFileRequest)!;
                 ValidateAbsolutePath(request.Path, "path");
                 ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsWriteTextFile);
                 await fileSystem.WriteTextFileAsync(request, cancellationToken).ConfigureAwait(false);
@@ -511,33 +523,33 @@ public sealed class Client : IClient
         {
             requests[Methods.TerminalCreate] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalCreateRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.CreateTerminalRequest)!;
                 if (request.Cwd is not null) ValidateAbsolutePath(request.Cwd, "cwd");
                 if (string.IsNullOrWhiteSpace(request.Command)) throw new RpcException(-32602, "Terminal command must not be empty.", Methods.TerminalCreate);
                 var terminalId = await terminal.CreateAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteTerminalCreateResponse(terminalId);
+                return JsonSerializer.SerializeToUtf8Bytes(new CreateTerminalResponse { TerminalId = terminalId }, JsonContext.Default.CreateTerminalResponse);
             };
             requests[Methods.TerminalOutput] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalOutputRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.TerminalOutputRequest)!;
                 var output = await terminal.GetOutputAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteTerminalOutputResponse(output);
+                return JsonSerializer.SerializeToUtf8Bytes(output, JsonContext.Default.TerminalOutputResponse);
             };
             requests[Methods.TerminalWaitForExit] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalExitRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.WaitForTerminalExitRequest)!;
                 var status = await terminal.WaitForExitAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteTerminalExitStatusResponse(status);
             };
             requests[Methods.TerminalKill] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalKillRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.KillTerminalRequest)!;
                 await terminal.KillAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyObject();
             };
             requests[Methods.TerminalRelease] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalReleaseRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.ReleaseTerminalRequest)!;
                 await terminal.ReleaseAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyObject();
             };

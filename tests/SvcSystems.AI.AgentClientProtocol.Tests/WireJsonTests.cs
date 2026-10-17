@@ -274,10 +274,10 @@ public sealed class WireJsonTests
     [Fact]
     public void CallbackWritersPreserveResponseShapesAndExplicitTerminalNulls()
     {
-        using var file = JsonDocument.Parse(WireJson.WriteTextFileReadResponse("contents"));
+        using var file = JsonDocument.Parse(JsonSerializer.SerializeToUtf8Bytes(new ReadTextFileResponse { Content = "contents" }, JsonContext.Default.ReadTextFileResponse));
         Assert.Equal("contents", file.RootElement.GetProperty("content").GetString());
 
-        using var output = JsonDocument.Parse(WireJson.WriteTerminalOutputResponse(new TerminalOutputResponse { Output = "stdout", Truncated = false }));
+        using var output = JsonDocument.Parse(JsonSerializer.SerializeToUtf8Bytes(new TerminalOutputResponse { Output = "stdout", Truncated = false }, JsonContext.Default.TerminalOutputResponse));
         Assert.False(output.RootElement.TryGetProperty("exitStatus", out _));
 
         using var exit = JsonDocument.Parse(WireJson.WriteTerminalExitStatusResponse(new TerminalExitStatus()));
@@ -296,7 +296,7 @@ public sealed class WireJsonTests
     [Fact]
     public void RemainingRequestWritersUseTheExpectedSchemaShapes()
     {
-        using var list = JsonDocument.Parse(WireJson.WriteListSessionsRequest("C:/workspace", "cursor-1"));
+        using var list = JsonDocument.Parse(JsonSerializer.SerializeToUtf8Bytes(new ListSessionsRequest { Cwd = "C:/workspace", Cursor = "cursor-1" }, JsonContext.Default.ListSessionsRequest));
         Assert.Equal("C:/workspace", list.RootElement.GetProperty("cwd").GetString());
         Assert.Equal("cursor-1", list.RootElement.GetProperty("cursor").GetString());
 
@@ -336,7 +336,7 @@ public sealed class WireJsonTests
             }
             """);
         var session = new Session(null!, "session-1");
-        var typedResponse = WireJson.ReadNewSessionResponse(response.RootElement);
+        var typedResponse = response.RootElement.Deserialize(JsonContext.Default.NewSessionResponse)!;
 
         session.SetInitialState(
             typedResponse.Modes,
@@ -350,7 +350,7 @@ public sealed class WireJsonTests
         using var sessions = JsonDocument.Parse("""
             { "sessions": [{ "sessionId": "session-1", "cwd": "C:/workspace", "additionalDirectories": ["C:/shared"], "title": "Work" }] }
             """);
-        var listed = Assert.Single(WireJson.ReadSessionListPage(sessions.RootElement).Sessions);
+        var listed = Assert.Single(sessions.RootElement.Deserialize(JsonContext.Default.ListSessionsResponse)!.Sessions);
         Assert.Equal("session-1", listed.SessionId);
         Assert.Equal("C:/workspace", listed.Cwd);
         Assert.Equal("C:/shared", Assert.Single(listed.AdditionalDirectories!));
