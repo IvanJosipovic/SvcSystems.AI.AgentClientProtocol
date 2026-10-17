@@ -33,6 +33,26 @@ public sealed class RegistryAgentLauncherTests
     }
 
     [Fact]
+    public async Task ChecksPackageRunnerAvailabilityBeforeBuildingOptions()
+    {
+        using var launcher = new RegistryAgentLauncher();
+        var agent = CreateAgent("npm-agent", "1.2.3", npx: new packageDistribution { Package = "agent@1.2.3" });
+        ProcessOptions process;
+        try
+        {
+            process = await launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken);
+        }
+        catch (RegistryAgentLaunchException exception) when (exception.Message.Contains("npx command is missing", StringComparison.Ordinal))
+        {
+            Assert.Skip("npx is not installed on this test host.");
+            return;
+        }
+
+        Assert.True(File.Exists(process.FileName));
+        Assert.Equal(["--yes", "agent@1.2.3"], process.Arguments);
+    }
+
+    [Fact]
     public async Task FallsBackToUvxWhenNpxIsUnavailableAndPreservesPipVersionSyntax()
     {
         var agent = CreateAgent("uv-agent", "0.10.1",
