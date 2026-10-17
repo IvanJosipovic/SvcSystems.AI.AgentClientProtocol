@@ -634,6 +634,12 @@ public sealed class JsonSchemaSourceGeneratorTests
             source.Contains("class AuthMethodJsonTypeClassifier", StringComparison.Ordinal));
         Assert.Contains("return typeof(AuthMethodAgent);", authMethodClassifier, StringComparison.Ordinal);
         Assert.DoesNotContain("ValueTextEquals(\"args\"u8)", authMethodClassifier, StringComparison.Ordinal);
+        var sessionUpdateClassifier = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class SessionUpdateJsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("\"user_message_chunk\" => typeof(SessionUpdateVariant0UserMessageChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
+        Assert.Contains("\"agent_message_chunk\" => typeof(SessionUpdateVariant1AgentMessageChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
+        Assert.Contains("\"agent_thought_chunk\" => typeof(SessionUpdateVariant2AgentThoughtChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
+        Assert.Contains("\"tool_call\" => typeof(ToolCall)", sessionUpdateClassifier, StringComparison.Ordinal);
         var elicitationClassifier = Assert.Single(result.GeneratedSources, source =>
             source.Contains("class CreateElicitationRequestJsonTypeClassifier", StringComparison.Ordinal));
         Assert.Contains("ValueTextEquals(\"mode\"u8)", elicitationClassifier, StringComparison.Ordinal);
