@@ -37,6 +37,8 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 
 `Client.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
 
+A dropped transport or protocol failure completes `Completion` with the failure and raises `TransportFaulted` once; a clean shutdown completes with `null` and raises nothing.
+
 Unrecognized JSON-RPC notifications, including agent-specific extensions such as `_auth/status_update`, are ignored without closing the connection. Unsupported requests still receive a JSON-RPC "Method not found" error.
 
 ## Host capabilities
@@ -108,6 +110,37 @@ var registry = new RegistryClient(httpClient);
 var index = await registry.GetIndexAsync(cancellationToken);
 ```
 
+## Dependency injection and logging
+
+`AddAgentClientProtocol` registers an `IAcpClientFactory` and an `IRegistryClient`; existing
+registrations are preserved, so the call is safe to repeat.
+
+```csharp
+using SvcSystems.AI.AgentClientProtocol;
+
+services.AddAgentClientProtocol();
+// Or supply default options and a registry mirror:
+services.AddAgentClientProtocol(
+    provider => new ClientOptions { LoggerFactory = provider.GetService<ILoggerFactory>() },
+    new Uri("https://mirror.example/registry.json"));
+```
+
+```csharp
+public sealed class AgentRunner(IAcpClientFactory clients)
+{
+    public Task<IClient> StartAsync(CancellationToken cancellationToken) =>
+        clients.StartAsync(
+            new ProcessOptions { FileName = "opencode", Arguments = ["acp"] },
+            cancellationToken: cancellationToken);
+}
+```
+
+Set `ClientOptions.LoggerFactory` to receive structured diagnostics for connection and callback
+failures. When it is null, diagnostics are written through `System.Diagnostics.Trace`; the
+`RequestHandlerException` callback still takes precedence when it is set. The library targets the
+Microsoft.Extensions abstractions that ship with the runtime, so registration and logging add no
+package dependency.
+
 ## Trimming and NativeAOT
 
 The library project enables AOT and trim analysis and sets:
@@ -177,6 +210,13 @@ integration tests.
 ## Scope
 
 The initial transport is stdio. The library targets stable ACP v1 and keeps the JSON-RPC implementation and generated wire types internal. HTTP/WebSocket transports and agent-specific APIs are not included.
+
+## Future work
+
+Not implemented yet:
+
+- An agent-side runtime host (the mirror of this client) shipped as a separate package.
+- Registry-driven discovery and launching of installed ACP agents.
 
 ## License
 
