@@ -15,9 +15,16 @@
   <ItemGroup>
     <ProjectReference Include="..\..\tools\SvcSystems.AI.AgentClientProtocol.Generator\SvcSystems.AI.AgentClientProtocol.Generator.csproj" />
   </ItemGroup>
+  <Target Name="ReferenceJsonSourceGeneratorForTests"
+          BeforeTargets="ResolveAssemblyReferences"
+          DependsOnTargets="ResolveTargetingPackAssets">
+    <ItemGroup>
+      <Reference Include="@(Analyzer->WithMetadataValue('Filename', 'System.Text.Json.SourceGeneration'))"
+                 Private="true" />
+    </ItemGroup>
+  </Target>
   <ItemGroup>
     <None Include="..\..\schema\acp\v1\schema.json" Link="acp-v1.schema.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\schema\acp\v1\schema.generator.json" Link="acp-v1.generator.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
-
