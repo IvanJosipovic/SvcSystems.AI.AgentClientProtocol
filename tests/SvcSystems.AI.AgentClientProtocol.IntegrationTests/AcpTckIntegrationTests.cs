@@ -72,7 +72,7 @@ public sealed class AcpTckIntegrationTests
         Assert.True(capabilities.PromptCapabilities?.Image);
         Assert.True(capabilities.PromptCapabilities?.Audio);
         Assert.True(capabilities.PromptCapabilities?.EmbeddedContext);
-        Assert.Equal("tck", Assert.IsType<AuthMethodAgent>(Assert.Single(client.Agent.AuthMethods!)).Id);
+        Assert.Equal("tck", Assert.IsType<AuthMethodAgent>(Assert.Single(client.Agent.AuthMethods!).Value).Id);
         await client.AuthenticateAsync("tck", timeout.Token);
 
         var directory = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);

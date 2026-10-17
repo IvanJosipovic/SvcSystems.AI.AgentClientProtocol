@@ -38,6 +38,12 @@ public sealed class WireJsonTests
 
         using var unknownJson = JsonDocument.Parse("""{"id":"unknown","name":"Unknown","type":"future"}""");
         Assert.Throws<JsonException>(() => DeserializeJson<AuthMethod>(unknownJson.RootElement));
+
+        // A default-case method with an explicit null description must keep its case when it is nested
+        // inside the initialize response, which is the shape the ACP TCK fixtures put on the wire.
+        using var initJson = JsonDocument.Parse("""{"protocolVersion":1,"authMethods":[{"id":"tck","name":"TCK","description":null}]}""");
+        var response = DeserializeJson<InitializeResponse>(initJson.RootElement);
+        Assert.Equal("tck", Assert.IsType<AuthMethodAgent>(Assert.Single(response.AuthMethods!).Value).Id);
     }
 
     [Fact]
