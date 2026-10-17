@@ -368,6 +368,47 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void ReportsTaggedUnionBranchesWithoutDiscriminatorValues()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Notification": {
+                  "discriminator": { "propertyName": "kind" },
+                  "oneOf": [
+                    {
+                      "title": "Tagged",
+                      "type": "object",
+                      "properties": {
+                        "kind": { "const": "tagged" },
+                        "text": { "type": "string" }
+                      },
+                      "required": ["kind", "text"]
+                    },
+                    {
+                      "title": "Untagged",
+                      "type": "object",
+                      "properties": {
+                        "value": { "type": "string" }
+                      },
+                      "required": ["value"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "untagged-union-branch.schema.json");
+
+        var diagnostic = Assert.Single(result.Diagnostics.Where(item => item.Id == "ACPGEN003"));
+        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
+        Assert.Contains("Untagged", diagnostic.GetMessage(), StringComparison.Ordinal);
+        Assert.Contains("has no 'kind' discriminator value", diagnostic.GetMessage(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void IntentionallyUnconstrainedReferencesRemainJsonElements()
     {
         const string schema = """

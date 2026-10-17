@@ -352,12 +352,14 @@ internal sealed class SchemaModelBuilder(
                 ? Resolve(discriminatorProperty.Schema)?.Const
                 : null;
             discriminatorValue ??= InferDiscriminatorValueFromVariantTitle(name, schema, branchSchema, discriminatorName);
+            var caseDefinition = GetReferenceDefinitionName(branch) ?? branchSchema.Title ?? "Variant" + index;
             if (string.IsNullOrEmpty(discriminatorValue))
             {
+                // Skipping the branch would silently drop a case from the generated union, so report it instead.
+                ReportUnsupported(name, "union branch '" + caseDefinition + "' has no '" + discriminatorName + "' discriminator value");
                 index++;
                 continue;
             }
-            var caseDefinition = GetReferenceDefinitionName(branch) ?? branchSchema.Title ?? "Variant" + index;
             var referencedVariantName = GetReusableAllOfReferenceName(schema, branchSchema);
             if (referencedVariantName is not null && _definitions.TryGetValue(referencedVariantName, out var referencedDefinition))
             {
