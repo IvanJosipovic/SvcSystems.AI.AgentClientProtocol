@@ -1,8 +1,7 @@
 ﻿namespace SvcSystems.AI.AgentClientProtocol;
 
-
 /// <summary>Host-provided terminal operations. Configure an implementation only when agent command execution is allowed.</summary>
-                                                                                                                                      public interface ITerminalHandler
+public interface ITerminalHandler
 {
     /// <summary>Creates a terminal and starts the requested command.</summary>
     ValueTask<string> CreateAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default);

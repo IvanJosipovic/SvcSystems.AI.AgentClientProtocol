@@ -2,10 +2,8 @@
 
 using System.Text.Json;
 
-
-
 /// <summary>Consumer-facing ACP client operations.</summary>
-                                                                 public interface IClient : IAsyncDisposable
+public interface IClient : IAsyncDisposable
 {
     /// <summary>Agent identity and capabilities negotiated during initialization.</summary>
     InitializeResponse Agent { get; }
