@@ -39,28 +39,14 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 
 ## Hosting an agent
 
-Reference the `SvcSystems.AI.AgentClientProtocol.Agent` package, implement `IAcpAgentHandler`,
-and run `AcpAgent`. If no transport is supplied, the host uses the current process's stdin and
-stdout. Prompt callbacks receive an `IAcpAgentContext` for sending updates and making requests to
-the client; `session/cancel` cancels the prompt callback's token.
-
-```csharp
-using SvcSystems.AI.AgentClientProtocol.Agent;
-
-await using var agent = new AcpAgent(new MyAgentHandler());
-await agent.RunAsync(cancellationToken);
-```
-
-The agent host shares the core library's bounded JSON-RPC dispatch and source-generated wire models.
-Client requests are processed concurrently with active prompts so cancellation and reverse callbacks
-can continue to flow while a prompt handler is running.
-
-## Hosting an agent
-
 Reference the `SvcSystems.AI.AgentClientProtocol.Agent` package and implement `IAcpAgentHandler` for
 initialize, session creation, and prompt handling. `AcpAgent` uses the current process's stdin/stdout
 by default, or accepts a custom `ITransport` for embedding and tests.
 
+The handler also exposes optional callbacks for session load/resume/list/delete/close, mode and
+configuration changes, authentication, and logout. Unimplemented optional callbacks return
+"Method not found"; advertise only the capabilities your handler supports.
+
 ```csharp
 using SvcSystems.AI.AgentClientProtocol.Agent;
 
@@ -68,10 +54,9 @@ await using var agent = new AcpAgent(new MyAgentHandler());
 await agent.RunAsync(cancellationToken);
 ```
 
-Prompt handlers receive an `IAcpAgentContext` to stream `session/update` events and send requests or
-notifications back to the client. Session cancellation is delivered through the prompt handler's
-`CancellationToken`; inbound requests are dispatched concurrently within the configured bound so
-`session/cancel` can be processed while a prompt is running.
+Prompt callbacks receive an `IAcpAgentContext` to stream `session/update` messages and make client
+requests. The runtime dispatches requests concurrently within a configured bound, so
+`session/cancel` can be handled while a prompt callback is active.
 
 A dropped transport or protocol failure completes `Completion` with the failure and raises `TransportFaulted` once; a clean shutdown completes with `null` and raises nothing. `TransportFaulted` is a member of `IClient`, so external implementers of the interface must add it.
 

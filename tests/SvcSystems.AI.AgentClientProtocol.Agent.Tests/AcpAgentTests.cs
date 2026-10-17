@@ -91,6 +91,67 @@ public sealed class AcpAgentTests
         await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
     }
 
+    [Fact]
+    public async Task DispatchesOptionalSessionAndAuthenticationRequests()
+    {
+        await using var transport = new TestTransport();
+        var handler = new OptionalOperationsHandler();
+        await using var agent = new AcpAgent(handler, transport);
+        var run = agent.RunAsync(Token);
+
+        transport.Receive("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":1}}""");
+        using (var initialize = await transport.ReadSentAsync())
+        {
+            Assert.Equal(1, initialize.RootElement.GetProperty("result").GetProperty("protocolVersion").GetInt32());
+        }
+
+        var requests = new[]
+        {
+            ("session/load", """{"sessionId":"s","cwd":"/workspace","mcpServers":[]}"""),
+            ("session/resume", """{"sessionId":"s","cwd":"/workspace"}"""),
+            ("session/list", "{}"),
+            ("session/delete", """{"sessionId":"s"}"""),
+            ("session/close", """{"sessionId":"s"}"""),
+            ("session/set_mode", """{"sessionId":"s","modeId":"code"}"""),
+            ("session/set_config_option", """{"sessionId":"s","configId":"confirm","type":"boolean","value":true}"""),
+            ("authenticate", """{"methodId":"token"}"""),
+            ("logout", "{}"),
+        };
+
+        var requestId = 2;
+        foreach (var (method, parameters) in requests)
+        {
+            transport.Receive($$"""{"jsonrpc":"2.0","id":{{requestId++}},"method":"{{method}}","params":{{parameters}}}""");
+            using var response = await transport.ReadSentAsync();
+            Assert.True(response.RootElement.TryGetProperty("result", out _), $"{method} did not return a result: {response.RootElement}");
+        }
+
+        Assert.Equal(requests.Select(request => request.Item1), handler.Calls);
+        transport.CompleteInput();
+        await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
+    [Fact]
+    public async Task UnimplementedOptionalAgentMethodReturnsMethodNotFound()
+    {
+        await using var transport = new TestTransport();
+        await using var agent = new AcpAgent(new CallbackHandler(), transport);
+        var run = agent.RunAsync(Token);
+
+        transport.Receive("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":1}}""");
+        using (var initialize = await transport.ReadSentAsync())
+        {
+            Assert.Equal(1, initialize.RootElement.GetProperty("result").GetProperty("protocolVersion").GetInt32());
+        }
+
+        transport.Receive("""{"jsonrpc":"2.0","id":2,"method":"session/list","params":{}}""");
+        using var response = await transport.ReadSentAsync();
+        Assert.Equal(-32601, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+
+        transport.CompleteInput();
+        await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
     private sealed class CallbackHandler : IAcpAgentHandler
     {
         public string? PromptText { get; private set; }
@@ -149,6 +210,76 @@ public sealed class AcpAgentTests
             }
 
             throw new InvalidOperationException("The test prompt should only finish through cancellation.");
+        }
+    }
+
+    private sealed class OptionalOperationsHandler : IAcpAgentHandler
+    {
+        public List<string> Calls { get; } = [];
+
+        public ValueTask<InitializeResponse> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken) =>
+            ValueTask.FromResult(new InitializeResponse { ProtocolVersion = request.ProtocolVersion });
+
+        public ValueTask<NewSessionResponse> NewSessionAsync(NewSessionRequest request, CancellationToken cancellationToken) =>
+            ValueTask.FromResult(new NewSessionResponse { SessionId = "session" });
+
+        public ValueTask<PromptResponse> PromptAsync(PromptRequest request, IAcpAgentContext context, CancellationToken cancellationToken) =>
+            ValueTask.FromResult(new PromptResponse { StopReason = "end_turn" });
+
+        public ValueTask<LoadSessionResponse> LoadSessionAsync(LoadSessionRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("session/load");
+            return ValueTask.FromResult(new LoadSessionResponse());
+        }
+
+        public ValueTask<ResumeSessionResponse> ResumeSessionAsync(ResumeSessionRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("session/resume");
+            return ValueTask.FromResult(new ResumeSessionResponse());
+        }
+
+        public ValueTask<ListSessionsResponse> ListSessionsAsync(ListSessionsRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("session/list");
+            return ValueTask.FromResult(new ListSessionsResponse { Sessions = [] });
+        }
+
+        public ValueTask<DeleteSessionResponse> DeleteSessionAsync(DeleteSessionRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("session/delete");
+            return ValueTask.FromResult(new DeleteSessionResponse());
+        }
+
+        public ValueTask<CloseSessionResponse> CloseSessionAsync(CloseSessionRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("session/close");
+            return ValueTask.FromResult(new CloseSessionResponse());
+        }
+
+        public ValueTask<SetSessionModeResponse> SetSessionModeAsync(SetSessionModeRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("session/set_mode");
+            return ValueTask.FromResult(new SetSessionModeResponse());
+        }
+
+        public ValueTask<SetSessionConfigOptionResponse> SetSessionConfigOptionAsync(
+            SetSessionConfigOptionRequest request,
+            CancellationToken cancellationToken)
+        {
+            Calls.Add("session/set_config_option");
+            return ValueTask.FromResult(new SetSessionConfigOptionResponse { ConfigOptions = [] });
+        }
+
+        public ValueTask<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("authenticate");
+            return ValueTask.FromResult(new AuthenticateResponse());
+        }
+
+        public ValueTask<LogoutResponse> LogoutAsync(LogoutRequest request, CancellationToken cancellationToken)
+        {
+            Calls.Add("logout");
+            return ValueTask.FromResult(new LogoutResponse());
         }
     }
 

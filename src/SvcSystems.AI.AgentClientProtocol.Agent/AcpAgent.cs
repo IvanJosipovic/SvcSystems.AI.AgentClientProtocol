@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using SvcSystems.AI.AgentClientProtocol.Agent.Models;
 using SvcSystems.AI.AgentClientProtocol.JsonRpc;
 using SvcSystems.AI.AgentClientProtocol.Serialization;
@@ -124,7 +125,48 @@ public sealed class AcpAgent : IAsyncDisposable
         });
 
         _connection.RegisterRequestHandler("session/prompt", HandlePromptAsync);
+        RegisterRequestHandler("session/load", JsonContext.Default.LoadSessionRequest, JsonContext.Default.LoadSessionResponse, _handler.LoadSessionAsync);
+        RegisterRequestHandler("session/resume", JsonContext.Default.ResumeSessionRequest, JsonContext.Default.ResumeSessionResponse, _handler.ResumeSessionAsync);
+        RegisterRequestHandler("session/list", JsonContext.Default.ListSessionsRequest, JsonContext.Default.ListSessionsResponse, _handler.ListSessionsAsync);
+        RegisterRequestHandler("session/delete", JsonContext.Default.DeleteSessionRequest, JsonContext.Default.DeleteSessionResponse, _handler.DeleteSessionAsync);
+        RegisterRequestHandler("session/close", JsonContext.Default.CloseSessionRequest, JsonContext.Default.CloseSessionResponse, _handler.CloseSessionAsync);
+        RegisterRequestHandler("session/set_mode", JsonContext.Default.SetSessionModeRequest, JsonContext.Default.SetSessionModeResponse, _handler.SetSessionModeAsync);
+        RegisterRequestHandler(
+            "session/set_config_option",
+            JsonContext.Default.SetSessionConfigOptionRequest,
+            JsonContext.Default.SetSessionConfigOptionResponse,
+            _handler.SetSessionConfigOptionAsync);
+        RegisterRequestHandler("authenticate", JsonContext.Default.AuthenticateRequest, JsonContext.Default.AuthenticateResponse, _handler.AuthenticateAsync);
+        RegisterRequestHandler("logout", JsonContext.Default.LogoutRequest, JsonContext.Default.LogoutResponse, _handler.LogoutAsync);
         _connection.RegisterNotificationHandler("session/cancel", HandleCancelAsync);
+    }
+
+    private void RegisterRequestHandler<TRequest, TResponse>(
+        string method,
+        JsonTypeInfo<TRequest> requestTypeInfo,
+        JsonTypeInfo<TResponse> responseTypeInfo,
+        Func<TRequest, CancellationToken, ValueTask<TResponse>> handler)
+    {
+        _connection.RegisterRequestHandler(method, async (parameters, cancellationToken) =>
+        {
+            TRequest request;
+            try
+            {
+                var deserialized = parameters.Deserialize(requestTypeInfo);
+                if (deserialized is null)
+                {
+                    throw new JsonException("Request params cannot be null.");
+                }
+                request = deserialized;
+            }
+            catch (JsonException)
+            {
+                throw new RpcException(-32602, "Request params are invalid.", method);
+            }
+
+            var response = await handler(request, cancellationToken).ConfigureAwait(false);
+            return JsonSerializer.SerializeToUtf8Bytes(response, responseTypeInfo);
+        });
     }
 
     private async ValueTask<byte[]> HandlePromptAsync(JsonElement parameters, CancellationToken shutdownToken)
