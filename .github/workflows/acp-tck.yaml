@@ -39,7 +39,7 @@ jobs:
         run: ./a/tools/Test-AcpTck.ps1
       - name: Upload upstream conformance reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: acp-tck-v1-${{ matrix.os }}
           path: a/artifacts/acp-tck/reports
