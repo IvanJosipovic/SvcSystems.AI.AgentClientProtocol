@@ -52,10 +52,15 @@ public sealed class Client : IClient
         _connection.UnhandledNotificationReceived = HandleExtensionNotification;
         // Surface the terminal failure without requiring callers to observe Completion. The continuation
         // runs on the thread pool rather than the receive loop so a slow handler cannot stall teardown.
+        // CompletedTask only ever reports a result (never faults), but Status is checked rather than
+        // Result so this continuation can never observe an exception and fault unobserved.
         _ = _connection.Completion.ContinueWith(
             static (completion, state) =>
             {
-                if (completion.Result is { } failure) ((Client)state!).RaiseTransportFaulted(failure);
+                if (completion.Status == TaskStatus.RanToCompletion && completion.Result is { } failure)
+                {
+                    ((Client)state!).RaiseTransportFaulted(failure);
+                }
             },
             this,
             CancellationToken.None,
@@ -737,15 +742,29 @@ public sealed class Client : IClient
 
     private void RaiseTransportFaulted(Exception failure)
     {
-        var handler = TransportFaulted;
-        if (handler is null) return;
-        try
+        // A fault can race with disposal; do not notify subscribers after the client is torn down.
+        if (Volatile.Read(ref _disposed) != 0) return;
+        if (TransportFaulted is not { } subscribers) return;
+        var args = new TransportFaultedEventArgs(failure);
+        // Invoke each subscriber in isolation: a throwing handler must not prevent the remaining
+        // subscribers from learning that the connection has gone away.
+        foreach (var subscriber in subscribers.GetInvocationList())
         {
-            handler(this, new TransportFaultedEventArgs(failure));
-        }
-        catch (Exception handlerException)
-        {
-            _logger?.LogWarning(handlerException, "An ACP transport-fault handler threw.");
+            try
+            {
+                ((EventHandler<TransportFaultedEventArgs>)subscriber).Invoke(this, args);
+            }
+            catch (Exception handlerException)
+            {
+                try
+                {
+                    _logger?.LogWarning(handlerException, "An ACP transport-fault handler threw.");
+                }
+                catch
+                {
+                    // A failing diagnostic sink must never fault connection teardown.
+                }
+            }
         }
     }
 

@@ -9,7 +9,12 @@ namespace SvcSystems.AI.AgentClientProtocol;
 public static class AgentClientProtocolServiceCollectionExtensions
 {
     /// <summary>Registers an <see cref="IAcpClientFactory"/> and an <see cref="IRegistryClient"/>.</summary>
-    /// <remarks>Existing registrations are preserved, so calling this method more than once is safe.</remarks>
+    /// <remarks>Existing registrations are preserved, so calling this method more than once is safe.
+    /// Both services are singletons and <paramref name="defaultClientOptions"/> is invoked once, on first
+    /// resolution, from the container root: it must not depend on scoped services.
+    /// <para>The registry client uses a container-registered <see cref="HttpClient"/> when one is present
+    /// (the caller then owns that client) and otherwise creates and owns its own. Registering an
+    /// <c>IHttpClientFactory</c>-configured client is the caller's responsibility.</para></remarks>
     /// <param name="services">The service collection to register into.</param>
     /// <param name="defaultClientOptions">Builds the <see cref="ClientOptions"/> used when callers do not supply
     /// their own. When null, a default instance that reports diagnostics through the container's

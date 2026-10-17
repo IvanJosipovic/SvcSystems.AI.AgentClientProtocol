@@ -26,17 +26,35 @@ public sealed class TransportFaultTests
     }
 
     [Fact]
+    public async Task AThrowingHandlerDoesNotStopOtherHandlersFromBeingNotified()
+    {
+        await using var transport = new InitializeTransport();
+        await using var client = await ConnectAsync(transport);
+        var faulted = new TaskCompletionSource<TransportFaultedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+        client.TransportFaulted += (_, _) => throw new InvalidOperationException("This handler always throws.");
+        client.TransportFaulted += (_, args) => faulted.TrySetResult(args);
+
+        transport.CloseOutput();
+
+        var args = await faulted.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        Assert.IsType<ProcessException>(args.Exception);
+    }
+
+    [Fact]
     public async Task NoFaultIsRaisedForACleanShutdown()
     {
         await using var transport = new InitializeTransport();
         var client = await ConnectAsync(transport);
-        var raised = false;
-        client.TransportFaulted += (_, _) => raised = true;
+        var faulted = new TaskCompletionSource<TransportFaultedEventArgs>(TaskCreationOptions.RunContinuationsAsynchronously);
+        client.TransportFaulted += (_, args) => faulted.TrySetResult(args);
 
         await client.DisposeAsync();
 
         Assert.Null(await client.Completion.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        Assert.False(raised);
+        // The event is raised from an asynchronous continuation, so observe a bounded window before
+        // asserting it did not fire; an immediate check could pass before a (wrong) raise happens.
+        var winner = await Task.WhenAny(faulted.Task, Task.Delay(TimeSpan.FromMilliseconds(250), TestContext.Current.CancellationToken));
+        Assert.NotSame(faulted.Task, winner);
     }
 
     private static async Task<AcpClient> ConnectAsync(InitializeTransport transport)

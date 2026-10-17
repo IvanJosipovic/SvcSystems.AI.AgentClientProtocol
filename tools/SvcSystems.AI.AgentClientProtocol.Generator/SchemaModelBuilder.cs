@@ -83,6 +83,11 @@ internal sealed class SchemaModelBuilder(
         // lists, so emit in a stable name order. Without this an upstream reorder of the schema's
         // $defs would reshuffle those committed files even though no type changed. Sorting runs after
         // all lookups above, so no build behaviour depends on it.
+        //
+        // List.Sort is not stable, so the comparators must be total: type names are unique (AddDefinition
+        // dedupes via _emitted, and variant names are merged through FindIndex) and method triples are
+        // guaranteed unique by the guard above, so no two entries compare equal and the order is fully
+        // determined by the model.
         _model.Types.Sort(static (left, right) => string.CompareOrdinal(left.Name, right.Name));
         _model.Methods.Sort(static (left, right) =>
         {

@@ -93,18 +93,34 @@ internal static class ModelRenderer
     /// independent of <see cref="SchemaModel.Types"/> iteration order stops a schema reorder from
     /// rewriting every generated file.
     /// </summary>
+    /// <remarks>
+    /// Only namespaces that actually contain a type are returned. Seeding a role namespace that has
+    /// no types would emit a <c>using</c> for a namespace that is never declared, which fails the
+    /// consumer's compilation.
+    /// </remarks>
     private static string[] GetModelNamespaces(SchemaModel model, SchemaGeneratorOptions options)
     {
-        var namespaces = new List<string>(3);
+        var used = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var type in model.Types) used.Add(GetModelNamespace(type, options));
+
+        var namespaces = new List<string>(used.Count);
         Add(options.ModelNamespace);
         Add(options.ClientNamespace);
         Add(options.AgentNamespace);
-        foreach (var type in model.Types) Add(GetModelNamespace(type, options));
+        foreach (var extra in used.Where(candidate => !namespaces.Contains(candidate, StringComparer.Ordinal))
+                     .OrderBy(candidate => candidate, StringComparer.Ordinal))
+        {
+            namespaces.Add(extra);
+        }
+
         return [.. namespaces];
 
         void Add(string? candidate)
         {
-            if (candidate is not null && !namespaces.Contains(candidate, StringComparer.Ordinal)) namespaces.Add(candidate);
+            if (candidate is not null && used.Contains(candidate) && !namespaces.Contains(candidate, StringComparer.Ordinal))
+            {
+                namespaces.Add(candidate);
+            }
         }
     }
 

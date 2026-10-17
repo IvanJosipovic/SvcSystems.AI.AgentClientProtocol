@@ -37,7 +37,7 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 
 `Client.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
 
-A dropped transport or protocol failure completes `Completion` with the failure and raises `TransportFaulted` once; a clean shutdown completes with `null` and raises nothing.
+A dropped transport or protocol failure completes `Completion` with the failure and raises `TransportFaulted` once; a clean shutdown completes with `null` and raises nothing. `TransportFaulted` is a member of `IClient`, so external implementers of the interface must add it.
 
 Unrecognized JSON-RPC notifications, including agent-specific extensions such as `_auth/status_update`, are ignored without closing the connection. Unsupported requests still receive a JSON-RPC "Method not found" error.
 
@@ -97,6 +97,11 @@ The incremental Roslyn generator builds typed wire models and trim-safe JSON wri
 checked-in ACP v1 schema. Open payloads such as `_meta` remain `JsonElement`-based; the library
 does not use reflection-based `JsonSerializer` overloads.
 
+A tagged-union branch that declares neither a `const` discriminator value nor an inferable title
+is reported as `ACPGEN003` and fails the build, rather than silently dropping that case from the
+generated union. A schema whose naming collides, or whose generator options and metadata files are
+missing, invalid, or ambiguous, is likewise reported (`ACPGEN001`–`ACPGEN008`).
+
 ## ACP Registry
 
 `RegistryClient` fetches the registry index using a caller-managed `HttpClient`; pass an
@@ -119,11 +124,15 @@ registrations are preserved, so the call is safe to repeat.
 using SvcSystems.AI.AgentClientProtocol;
 
 services.AddAgentClientProtocol();
-// Or supply default options and a registry mirror:
+// Or point the registry client at a mirror:
 services.AddAgentClientProtocol(
-    provider => new ClientOptions { LoggerFactory = provider.GetService<ILoggerFactory>() },
-    new Uri("https://mirror.example/registry.json"));
+    registryIndexUri: new Uri("https://mirror.example/registry.json"));
 ```
+
+Both services are singletons, and a `defaultClientOptions` factory (when supplied) is invoked once
+from the container root, so it must not depend on scoped services. When `defaultClientOptions` is
+null, the factory builds options that report through the container's `ILoggerFactory`; pass your
+own factory to replace those defaults entirely.
 
 ```csharp
 public sealed class AgentRunner(IAcpClientFactory clients)

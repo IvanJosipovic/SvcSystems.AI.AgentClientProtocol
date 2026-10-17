@@ -13,7 +13,10 @@ public interface IClient : IAsyncDisposable
 
     /// <summary>Raised once when the connection ends because of a transport or protocol failure.</summary>
     /// <remarks>Not raised for a clean shutdown. The same failure is available as the result of
-    /// <see cref="Completion"/>. Handlers run on a thread-pool thread and must not block.</remarks>
+    /// <see cref="Completion"/>, but the two are not ordered: <see cref="Completion"/> may complete
+    /// before the event is raised, and no event is raised once the client has been disposed.
+    /// Handlers run on a thread-pool thread and must not block; a throwing handler does not prevent
+    /// the remaining handlers from running.</remarks>
     event EventHandler<TransportFaultedEventArgs>? TransportFaulted;
 
     /// <summary>Latest reported authentication identity, or null when the agent has not reported one.</summary>
