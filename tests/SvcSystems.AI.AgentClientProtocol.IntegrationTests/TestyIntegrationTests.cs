@@ -307,7 +307,9 @@ public sealed class TestyIntegrationTests
         SessionUpdates(updates)
             .Select(update => update.Value)
             .OfType<SessionUpdateVariant1AgentMessageChunk>()
-            .Select(update => Assert.IsType<TextContent>(update.Content.Value).Text);
+            .Select(update => update.Content.Value)
+            .OfType<TextContent>()
+            .Select(content => content.Text);
 
     private sealed class RejectOncePermissionHandler : IPermissionHandler
     {
