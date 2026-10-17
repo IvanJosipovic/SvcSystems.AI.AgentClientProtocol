@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Registry.Models;
 
 namespace SvcSystems.AI.AgentClientProtocol.Registry;
@@ -81,10 +80,8 @@ public sealed class RegistryAgentLauncher : IDisposable
         }
 
         var platform = GetRegistryPlatform();
-        if (platform is not null && agent.Distribution.Binary?.Targets is { } targets && targets.TryGetValue(platform.Value.RegistryName, out var targetJson))
+        if (platform is not null && agent.Distribution.Binary is { } binary && binary.Targets.TryGetValue(platform.Value.RegistryName, out var target))
         {
-            var target = targetJson.Deserialize(Serialization.RegistryJsonContext.Default.binaryTarget)
-                ?? throw new RegistryAgentLaunchException($"Agent '{agent.Id}' has an invalid binary target for {platform.Value.RegistryName}.");
             var executable = await EnsureBinaryInstalledAsync(
                 agent,
                 platform.Value,

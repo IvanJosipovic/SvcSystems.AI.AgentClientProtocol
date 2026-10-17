@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Registry;
 using SvcSystems.AI.AgentClientProtocol.Registry.Models;
 using SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
@@ -76,15 +75,15 @@ public sealed class RegistryAgentLauncherTests
         var sha256 = Convert.ToHexString(SHA256.HashData(zipBytes));
         var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
         {
-            Targets = new Dictionary<string, JsonElement>
+            Targets = new Dictionary<string, binaryTarget>
             {
-                [platform.Value.RegistryName] = JsonSerializer.SerializeToElement(new binaryTarget
+                [platform.Value.RegistryName] = new binaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Sha256 = sha256,
                     Cmd = "agent.exe",
                     Args = ["acp"],
-                }, RegistryJsonContext.Default.binaryTarget),
+                },
             },
         });
         var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}");
@@ -119,14 +118,14 @@ public sealed class RegistryAgentLauncherTests
         var zipBytes = CreateZip("agent.exe", "test executable");
         var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
         {
-            Targets = new Dictionary<string, JsonElement>
+            Targets = new Dictionary<string, binaryTarget>
             {
-                [platform.Value.RegistryName] = JsonSerializer.SerializeToElement(new binaryTarget
+                [platform.Value.RegistryName] = new binaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Sha256 = new string('0', 64),
                     Cmd = "agent.exe",
-                }, RegistryJsonContext.Default.binaryTarget),
+                },
             },
         });
         var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}");
@@ -302,13 +301,13 @@ public sealed class RegistryAgentLauncherTests
 
     private static binaryDistribution CreateBinaryDistribution(string platform, string archive, string command) => new()
     {
-        Targets = new Dictionary<string, JsonElement>
+        Targets = new Dictionary<string, binaryTarget>
         {
-            [platform] = JsonSerializer.SerializeToElement(new binaryTarget
+            [platform] = new binaryTarget
             {
                 Archive = archive,
                 Cmd = command,
-            }, RegistryJsonContext.Default.binaryTarget),
+            },
         },
     };
 
