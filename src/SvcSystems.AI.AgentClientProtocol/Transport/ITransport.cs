@@ -1,1 +1,17 @@
-﻿namespace SvcSystems.AI.AgentClientProtocol.Transport;/// <summary>Bidirectional framed transport used by an ACP client.</summary>/// <remarks>Each send is one complete JSON-RPC message; each received item must contain one complete message.</remarks>public interface ITransport : IAsyncDisposable{    /// <summary>Sends one complete JSON-RPC message.</summary>    /// <param name="message">The serialized message bytes.</param>    /// <param name="cancellationToken">A token that cancels the send operation.</param>    /// <returns>A task that represents the asynchronous send operation.</returns>    ValueTask SendAsync(ReadOnlyMemory<byte> message, CancellationToken cancellationToken);    /// <summary>Receives complete JSON-RPC messages.</summary>    /// <param name="cancellationToken">A token that cancels the receive operation.</param>    /// <returns>An asynchronous sequence of serialized message bytes.</returns>    IAsyncEnumerable<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken);}
+﻿namespace SvcSystems.AI.AgentClientProtocol.Transport;
+
+/// <summary>Bidirectional framed transport used by an ACP client.</summary>
+/// <remarks>Each send is one complete JSON-RPC message; each received item must contain one complete message.</remarks>
+public interface ITransport : IAsyncDisposable
+{
+    /// <summary>Sends one complete JSON-RPC message.</summary>
+    /// <param name="message">The serialized message bytes.</param>
+    /// <param name="cancellationToken">A token that cancels the send operation.</param>
+    /// <returns>A task that represents the asynchronous send operation.</returns>
+    ValueTask SendAsync(ReadOnlyMemory<byte> message, CancellationToken cancellationToken);
+
+    /// <summary>Receives complete JSON-RPC messages.</summary>
+    /// <param name="cancellationToken">A token that cancels the receive operation.</param>
+    /// <returns>An asynchronous sequence of serialized message bytes.</returns>
+    IAsyncEnumerable<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken);
+}

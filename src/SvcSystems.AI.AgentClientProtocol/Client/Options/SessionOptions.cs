@@ -1,1 +1,19 @@
-﻿using System.Text.Json;namespace SvcSystems.AI.AgentClientProtocol;/// <summary>Options used to create or load an ACP session.</summary>public sealed class SessionOptions{    /// <summary>Absolute working directory for the session.</summary>    public required string WorkingDirectory { get; init; }    /// <summary>Additional absolute workspace directories, when supported by the agent.</summary>    public IReadOnlyList<string> AdditionalDirectories { get; init; } = [];    /// <summary>MCP servers configured for this session.</summary>    public IReadOnlyList<McpServer> McpServers { get; init; } = [];    /// <summary>ACP _meta attached to session/new, session/load, or session/resume.</summary>    public IReadOnlyDictionary<string, JsonElement>? Metadata { get; init; }}
+﻿using System.Text.Json;
+
+namespace SvcSystems.AI.AgentClientProtocol;
+
+/// <summary>Options used to create or load an ACP session.</summary>
+public sealed class SessionOptions
+{
+    /// <summary>Absolute working directory for the session.</summary>
+    public required string WorkingDirectory { get; init; }
+
+    /// <summary>Additional absolute workspace directories, when supported by the agent.</summary>
+    public IReadOnlyList<string> AdditionalDirectories { get; init; } = [];
+
+    /// <summary>MCP servers configured for this session.</summary>
+    public IReadOnlyList<McpServer> McpServers { get; init; } = [];
+
+    /// <summary>ACP _meta attached to session/new, session/load, or session/resume.</summary>
+    public IReadOnlyDictionary<string, JsonElement>? Metadata { get; init; }
+}

@@ -1,1 +1,43 @@
-﻿using SvcSystems.AI.AgentClientProtocol;using AcpClient = SvcSystems.AI.AgentClientProtocol.Client.Client;if (args is ["--extension-smoke-test"]){    await ExtensionSmokeTest.RunAsync();    return;}if (args is ["--help"] or ["-h"]){    Console.WriteLine("Usage: SvcSystems.AI.AgentClientProtocol.Console [agent-executable] [agent-arguments...]");    Console.WriteLine("ACP_PROMPT can set the default prompt text.");    Console.WriteLine("--extension-smoke-test validates extension APIs without an external agent.");    return;}var executable = args.FirstOrDefault() ?? "opencode";var agentArguments = args.Length > 1 ? args.Skip(1).ToArray() : ["acp"];var prompt = Environment.GetEnvironmentVariable("ACP_PROMPT") ??    "Explain the repository in a short, actionable summary.";await using var client = await AcpClient.StartAsync(    new ProcessOptions    {        FileName = executable,        Arguments = agentArguments,        WorkingDirectory = Directory.GetCurrentDirectory(),        StandardErrorReceived = line => Console.Error.WriteLine("[agent] " + line)    });var agentInfo = client.Agent.AgentInfo;var agentVersion = string.IsNullOrWhiteSpace(agentInfo?.Version) ? string.Empty : $" {agentInfo.Version}";Console.WriteLine($"Connected to {agentInfo?.Name ?? "ACP agent"}{agentVersion} (ACP v{client.Agent.ProtocolVersion}).");var session = await client.CreateSessionAsync(new SessionOptions{    WorkingDirectory = Directory.GetCurrentDirectory()});await foreach (var update in session.PromptAsync(prompt)){    Console.WriteLine(update);}
+﻿using SvcSystems.AI.AgentClientProtocol;
+using AcpClient = SvcSystems.AI.AgentClientProtocol.Client.Client;
+
+if (args is ["--extension-smoke-test"])
+{
+    await ExtensionSmokeTest.RunAsync();
+    return;
+}
+
+if (args is ["--help"] or ["-h"])
+{
+    Console.WriteLine("Usage: SvcSystems.AI.AgentClientProtocol.Console [agent-executable] [agent-arguments...]");
+    Console.WriteLine("ACP_PROMPT can set the default prompt text.");
+    Console.WriteLine("--extension-smoke-test validates extension APIs without an external agent.");
+    return;
+}
+
+var executable = args.FirstOrDefault() ?? "opencode";
+var agentArguments = args.Length > 1 ? args.Skip(1).ToArray() : ["acp"];
+var prompt = Environment.GetEnvironmentVariable("ACP_PROMPT") ??
+    "Explain the repository in a short, actionable summary.";
+
+await using var client = await AcpClient.StartAsync(
+    new ProcessOptions
+    {
+        FileName = executable,
+        Arguments = agentArguments,
+        WorkingDirectory = Directory.GetCurrentDirectory(),
+        StandardErrorReceived = line => Console.Error.WriteLine("[agent] " + line)
+    });
+
+var agentInfo = client.Agent.AgentInfo;
+var agentVersion = string.IsNullOrWhiteSpace(agentInfo?.Version) ? string.Empty : $" {agentInfo.Version}";
+Console.WriteLine($"Connected to {agentInfo?.Name ?? "ACP agent"}{agentVersion} (ACP v{client.Agent.ProtocolVersion}).");
+var session = await client.CreateSessionAsync(new SessionOptions
+{
+    WorkingDirectory = Directory.GetCurrentDirectory()
+});
+
+await foreach (var update in session.PromptAsync(prompt))
+{
+    Console.WriteLine(update);
+}

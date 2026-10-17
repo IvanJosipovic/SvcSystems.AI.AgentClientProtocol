@@ -1,1 +1,20 @@
-﻿namespace SvcSystems.AI.AgentClientProtocol;/// <summary>Decision returned for an agent permission request.</summary>public sealed record PermissionDecision(string? SelectedOptionId, bool Cancelled = false){    /// <summary>Accepts an option advertised in the permission request.</summary>    public static PermissionDecision Select(string optionId) => new(optionId);    /// <summary>Indicates that the prompt turn was cancelled before the user responded.</summary>    public static PermissionDecision Cancel() => new(null, Cancelled: true);}/// <summary>Provides host decisions for ACP permission requests.</summary>public interface IPermissionHandler{    /// <summary>Requests a user or policy decision for the supplied operation.</summary>    ValueTask<PermissionDecision> RequestPermissionAsync(        RequestPermissionRequest request,        CancellationToken cancellationToken = default);}
+﻿namespace SvcSystems.AI.AgentClientProtocol;
+
+/// <summary>Decision returned for an agent permission request.</summary>
+public sealed record PermissionDecision(string? SelectedOptionId, bool Cancelled = false)
+{
+    /// <summary>Accepts an option advertised in the permission request.</summary>
+    public static PermissionDecision Select(string optionId) => new(optionId);
+
+    /// <summary>Indicates that the prompt turn was cancelled before the user responded.</summary>
+    public static PermissionDecision Cancel() => new(null, Cancelled: true);
+}
+
+/// <summary>Provides host decisions for ACP permission requests.</summary>
+public interface IPermissionHandler
+{
+    /// <summary>Requests a user or policy decision for the supplied operation.</summary>
+    ValueTask<PermissionDecision> RequestPermissionAsync(
+        RequestPermissionRequest request,
+        CancellationToken cancellationToken = default);
+}

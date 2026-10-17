@@ -19,6 +19,7 @@ csharp_style_prefer_primary_constructors = false:suggestion
 dotnet_diagnostic.IDE0005.severity = error
 
 [*.{json,yml,yaml,md}]
+end_of_line = lf
 insert_final_newline = true
 
 [*.{csproj,props}]

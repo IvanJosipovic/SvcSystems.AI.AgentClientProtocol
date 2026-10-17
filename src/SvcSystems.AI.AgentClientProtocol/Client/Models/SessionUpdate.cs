@@ -1,1 +1,10 @@
-﻿namespace SvcSystems.AI.AgentClientProtocol;/// <summary>A session update or the response that completes a prompt turn.</summary>public abstract record SessionEvent;/// <summary>A schema-generated ACP session update.</summary>public sealed record SessionUpdateEvent(SessionUpdate Update) : SessionEvent;/// <summary>The schema-generated response that ends a prompt turn.</summary>public sealed record Completed(PromptResponse Response) : SessionEvent;
+﻿namespace SvcSystems.AI.AgentClientProtocol;
+
+/// <summary>A session update or the response that completes a prompt turn.</summary>
+public abstract record SessionEvent;
+
+/// <summary>A schema-generated ACP session update.</summary>
+public sealed record SessionUpdateEvent(SessionUpdate Update) : SessionEvent;
+
+/// <summary>The schema-generated response that ends a prompt turn.</summary>
+public sealed record Completed(PromptResponse Response) : SessionEvent;
