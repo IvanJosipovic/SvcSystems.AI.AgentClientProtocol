@@ -8,4 +8,7 @@ public sealed class RegistryAgentLauncherOptions
     /// Defaults to <c>agents</c> under the process working directory.
     /// </summary>
     public string? AgentsDirectory { get; init; }
+
+    /// <summary>Gets or sets which registry release channel to launch. Defaults to stable.</summary>
+    public RegistryAgentReleaseChannel ReleaseChannel { get; init; } = RegistryAgentReleaseChannel.Stable;
 }

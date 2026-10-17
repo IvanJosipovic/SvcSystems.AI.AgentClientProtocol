@@ -67,6 +67,84 @@ public sealed class RegistryAgentLauncherTests
     }
 
     [Fact]
+    public async Task PreviewChannelUsesItsPinnedNpxDistributionWhenSelected()
+    {
+        var agent = CreateAgent(
+            "preview-agent",
+            "1.0.0",
+            npx: new packageDistribution { Package = "preview-agent@1.0.0" },
+            preview: new previewChannel
+            {
+                Version = "1.1.0-preview.2",
+                Distribution = new previewChannelDistribution
+                {
+                    Npx = new packageDistribution { Package = "preview-agent@1.1.0-preview.2", Args = ["--acp"] },
+                },
+            });
+        using var launcher = CreateLauncher(
+            (_, _) => Task.FromResult<string?>("fake-npx"),
+            new RegistryAgentLauncherOptions { ReleaseChannel = RegistryAgentReleaseChannel.Preview });
+
+        var process = await launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(["--yes", "preview-agent@1.1.0-preview.2", "--acp"], process.Arguments);
+    }
+
+    [Fact]
+    public async Task PreviewBinaryUsesPreviewVersionInItsCachePath()
+    {
+        var platform = RegistryAgentLauncher.GetRegistryPlatform();
+        Assert.NotNull(platform);
+        var zipBytes = CreateZip("agent.exe", "preview executable");
+        var agent = CreateAgent(
+            "preview-binary-agent",
+            "1.0.0",
+            npx: new packageDistribution { Package = "preview-binary-agent@1.0.0" },
+            preview: new previewChannel
+            {
+                Version = "1.1.0-preview.3",
+                Distribution = new previewChannelDistribution
+                {
+                    Binary = CreateBinaryDistribution(platform.Value.RegistryName, "https://registry.test/preview.zip", "agent.exe"),
+                },
+            });
+        var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-preview-agents-{Guid.NewGuid():N}");
+        using var httpClient = new HttpClient(new StaticResponseHandler(zipBytes));
+        using var launcher = new RegistryAgentLauncher(
+            httpClient,
+            new RegistryAgentLauncherOptions { AgentsDirectory = agentsDirectory, ReleaseChannel = RegistryAgentReleaseChannel.Preview },
+            (_, _) => Task.FromResult<string?>(null));
+
+        try
+        {
+            var process = await launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken);
+            Assert.Contains(Path.Combine("preview-binary-agent", "1.1.0-preview.3", platform.Value.RuntimeIdentifier), process.FileName, StringComparison.Ordinal);
+            Assert.Equal("preview executable", await File.ReadAllTextAsync(process.FileName, TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            if (Directory.Exists(agentsDirectory))
+            {
+                Directory.Delete(agentsDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task PreviewSelectionDoesNotSilentlyFallBackToStable()
+    {
+        var agent = CreateAgent("stable-only", "1.0.0", npx: new packageDistribution { Package = "stable-only@1.0.0" });
+        using var launcher = CreateLauncher(
+            (_, _) => Task.FromResult<string?>("fake-npx"),
+            new RegistryAgentLauncherOptions { ReleaseChannel = RegistryAgentReleaseChannel.Preview });
+
+        var exception = await Assert.ThrowsAsync<RegistryAgentLaunchException>(
+            () => launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Contains("does not advertise a preview", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task FallsBackToBinaryWhenPackageManagersAreUnavailableAndVerifiesArchiveChecksum()
     {
         var platform = RegistryAgentLauncher.GetRegistryPlatform();
@@ -279,10 +357,13 @@ public sealed class RegistryAgentLauncherTests
 
     private static string NpxCommand => OperatingSystem.IsWindows() ? "npx.cmd" : "npx";
 
-    private static RegistryAgentLauncher CreateLauncher(Func<string, CancellationToken, Task<string?>> findCommand) =>
+    private static RegistryAgentLauncher CreateLauncher(
+        Func<string, CancellationToken, Task<string?>> findCommand,
+        RegistryAgentLauncherOptions? options = null) =>
         new(null, new RegistryAgentLauncherOptions
         {
-            AgentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}"),
+            AgentsDirectory = options?.AgentsDirectory ?? Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}"),
+            ReleaseChannel = options?.ReleaseChannel ?? RegistryAgentReleaseChannel.Stable,
         }, findCommand);
 
     private static RegistryAgent CreateAgent(
@@ -290,13 +371,15 @@ public sealed class RegistryAgentLauncherTests
         string version,
         packageDistribution? npx = null,
         packageDistribution? uvx = null,
-        binaryDistribution? binary = null) => new()
+        binaryDistribution? binary = null,
+        previewChannel? preview = null) => new()
     {
         Id = id,
         Name = id,
         Version = version,
         Description = id,
         Distribution = new RegistryAgentDistribution { Npx = npx, Uvx = uvx, Binary = binary },
+        Preview = preview,
     };
 
     private static binaryDistribution CreateBinaryDistribution(string platform, string archive, string command) => new()
