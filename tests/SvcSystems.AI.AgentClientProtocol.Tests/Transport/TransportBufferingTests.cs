@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using SvcSystems.AI.AgentClientProtocol.Transport;
 using Xunit;
 

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
 using Xunit;
 

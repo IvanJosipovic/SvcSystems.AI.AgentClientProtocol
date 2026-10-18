@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -9,9 +9,9 @@ using SvcSystems.AI.AgentClientProtocol.Transport;
 namespace SvcSystems.AI.AgentClientProtocol.Agent;
 
 /// <summary>Hosts an ACP agent over a caller-provided transport or the process stdio streams.</summary>
-public sealed class AcpAgent : IAsyncDisposable
+public sealed class Agent : IAsyncDisposable
 {
-    private readonly IAcpAgentHandler _handler;
+    private readonly IAgentHandler _handler;
     private readonly DeferredTransport _transport;
     private readonly JsonRpcConnection _connection;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activePrompts = new(StringComparer.Ordinal);
@@ -19,10 +19,10 @@ public sealed class AcpAgent : IAsyncDisposable
     private int _disposed;
 
     /// <summary>Creates an ACP agent host. If no transport is supplied, stdin/stdout stdio is used.</summary>
-    public AcpAgent(IAcpAgentHandler handler, ITransport? transport = null, AcpAgentOptions? options = null)
+    public Agent(IAgentHandler handler, ITransport? transport = null, AgentOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(handler);
-        options ??= new AcpAgentOptions();
+        options ??= new AgentOptions();
         if (options.MaximumConcurrentIncomingRequests <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(options), "Maximum concurrent incoming requests must be positive.");
@@ -180,7 +180,7 @@ public sealed class AcpAgent : IAsyncDisposable
 
         try
         {
-            var context = new AcpAgentContext(_connection);
+            var context = new AgentContext(_connection);
             PromptResponse response;
             try
             {

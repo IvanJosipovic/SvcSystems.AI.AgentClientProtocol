@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
 using SvcSystems.AI.AgentClientProtocol.Transport;

@@ -1,12 +1,11 @@
-using System.IO.Compression;
+﻿using System.Diagnostics;
 using System.Formats.Tar;
-using System.Diagnostics;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using SvcSystems.AI.AgentClientProtocol.Registry;
 using SvcSystems.AI.AgentClientProtocol.Registry.Models;
-using SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
 using Xunit;
 
 namespace SvcSystems.AI.AgentClientProtocol.Tests;
@@ -373,14 +372,14 @@ public sealed class RegistryAgentLauncherTests
         packageDistribution? uvx = null,
         binaryDistribution? binary = null,
         previewChannel? preview = null) => new()
-    {
-        Id = id,
-        Name = id,
-        Version = version,
-        Description = id,
-        Distribution = new RegistryAgentDistribution { Npx = npx, Uvx = uvx, Binary = binary },
-        Preview = preview,
-    };
+        {
+            Id = id,
+            Name = id,
+            Version = version,
+            Description = id,
+            Distribution = new RegistryAgentDistribution { Npx = npx, Uvx = uvx, Binary = binary },
+            Preview = preview,
+        };
 
     private static binaryDistribution CreateBinaryDistribution(string platform, string archive, string command) => new()
     {

@@ -1,5 +1,4 @@
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Xunit;
 
 namespace SvcSystems.AI.AgentClientProtocol.Tests;

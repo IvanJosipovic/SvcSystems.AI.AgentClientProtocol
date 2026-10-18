@@ -1,4 +1,4 @@
-namespace SvcSystems.AI.AgentClientProtocol.Registry;
+﻿namespace SvcSystems.AI.AgentClientProtocol.Registry;
 
 /// <summary>Release channel to select from a registry agent entry.</summary>
 public enum RegistryAgentReleaseChannel

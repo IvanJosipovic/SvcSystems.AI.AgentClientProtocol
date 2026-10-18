@@ -39,8 +39,8 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 
 ## Hosting an agent
 
-Implement `IAcpAgentHandler` for
-initialize, session creation, and prompt handling. `AcpAgent` uses the current process's stdin/stdout
+Implement `IAgentHandler` for
+initialize, session creation, and prompt handling. `Agent` uses the current process's stdin/stdout
 by default, or accepts a custom `ITransport` for embedding and tests.
 
 The handler also exposes optional callbacks for session load/resume/list/delete/close, mode and
@@ -50,11 +50,11 @@ configuration changes, authentication, and logout. Unimplemented optional callba
 ```csharp
 using SvcSystems.AI.AgentClientProtocol.Agent;
 
-await using var agent = new AcpAgent(new MyAgentHandler());
+await using var agent = new Agent(new MyAgentHandler());
 await agent.RunAsync(cancellationToken);
 ```
 
-Prompt callbacks receive an `IAcpAgentContext` to stream `session/update` messages and make client
+Prompt callbacks receive an `IAgentContext` to stream `session/update` messages and make client
 requests. The runtime dispatches requests concurrently within a configured bound, so
 `session/cancel` can be handled while a prompt callback is active.
 
@@ -197,7 +197,7 @@ Run the published console executable with `--extension-smoke-test` to exercise m
 
 ## Testing
 
-- `SvcSystems.AI.AgentClientProtocol.Tests` tests JSON-RPC correlation, cancellation, error responses, and reflection-disabled execution.
+- `SvcSystems.AI.AgentClientProtocol.Tests` tests JSON-RPC correlation, cancellation, error responses, host callback routing for filesystem, terminal, and elicitation requests, and reflection-disabled execution.
 - `SvcSystems.AI.AgentClientProtocol.Generator.Tests` tests the incremental generator against arbitrary JSON Schema inputs and checks that every applicable ACP method definition gets generated wire models.
 - `SvcSystems.AI.AgentClientProtocol.IntegrationTests` launches the official deterministic **Testy** agent from the ACP Rust SDK. The `full` scenario exercises stable v1 updates and reverse callbacks without a live model or credentials.
 
@@ -217,8 +217,10 @@ If Cargo is unavailable, Testy tests are reported as skipped unless the binary p
 ### ACP TCK
 
 [ACP TCK](https://github.com/agentclientprotocol/acp-tck) tests agents, not clients. We run its
-complete v1 suite against official reference agents, plus a separate .NET client interoperability
-suite against the same fixtures. These checks do not claim ACP TCK certification of this client.
+complete v1 suite against official reference agents and against the library's own agent host
+through the sample agent in `samples/SvcSystems.AI.AgentClientProtocol.SampleAgent`, plus a
+separate .NET client interoperability suite against the same fixtures. These checks do not claim
+ACP TCK certification of this client.
 
 ```powershell
 pwsh -File .\tools\Test-AcpTck.ps1
@@ -229,9 +231,10 @@ run checks out a pinned TCK revision and provisions Python 3.14; no model, crede
 Cargo are needed. Reports and sources go under `artifacts/acp-tck`.
 
 The upstream run covers all **56 registered v1 requirements** across minimal, authenticated,
-and full-capability fixtures; the runner fails if any requirement lacks a passing result.
-Client tests cover v1 sessions, prompts, capabilities, metadata, extensions, transport, and
-error handling. GitHub Actions runs both suites on Windows and Linux.
+and full-capability fixtures and the sample agent, which advertises every optional capability so
+the suite exercises the whole `IAgentHandler` surface; the runner fails if any requirement
+lacks a passing result. Client tests cover v1 sessions, prompts, capabilities, metadata,
+extensions, transport, and error handling. GitHub Actions runs both suites on Windows and Linux.
 
 ACP v2 is not supported (the client test verifies that a v2-only agent is rejected). TCK does
 not cover positive MCP, filesystem, or terminal operations; those remain in the separate Testy

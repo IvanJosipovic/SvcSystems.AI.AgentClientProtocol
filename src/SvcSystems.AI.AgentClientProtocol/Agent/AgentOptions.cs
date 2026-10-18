@@ -1,7 +1,7 @@
-namespace SvcSystems.AI.AgentClientProtocol.Agent;
+﻿namespace SvcSystems.AI.AgentClientProtocol.Agent;
 
 /// <summary>Resource limits for an ACP agent host.</summary>
-public sealed class AcpAgentOptions
+public sealed class AgentOptions
 {
     /// <summary>Maximum number of client requests handled concurrently. Defaults to 32.</summary>
     public int MaximumConcurrentIncomingRequests { get; init; } = 32;

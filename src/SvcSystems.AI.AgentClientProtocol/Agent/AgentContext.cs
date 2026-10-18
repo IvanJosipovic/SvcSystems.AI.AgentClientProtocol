@@ -1,10 +1,10 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.JsonRpc;
 using SvcSystems.AI.AgentClientProtocol.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Agent;
 
-internal sealed class AcpAgentContext(JsonRpcConnection connection) : IAcpAgentContext
+internal sealed class AgentContext(JsonRpcConnection connection) : IAgentContext
 {
     public ValueTask SendSessionUpdateAsync(string sessionId, SessionUpdate update, CancellationToken cancellationToken = default)
     {

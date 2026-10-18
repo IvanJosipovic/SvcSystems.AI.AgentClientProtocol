@@ -1,4 +1,4 @@
-namespace SvcSystems.AI.AgentClientProtocol.Registry;
+﻿namespace SvcSystems.AI.AgentClientProtocol.Registry;
 
 /// <summary>Configures local storage for registry binary distributions.</summary>
 public sealed class RegistryAgentLauncherOptions

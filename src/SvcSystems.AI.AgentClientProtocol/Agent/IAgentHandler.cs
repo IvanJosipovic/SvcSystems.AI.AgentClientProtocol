@@ -1,7 +1,7 @@
-namespace SvcSystems.AI.AgentClientProtocol.Agent;
+﻿namespace SvcSystems.AI.AgentClientProtocol.Agent;
 
 /// <summary>Application callbacks that implement an ACP agent.</summary>
-public interface IAcpAgentHandler
+public interface IAgentHandler
 {
     /// <summary>Negotiates protocol version and reports agent capabilities.</summary>
     ValueTask<InitializeResponse> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken);
@@ -10,7 +10,7 @@ public interface IAcpAgentHandler
     ValueTask<NewSessionResponse> NewSessionAsync(NewSessionRequest request, CancellationToken cancellationToken);
 
     /// <summary>Processes a prompt. Stream progress through <paramref name="context"/>.</summary>
-    ValueTask<PromptResponse> PromptAsync(PromptRequest request, IAcpAgentContext context, CancellationToken cancellationToken);
+    ValueTask<PromptResponse> PromptAsync(PromptRequest request, IAgentContext context, CancellationToken cancellationToken);
 
     /// <summary>Loads and replays an existing session when the agent advertises load support.</summary>
     ValueTask<LoadSessionResponse> LoadSessionAsync(LoadSessionRequest request, CancellationToken cancellationToken) =>

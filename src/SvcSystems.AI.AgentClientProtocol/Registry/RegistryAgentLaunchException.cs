@@ -1,4 +1,4 @@
-namespace SvcSystems.AI.AgentClientProtocol.Registry;
+﻿namespace SvcSystems.AI.AgentClientProtocol.Registry;
 
 /// <summary>Thrown when no advertised registry distribution can be launched.</summary>
 public sealed class RegistryAgentLaunchException : InvalidOperationException

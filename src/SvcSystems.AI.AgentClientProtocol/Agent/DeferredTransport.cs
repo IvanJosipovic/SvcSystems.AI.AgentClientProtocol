@@ -1,4 +1,4 @@
-using SvcSystems.AI.AgentClientProtocol.Transport;
+﻿using SvcSystems.AI.AgentClientProtocol.Transport;
 
 namespace SvcSystems.AI.AgentClientProtocol.Agent;
 

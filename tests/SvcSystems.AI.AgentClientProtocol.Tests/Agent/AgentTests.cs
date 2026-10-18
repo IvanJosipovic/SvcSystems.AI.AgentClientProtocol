@@ -1,15 +1,12 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Threading.Channels;
-using SvcSystems.AI.AgentClientProtocol.Agent;
-using SvcSystems.AI.AgentClientProtocol.Agent.Models;
-using SvcSystems.AI.AgentClientProtocol.Models;
 using SvcSystems.AI.AgentClientProtocol.Transport;
 using Xunit;
 
 namespace SvcSystems.AI.AgentClientProtocol.Agent.Tests;
 
-public sealed class AcpAgentTests
+public sealed class AgentTests
 {
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
@@ -152,7 +149,7 @@ public sealed class AcpAgentTests
         await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
     }
 
-    private sealed class CallbackHandler : IAcpAgentHandler
+    private sealed class CallbackHandler : IAgentHandler
     {
         public string? PromptText { get; private set; }
 
@@ -170,7 +167,7 @@ public sealed class AcpAgentTests
 
         public async ValueTask<PromptResponse> PromptAsync(
             PromptRequest request,
-            IAcpAgentContext context,
+            IAgentContext context,
             CancellationToken cancellationToken)
         {
             PromptText = Assert.IsType<TextContent>(Assert.Single(request.Prompt).Value).Text;
@@ -181,7 +178,7 @@ public sealed class AcpAgentTests
         }
     }
 
-    private sealed class CancellationHandler : IAcpAgentHandler
+    private sealed class CancellationHandler : IAgentHandler
     {
         public TaskCompletionSource PromptStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -195,7 +192,7 @@ public sealed class AcpAgentTests
 
         public async ValueTask<PromptResponse> PromptAsync(
             PromptRequest request,
-            IAcpAgentContext context,
+            IAgentContext context,
             CancellationToken cancellationToken)
         {
             PromptStarted.TrySetResult();
@@ -213,7 +210,7 @@ public sealed class AcpAgentTests
         }
     }
 
-    private sealed class OptionalOperationsHandler : IAcpAgentHandler
+    private sealed class OptionalOperationsHandler : IAgentHandler
     {
         public List<string> Calls { get; } = [];
 
@@ -223,7 +220,7 @@ public sealed class AcpAgentTests
         public ValueTask<NewSessionResponse> NewSessionAsync(NewSessionRequest request, CancellationToken cancellationToken) =>
             ValueTask.FromResult(new NewSessionResponse { SessionId = "session" });
 
-        public ValueTask<PromptResponse> PromptAsync(PromptRequest request, IAcpAgentContext context, CancellationToken cancellationToken) =>
+        public ValueTask<PromptResponse> PromptAsync(PromptRequest request, IAgentContext context, CancellationToken cancellationToken) =>
             ValueTask.FromResult(new PromptResponse { StopReason = "end_turn" });
 
         public ValueTask<LoadSessionResponse> LoadSessionAsync(LoadSessionRequest request, CancellationToken cancellationToken)

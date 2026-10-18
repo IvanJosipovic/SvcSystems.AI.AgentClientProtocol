@@ -91,6 +91,45 @@ foreach ($fixture in @('conforming_full', 'conforming', 'gated_by_auth')) {
     $reports += $report
 }
 
+# The repository's own agent host is a conformance target too: build the sample agent and drive it
+# with the same official suite so Agent/IAgentHandler are exercised end to end, not just the
+# Python baselines.
+$sampleProject = Join-Path $repoRoot 'samples' 'SvcSystems.AI.AgentClientProtocol.SampleAgent' 'SvcSystems.AI.AgentClientProtocol.SampleAgent.csproj'
+$sampleOutput = Join-Path (Split-Path $sampleProject -Parent) 'bin' 'Release' 'net11.0'
+Write-Host 'Building the repository sample agent (SvcSystems.AI.AgentClientProtocol.SampleAgent).'
+& dotnet build $sampleProject --configuration Release --nologo
+if ($LASTEXITCODE -ne 0) { throw 'Failed to build the repository sample agent.' }
+$sampleExecutable = Join-Path $sampleOutput 'SvcSystems.AI.AgentClientProtocol.SampleAgent'
+if (Test-Path -LiteralPath "$sampleExecutable.exe") { $sampleExecutable = "$sampleExecutable.exe" }
+if (-not (Test-Path -LiteralPath $sampleExecutable)) {
+    throw "Could not find the built sample agent at $sampleExecutable."
+}
+
+$sampleReportPath = Join-Path $ReportDirectory 'sample-agent.json'
+$sampleArguments = @(
+    '--protocol-version', '1',
+    '--agent-cwd', $ReportDirectory,
+    '--agent-env', 'DOTNET_NOLOGO=1',
+    '--timeout', "$Timeout",
+    '--startup-timeout', "$StartupTimeout",
+    '--test-timeout', "$TestTimeout",
+    '--cancel-prompt', '__hang__',
+    '--close-grace', "$CloseGrace",
+    '--auth-method', 'tck',
+    # The sample agent is offline and ships no credentials; logging out revokes nothing.
+    '--allow-logout',
+    '--report-json', $sampleReportPath,
+    '-v'
+)
+Write-Host 'Running the complete upstream v1 conformance suite against the repository sample agent (agent host, not client certification).'
+& uv run --no-sync --project $SourceDirectory acp-tck @sampleArguments -- $sampleExecutable
+if ($LASTEXITCODE -ne 0) { throw "Official ACP TCK reported the repository sample agent as non-conformant. See $sampleReportPath." }
+$sampleReport = Get-Content -LiteralPath $sampleReportPath -Raw | ConvertFrom-Json
+if ($sampleReport.protocol_version -ne 1 -or -not $sampleReport.verdict.conformant) {
+    throw 'ACP TCK did not report a conformant v1 agent for the repository sample agent.'
+}
+$reports += $sampleReport
+
 # A conformant verdict alone can hide skipped/untested optional requirements.
 $requirements = @($reports | ForEach-Object { $_.requirements })
 $uncovered = @($requirements | Group-Object id | Where-Object {
@@ -99,7 +138,7 @@ $uncovered = @($requirements | Group-Object id | Where-Object {
 if ($uncovered.Count -ne 0) {
     throw "Not every upstream v1 requirement was exercised successfully: $($uncovered.Name -join ', ')."
 }
-Write-Host "All $(($requirements | Group-Object id).Count) upstream v1 requirements have a PASS across the agent baselines."
+Write-Host "All $(($requirements | Group-Object id).Count) upstream v1 requirements have a PASS across the agent baselines and the repository sample agent."
 
 $previousRoot = $env:ACP_TCK_ROOT
 $previousPython = $env:ACP_TCK_PYTHON
