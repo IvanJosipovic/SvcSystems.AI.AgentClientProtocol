@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/SvcSystems.AI.AgentClientProtocol)](https://www.nuget.org/packages/SvcSystems.AI.AgentClientProtocol)
 
-A .NET library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/). The core package provides a session-oriented client; the separate `SvcSystems.AI.AgentClientProtocol.Agent` package hosts ACP agents over stdio.
+A .NET library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/). The core package provides both a session-oriented client and an agent host in the `SvcSystems.AI.AgentClientProtocol.Agent` namespace.
 
 Targets `net11.0`. The library is trim-analyzed and NativeAOT compatible. Reflection-based `System.Text.Json` serialization is disabled in the project.
 
@@ -39,7 +39,7 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 
 ## Hosting an agent
 
-Reference the `SvcSystems.AI.AgentClientProtocol.Agent` package and implement `IAcpAgentHandler` for
+Implement `IAcpAgentHandler` for
 initialize, session creation, and prompt handling. `AcpAgent` uses the current process's stdin/stdout
 by default, or accepts a custom `ITransport` for embedding and tests.
 

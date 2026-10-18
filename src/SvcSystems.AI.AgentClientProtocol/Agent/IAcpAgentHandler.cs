@@ -1,5 +1,3 @@
-using SvcSystems.AI.AgentClientProtocol.Agent.Models;
-
 namespace SvcSystems.AI.AgentClientProtocol.Agent;
 
 /// <summary>Application callbacks that implement an ACP agent.</summary>

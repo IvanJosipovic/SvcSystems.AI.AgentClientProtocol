@@ -1,5 +1,4 @@
 using System.Text.Json;
-using SvcSystems.AI.AgentClientProtocol.Models;
 
 namespace SvcSystems.AI.AgentClientProtocol.Agent;
 
