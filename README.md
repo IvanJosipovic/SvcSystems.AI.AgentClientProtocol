@@ -56,7 +56,23 @@ await agent.RunAsync(cancellationToken);
 
 Prompt callbacks receive an `IAgentContext` to stream `session/update` messages and make client
 requests. The runtime dispatches requests concurrently within a configured bound, so
-`session/cancel` can be handled while a prompt callback is active.
+`session/cancel` can be handled while a prompt callback is active. Typed helpers cover the client
+methods an agent calls, so handlers do not hand-build JSON:
+
+```csharp
+var file = await context.ReadTextFileAsync(
+    new ReadTextFileRequest { SessionId = request.SessionId, Path = "notes.txt" }, cancellationToken);
+var permission = await context.RequestPermissionAsync(
+    new RequestPermissionRequest { SessionId = request.SessionId, ToolCall = toolCall, Options = options },
+    cancellationToken);
+```
+
+`ClientRequestExtensions` provides `ReadTextFileAsync`, `WriteTextFileAsync`, `CreateTerminalAsync`,
+`GetTerminalOutputAsync`, `WaitForTerminalExitAsync`, `KillTerminalAsync`, `ReleaseTerminalAsync`,
+`RequestPermissionAsync`, `CreateElicitationAsync`, and `CompleteElicitationAsync`; use
+`IAgentContext.SendClientRequestAsync` for anything else. `AcpJson` exposes the generated serializer contract (`AcpJson.Options`,
+`AcpJson.TypeInfo<T>()`, `SerializeToElement`, `SerializeToUtf8Bytes`, and `Deserialize<T>`) so
+extension payloads use the same wire settings.
 
 A dropped transport or protocol failure completes `Completion` with the failure and raises `TransportFaulted` once; a clean shutdown completes with `null` and raises nothing. `TransportFaulted` is a member of `IClient`, so external implementers of the interface must add it.
 
@@ -77,6 +93,8 @@ var clientOptions = new ClientOptions
 ```
 
 The client advertises only the capabilities supported by these configured handlers. `Session` exposes prompt streaming, cancellation, mode changes, and session configuration. `IClient` exposes create/load/list/resume/delete/close, authentication, and logout operations, with optional operations gated by the agent's negotiated capabilities.
+
+Elicitation handlers work with the generated wire models: `IElicitationHandler.RequestElicitationAsync` receives the `CreateElicitationRequest` union, whose `Value` is an `ElicitationFormMode`, an `ElicitationUrlMode`, or a `CreateElicitationRequestCase2` for a mode the schema does not model, and answers with a `CreateElicitationResponse` case such as `ElicitationAcceptAction`. `ClientOptions.ElicitationCompleted` receives the generated `CompleteElicitationNotification` for URL elicitations.
 
 ACP model types are generated from the checked-in schema and exposed directly: `Client.Agent` is an `InitializeResponse`, and MCP servers, prompt content, session updates, and config options use their generated wire models. Prompt streams yield `SessionUpdateEvent` values containing the generated `SessionUpdate` union and `Completed` values containing the generated `PromptResponse`; unknown update, content, and config-option variants remain available as `JsonElement`.
 
@@ -110,7 +128,10 @@ extensions, not authentication proof or ACP guarantees.
 `ClientOptions.Metadata` and `CapabilityMetadata` attach `_meta` to `initialize` and
 `clientCapabilities`; `SessionOptions.Metadata` and `PromptOptions.Metadata` attach it to
 session and prompt requests. Other extension calls can include `_meta` directly in their JSON
-parameters. Incoming raw payloads retain metadata and unknown fields.
+parameters. Incoming raw payloads retain metadata and unknown fields. `Session.RawPayload` and
+`AuthenticationStatus.RawPayload` are the intentional escape hatch for the vendor-specific
+`_meta` and extension data an agent may add to an otherwise typed payload; typed members cover
+everything ACP defines.
 
 ## Schema-generated wire models
 

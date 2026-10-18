@@ -57,7 +57,7 @@ public sealed class ClientOptions
     public ITerminalAuthenticationHandler? TerminalAuthenticationHandler { get; init; }
 
     /// <summary>Receives completion notifications for URL-based elicitation.</summary>
-    public Action<ElicitationCompleted>? ElicitationCompleted { get; init; }
+    public Action<CompleteElicitationNotification>? ElicitationCompleted { get; init; }
 
     /// <summary>Advertises and accepts ACP context-compaction updates.</summary>
     public bool SupportsCompactionUpdates { get; init; } = true;

@@ -17,6 +17,18 @@ public sealed partial class CreateElicitationResponseCase1
     [JsonPropertyName("action")]
     public string Action { get; } = "decline";
 
+    /// <summary>
+    /// The _meta property is reserved by ACP to allow clients and agents to attach additional
+    /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
+    /// these keys.
+    /// 
+    /// Optional. Omitted and `null` are equivalent and mean no metadata.
+    /// 
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// </summary>
+    [JsonPropertyName("_meta")]
+    public Dictionary<string, JsonElement>? Meta { get; init; }
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

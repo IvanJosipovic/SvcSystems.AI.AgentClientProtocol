@@ -82,9 +82,8 @@ public sealed class ClientOperationsTests
         await modeChange;
 
         var configChange = client.SetSessionConfigOptionAsync(
-            "session",
-            "confirm",
-            new SetSessionConfigOptionRequest(new SetSessionConfigOptionRequestCase0 { Value = true }),
+            new SetSessionConfigOptionRequest(
+                new SetSessionConfigOptionRequestCase0 { SessionId = "session", ConfigId = "confirm", Value = true }),
             Token);
         using (var request = await transport.ReadSentAsync())
         {

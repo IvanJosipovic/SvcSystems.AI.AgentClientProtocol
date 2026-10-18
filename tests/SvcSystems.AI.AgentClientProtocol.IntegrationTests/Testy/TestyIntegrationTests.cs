@@ -255,11 +255,15 @@ public sealed class TestyIntegrationTests
 
             Assert.Equal(5, elicitationHandler.Requests.Count);
             Assert.Equal(new[] { "accept", "decline", "cancel", "accept", "decline" }, elicitationHandler.Responses);
-            Assert.Equal(session.Id, elicitationHandler.Requests[0].SessionId);
-            Assert.False(string.IsNullOrWhiteSpace(elicitationHandler.Requests[0].ToolCallId));
-            Assert.Equal("testy-request-form-cancel", elicitationHandler.Requests[2].RequestId);
-            Assert.Equal("testy-url-session", elicitationHandler.Requests[3].ElicitationId);
-            Assert.Equal("testy-request-url-decline", elicitationHandler.Requests[4].RequestId);
+            var sessionForm = Assert.IsType<ElicitationFormMode>(elicitationHandler.Requests[0].Value);
+            Assert.Equal(session.Id, sessionForm.SessionId);
+            Assert.False(string.IsNullOrWhiteSpace(sessionForm.ToolCallId));
+            var requestForm = Assert.IsType<ElicitationFormMode>(elicitationHandler.Requests[2].Value);
+            Assert.Equal("testy-request-form-cancel", RequestIdText(requestForm.RequestId));
+            var sessionUrl = Assert.IsType<ElicitationUrlMode>(elicitationHandler.Requests[3].Value);
+            Assert.Equal("testy-url-session", sessionUrl.ElicitationId);
+            var requestUrl = Assert.IsType<ElicitationUrlMode>(elicitationHandler.Requests[4].Value);
+            Assert.Equal("testy-request-url-decline", RequestIdText(requestUrl.RequestId));
             Assert.Equal("testy-url-session", Assert.Single(elicitationHandler.Completed));
             var wireUpdates = SessionUpdates(updates);
             Assert.Contains(wireUpdates, update => update.Value is ToolCall);
@@ -398,27 +402,43 @@ public sealed class TestyIntegrationTests
         public bool SupportsForm => true;
         public bool SupportsUrl => true;
         public List<string> Completed { get; } = [];
-        public List<ElicitationRequest> Requests { get; } = [];
+        public List<CreateElicitationRequest> Requests { get; } = [];
         public List<string> Responses { get; } = [];
 
-        public ValueTask<ElicitationResponse> RequestElicitationAsync(ElicitationRequest request, CancellationToken cancellationToken = default)
+        public ValueTask<CreateElicitationResponse> RequestElicitationAsync(CreateElicitationRequest request, CancellationToken cancellationToken = default)
         {
             Requests.Add(request);
-            if (request.Message.Contains("Decline", StringComparison.OrdinalIgnoreCase))
+            var message = request.Value switch
+            {
+                ElicitationFormMode form => form.Message,
+                ElicitationUrlMode url => url.Message,
+                CreateElicitationRequestCase2 custom => custom.Message,
+                _ => string.Empty
+            };
+            if (message.Contains("Decline", StringComparison.OrdinalIgnoreCase))
                 return RecordResponse("decline");
-            if (request.Message.Contains("Cancel", StringComparison.OrdinalIgnoreCase))
+            if (message.Contains("Cancel", StringComparison.OrdinalIgnoreCase))
                 return RecordResponse("cancel");
-            if (request.Mode == "form" && request.RequestedSchema is { } schema)
-                return RecordResponse("accept", CreateFormAnswer(schema));
+            if (request.Value is ElicitationFormMode formMode)
+                return RecordResponse("accept", CreateFormAnswer(formMode.RequestedSchema));
             return RecordResponse("accept");
         }
 
-        public void OnCompleted(ElicitationCompleted notification) => Completed.Add(notification.ElicitationId);
+        public void OnCompleted(CompleteElicitationNotification notification) => Completed.Add(notification.ElicitationId);
 
-        private ValueTask<ElicitationResponse> RecordResponse(string action, IReadOnlyDictionary<string, ElicitationContentValue>? content = null)
+        private ValueTask<CreateElicitationResponse> RecordResponse(string action, IReadOnlyDictionary<string, ElicitationContentValue>? content = null)
         {
             Responses.Add(action);
-            return ValueTask.FromResult(new ElicitationResponse(action, content));
+            CreateElicitationResponse response = action switch
+            {
+                "decline" => new CreateElicitationResponseCase1(),
+                "cancel" => new CreateElicitationResponseCase2(),
+                _ => new ElicitationAcceptAction
+                {
+                    Content = content?.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal)
+                }
+            };
+            return ValueTask.FromResult(response);
         }
 
         private static IReadOnlyDictionary<string, ElicitationContentValue> CreateFormAnswer(ElicitationSchema schema)
@@ -442,4 +462,7 @@ public sealed class TestyIntegrationTests
             return answer;
         }
     }
+
+    /// <summary>Unwraps the string form of a request-scoped elicitation identifier.</summary>
+    private static string? RequestIdText(RequestId? requestId) => requestId is { } id ? id.Value as string : null;
 }

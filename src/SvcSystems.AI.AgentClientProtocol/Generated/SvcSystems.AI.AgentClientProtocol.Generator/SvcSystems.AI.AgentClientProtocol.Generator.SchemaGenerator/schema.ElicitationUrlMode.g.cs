@@ -3,6 +3,8 @@
 #nullable enable
 using global::SvcSystems.AI.AgentClientProtocol.Client.Models;
 using global::SvcSystems.AI.AgentClientProtocol.Agent.Models;
+using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Models;
@@ -10,5 +12,62 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// URL-based elicitation mode where the client directs the user to a URL.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ElicitationUrlModeJsonTypeClassifier))]
-public union ElicitationUrlMode(ElicitationSessionScope, ElicitationRequestScope);
+public sealed partial class ElicitationUrlMode
+{
+    /// <summary>
+    /// The unique identifier for this elicitation.
+    /// </summary>
+    [JsonPropertyName("elicitationId")]
+    public required string ElicitationId { get; init; }
+
+    /// <summary>
+    /// The URL to direct the user to.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public required string Url { get; init; }
+
+    /// <summary>
+    /// The session this elicitation is tied to.
+    /// </summary>
+    [JsonPropertyName("sessionId")]
+    public string? SessionId { get; init; }
+
+    /// <summary>
+    /// Optional tool call within the session.
+    /// 
+    /// Optional. Omitted and `null` are equivalent and mean the elicitation is scoped to the
+    /// session without a specific tool call.
+    /// </summary>
+    [JsonPropertyName("toolCallId")]
+    public string? ToolCallId { get; init; }
+
+    /// <summary>
+    /// The request this elicitation is tied to.
+    /// </summary>
+    [JsonPropertyName("requestId")]
+    public RequestId? RequestId { get; init; }
+
+    [JsonPropertyName("mode")]
+    public string Mode { get; } = "url";
+
+    /// <summary>
+    /// A human-readable message describing what input is needed.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public required string Message { get; init; }
+
+    /// <summary>
+    /// The _meta property is reserved by ACP to allow clients and agents to attach additional
+    /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
+    /// these keys.
+    /// 
+    /// Optional. Omitted and `null` are equivalent and mean no metadata.
+    /// 
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// </summary>
+    [JsonPropertyName("_meta")]
+    public Dictionary<string, JsonElement>? Meta { get; init; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
+}

@@ -129,26 +129,15 @@ internal static class WireJson
             Meta = CopyMetadata(options.Metadata)
         }, JsonContext.Default.ResumeSessionRequest);
 
-    public static byte[] WriteSetConfigOptionRequest(string sessionId, string configId, SetSessionConfigOptionRequest value)
-    {
-        // The allOf variants of the request schema only declare `value`/`type`; `sessionId` and
-        // `configId` live on the enclosing request object, so they are re-attached as extension data.
-        var common = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        {
-            ["sessionId"] = JsonSerializer.SerializeToElement(sessionId, JsonContext.Default.String),
-            ["configId"] = JsonSerializer.SerializeToElement(configId, JsonContext.Default.String)
-        };
-        return value.Value switch
+    public static byte[] WriteSetConfigOptionRequest(SetSessionConfigOptionRequest value) =>
+        value.Value switch
         {
             SetSessionConfigOptionRequestCase0 boolean => JsonSerializer.SerializeToUtf8Bytes(
-                new SetSessionConfigOptionRequestCase0 { Value = boolean.Value, ExtensionData = common },
-                JsonContext.Default.SetSessionConfigOptionRequestCase0),
+                boolean, JsonContext.Default.SetSessionConfigOptionRequestCase0),
             SetSessionConfigOptionRequestCase1 selection => JsonSerializer.SerializeToUtf8Bytes(
-                new SetSessionConfigOptionRequestCase1 { Value = selection.Value, ExtensionData = common },
-                JsonContext.Default.SetSessionConfigOptionRequestCase1),
+                selection, JsonContext.Default.SetSessionConfigOptionRequestCase1),
             _ => throw new ArgumentException("A string or boolean session configuration value is required.", nameof(value))
         };
-    }
 
     public static byte[] WritePermissionResponse(PermissionDecision decision) =>
         JsonSerializer.SerializeToUtf8Bytes(new RequestPermissionResponse
@@ -161,26 +150,13 @@ internal static class WireJson
     public static string ReadNotificationSessionId(JsonElement parameters) =>
         ReadString(parameters, "sessionId") ?? throw new ProtocolException("ACP session notification did not include sessionId.");
 
-    public static ElicitationRequest ReadElicitationRequest(JsonElement parameters)
-    {
-        var mode = ReadString(parameters, "mode") ?? "unknown";
-        ElicitationSchema? requestedSchema = parameters.TryGetProperty("requestedSchema", out var schema) && schema.ValueKind != JsonValueKind.Null
-            ? schema.Deserialize(JsonContext.Default.ElicitationSchema)!
-            : null;
-        return new ElicitationRequest(
-            mode,
-            ReadString(parameters, "message") ?? string.Empty,
-            ReadString(parameters, "sessionId"),
-            ReadString(parameters, "toolCallId"),
-            ReadString(parameters, "requestId"),
-            ReadString(parameters, "elicitationId"),
-            ReadString(parameters, "url"),
-            requestedSchema,
-            parameters.Clone());
-    }
+    public static string ReadElicitationMode(JsonElement parameters) => ReadString(parameters, "mode") ?? "unknown";
 
-    public static ElicitationCompleted ReadElicitationCompleted(JsonElement parameters) =>
-        new(parameters.Deserialize(JsonContext.Default.CompleteElicitationNotification)!.ElicitationId, parameters.Clone());
+    public static CreateElicitationRequest ReadElicitationRequest(JsonElement parameters) =>
+        parameters.Deserialize(JsonContext.Default.CreateElicitationRequest)!;
+
+    public static CompleteElicitationNotification ReadElicitationCompleted(JsonElement parameters) =>
+        parameters.Deserialize(JsonContext.Default.CompleteElicitationNotification)!;
 
     /// <summary>
     /// Serializes the empty JSON object that ACP returns for methods with no response payload
@@ -197,28 +173,8 @@ internal static class WireJson
             ExtensionData = MergeNullOptionalValues(status.ExtensionData, status.ExitCode is null, status.Signal is null)
         }, JsonContext.Default.TerminalExitStatus);
 
-    public static byte[] WriteElicitationResponse(ElicitationResponse response)
-    {
-        // The accept variant does not declare `action` (the schema leaves it to the union
-        // discriminator), so it is re-attached as extension data.
-        var extensionData = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        {
-            ["action"] = JsonSerializer.SerializeToElement(response.Action, JsonContext.Default.String)
-        };
-
-        CreateElicitationResponse model = Discriminators.ParseCreateElicitationResponseDiscriminator(response.Action) switch
-        {
-            CreateElicitationResponseDiscriminator.Accept => new ElicitationAcceptAction
-            {
-                Content = response.Content?.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal),
-                ExtensionData = extensionData
-            },
-            CreateElicitationResponseDiscriminator.Decline => new CreateElicitationResponseCase1(),
-            CreateElicitationResponseDiscriminator.Cancel => new CreateElicitationResponseCase2(),
-            _ => new CreateElicitationResponseCase3 { Action = response.Action }
-        };
-        return JsonSerializer.SerializeToUtf8Bytes(model, JsonContext.Default.CreateElicitationResponse);
-    }
+    public static byte[] WriteElicitationResponse(CreateElicitationResponse response) =>
+        JsonSerializer.SerializeToUtf8Bytes(response, JsonContext.Default.CreateElicitationResponse);
 
     public static SessionUpdate ReadSessionUpdate(JsonElement notification)
     {

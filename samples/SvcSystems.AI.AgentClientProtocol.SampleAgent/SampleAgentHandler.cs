@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Text.Json;
 using SvcSystems.AI.AgentClientProtocol.Agent;
 using SvcSystems.AI.AgentClientProtocol.Agent.Models;
 using SvcSystems.AI.AgentClientProtocol.Models;
@@ -230,16 +229,10 @@ internal sealed class SampleAgentHandler : IAgentHandler
         SetSessionConfigOptionRequest request,
         CancellationToken cancellationToken)
     {
-        // The generated request union models only the `value`/`type` variant fields; `sessionId`
-        // and `configId` live on the enclosing request object and arrive as extension data.
         var (sessionId, configId) = request.Value switch
         {
-            SetSessionConfigOptionRequestCase0 boolean => (
-                ReadExtensionString(boolean.ExtensionData, "sessionId"),
-                ReadExtensionString(boolean.ExtensionData, "configId")),
-            SetSessionConfigOptionRequestCase1 selection => (
-                ReadExtensionString(selection.ExtensionData, "sessionId"),
-                ReadExtensionString(selection.ExtensionData, "configId")),
+            SetSessionConfigOptionRequestCase0 boolean => (boolean.SessionId, boolean.ConfigId),
+            SetSessionConfigOptionRequestCase1 selection => (selection.SessionId, selection.ConfigId),
             _ => (null, null)
         };
 
@@ -304,11 +297,6 @@ internal sealed class SampleAgentHandler : IAgentHandler
 
         return null;
     }
-
-    private static string? ReadExtensionString(IReadOnlyDictionary<string, JsonElement>? extensionData, string name) =>
-        extensionData is not null && extensionData.TryGetValue(name, out var value) && value.ValueKind == JsonValueKind.String
-            ? value.GetString()
-            : null;
 
     private SampleSession GetOrCreate(string sessionId, string cwd, IReadOnlyList<string>? additionalDirectories) =>
         _sessions.GetOrAdd(sessionId, _ => new SampleSession(sessionId, cwd, additionalDirectories));

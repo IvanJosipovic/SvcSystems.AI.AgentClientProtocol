@@ -38,6 +38,10 @@ public sealed class Session
     public string Id { get; }
 
     /// <summary>The complete most recent session creation, load, or resume response.</summary>
+    /// <remarks>
+    /// Typed members cover the members ACP defines; this is the documented escape hatch for the
+    /// vendor-specific <c>_meta</c> and extension data an agent may add to the same payload.
+    /// </remarks>
     public JsonElement? RawPayload { get; private set; }
 
     /// <summary>The agent's initial or most recently reported mode state.</summary>
@@ -147,7 +151,9 @@ public sealed class Session
     /// <summary>Sets a string-valued session configuration option.</summary>
     public async Task<IReadOnlyList<SessionConfigOption>> SetConfigOptionAsync(string configId, string valueId, CancellationToken cancellationToken = default)
     {
-        var options = await _client.SetSessionConfigOptionAsync(Id, configId, new SetSessionConfigOptionRequestCase1 { Value = valueId }, cancellationToken).ConfigureAwait(false);
+        var options = await _client.SetSessionConfigOptionAsync(
+            new SetSessionConfigOptionRequestCase1 { SessionId = Id, ConfigId = configId, Value = valueId },
+            cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref _configOptions, options);
         return options;
     }
@@ -155,7 +161,9 @@ public sealed class Session
     /// <summary>Sets a boolean-valued session configuration option.</summary>
     public async Task<IReadOnlyList<SessionConfigOption>> SetConfigOptionAsync(string configId, bool value, CancellationToken cancellationToken = default)
     {
-        var options = await _client.SetSessionConfigOptionAsync(Id, configId, new SetSessionConfigOptionRequestCase0 { Value = value }, cancellationToken).ConfigureAwait(false);
+        var options = await _client.SetSessionConfigOptionAsync(
+            new SetSessionConfigOptionRequestCase0 { SessionId = Id, ConfigId = configId, Value = value },
+            cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref _configOptions, options);
         return options;
     }

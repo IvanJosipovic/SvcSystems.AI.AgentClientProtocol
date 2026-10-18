@@ -23,6 +23,28 @@ public sealed partial class SetSessionConfigOptionRequestCase0
     [JsonPropertyName("type")]
     public string Type { get; } = "boolean";
 
+    /// <summary>
+    /// The ID of the session to set the configuration option for.
+    /// </summary>
+    [JsonPropertyName("sessionId")]
+    public required string SessionId { get; init; }
+
+    /// <summary>
+    /// The ID of the configuration option to set.
+    /// </summary>
+    [JsonPropertyName("configId")]
+    public required string ConfigId { get; init; }
+
+    /// <summary>
+    /// The _meta property is reserved by ACP to allow clients and agents to attach additional
+    /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
+    /// these keys.
+    /// 
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// </summary>
+    [JsonPropertyName("_meta")]
+    public Dictionary<string, JsonElement>? Meta { get; init; }
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

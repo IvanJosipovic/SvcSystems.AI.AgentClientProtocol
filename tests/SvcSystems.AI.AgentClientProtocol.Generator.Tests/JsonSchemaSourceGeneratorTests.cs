@@ -186,6 +186,237 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void CarriesEnclosingUnionPropertiesAndBranchDiscriminatorsOntoCaseModels()
+    {
+        // Mirrors the ACP shape where the request/response object keeps required fields and the
+        // discriminator beside an untagged variant union.
+        const string schema = """
+            {
+              "$defs": {
+                "AcceptBody": {
+                  "type": "object",
+                  "properties": { "content": { "type": "string" } }
+                },
+                "Response": {
+                  "type": "object",
+                  "properties": { "sessionId": { "type": "string" } },
+                  "required": ["sessionId"],
+                  "anyOf": [
+                    {
+                      "allOf": [{ "$ref": "#/$defs/AcceptBody" }],
+                      "properties": { "action": { "type": "string", "const": "accept" } },
+                      "required": ["action"]
+                    },
+                    {
+                      "properties": {
+                        "action": { "type": "string" },
+                        "reason": { "type": "string" }
+                      },
+                      "required": ["action", "reason"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/enclosing-union.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var accept = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class AcceptBody", StringComparison.Ordinal));
+        Assert.Contains("public string Action { get; } = \"accept\";", accept, StringComparison.Ordinal);
+        Assert.Contains("public required string SessionId { get; init; }", accept, StringComparison.Ordinal);
+        var decline = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class ResponseCase1", StringComparison.Ordinal));
+        Assert.Contains("public required string Action { get; init; }", decline, StringComparison.Ordinal);
+        Assert.Contains("public required string SessionId { get; init; }", decline, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void LeavesCaseModelsSharedByMultipleUnionsUntouchedWhenCarryingEnclosingProperties()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "SharedBody": {
+                  "type": "object",
+                  "properties": { "value": { "type": "string" } },
+                  "required": ["value"]
+                },
+                "Left": {
+                  "type": "object",
+                  "properties": { "enclosingMarker": { "type": "string" } },
+                  "anyOf": [
+                    { "allOf": [{ "$ref": "#/$defs/SharedBody" }] },
+                    { "properties": { "left": { "type": "string" } } }
+                  ]
+                },
+                "Right": {
+                  "type": "object",
+                  "properties": { "enclosingMarker": { "type": "string" } },
+                  "anyOf": [
+                    { "allOf": [{ "$ref": "#/$defs/SharedBody" }] },
+                    { "properties": { "right": { "type": "string" } } }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/shared-enclosing-union.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var shared = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class SharedBody", StringComparison.Ordinal));
+        Assert.Contains("public required string Value { get; init; }", shared, StringComparison.Ordinal);
+        Assert.DoesNotContain("EnclosingMarker", shared, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MergesPropertyBagUnionsIntoOneClassAndInheritsEnclosingProperties()
+    {
+        // Mirrors the ACP elicitation shape: a union whose branches reuse scope/body definitions describes
+        // one flat object, so it becomes a single class the enclosing request can inherit its own members into.
+        const string schema = """
+            {
+              "$defs": {
+                "SessionScope": {
+                  "type": "object",
+                  "properties": {
+                    "sessionId": { "type": "string" },
+                    "toolCallId": { "type": "string" }
+                  },
+                  "required": ["sessionId"]
+                },
+                "RequestScope": {
+                  "type": "object",
+                  "properties": { "requestId": { "type": "string" } },
+                  "required": ["requestId"]
+                },
+                "FormMode": {
+                  "type": "object",
+                  "properties": { "requestedSchema": { "type": "string" } },
+                  "required": ["requestedSchema"],
+                  "anyOf": [
+                    { "allOf": [{ "$ref": "#/$defs/SessionScope" }] },
+                    { "allOf": [{ "$ref": "#/$defs/RequestScope" }] }
+                  ]
+                },
+                "CreateRequest": {
+                  "type": "object",
+                  "properties": { "message": { "type": "string" } },
+                  "required": ["message"],
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": { "mode": { "type": "string", "const": "form" } },
+                      "required": ["mode"],
+                      "allOf": [{ "$ref": "#/$defs/FormMode" }]
+                    },
+                    {
+                      "type": "object",
+                      "properties": { "mode": { "type": "string" } },
+                      "required": ["mode"],
+                      "anyOf": [
+                        { "allOf": [{ "$ref": "#/$defs/SessionScope" }] },
+                        { "allOf": [{ "$ref": "#/$defs/RequestScope" }] }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/property-bag-union.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var formMode = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "FormMode"));
+        Assert.DoesNotContain("union FormMode", formMode, StringComparison.Ordinal);
+        Assert.Contains("public required string RequestedSchema { get; init; }", formMode, StringComparison.Ordinal);
+        Assert.Contains("public string? SessionId { get; init; }", formMode, StringComparison.Ordinal);
+        Assert.Contains("public string? ToolCallId { get; init; }", formMode, StringComparison.Ordinal);
+        Assert.Contains("public string? RequestId { get; init; }", formMode, StringComparison.Ordinal);
+        // The enclosing request keeps its own required member and the branch discriminator on the case model.
+        Assert.Contains("public string Mode { get; } = \"form\";", formMode, StringComparison.Ordinal);
+        Assert.Contains("public required string Message { get; init; }", formMode, StringComparison.Ordinal);
+
+        var nested = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "CreateRequestCase1"));
+        Assert.DoesNotContain("union CreateRequestCase1", nested, StringComparison.Ordinal);
+        Assert.Contains("public required string Mode { get; init; }", nested, StringComparison.Ordinal);
+        Assert.Contains("public required string Message { get; init; }", nested, StringComparison.Ordinal);
+        Assert.Contains("public string? SessionId { get; init; }", nested, StringComparison.Ordinal);
+        Assert.Contains("public string? RequestId { get; init; }", nested, StringComparison.Ordinal);
+
+        // The enclosing union still needs its classifier: only one branch carries a mode constant.
+        Assert.Contains(result.GeneratedSources, source =>
+            source.Contains("public union CreateRequest(FormMode, CreateRequestCase1);", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void LeavesUnionsAsUnionsWhenBranchesAreNotReusedBodiesOrDisagreeOnAType()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "TextBody": {
+                  "type": "object",
+                  "properties": { "text": { "type": "string" } }
+                },
+                "BlobBody": {
+                  "type": "object",
+                  "properties": { "blob": { "type": "string" } }
+                },
+                "InlineChoice": {
+                  "type": "object",
+                  "properties": { "marker": { "type": "string" } },
+                  "anyOf": [
+                    { "properties": { "result": { "type": "string" } } },
+                    { "properties": { "error": { "type": "string" } } }
+                  ]
+                },
+                "DirectReference": {
+                  "type": "object",
+                  "properties": { "marker": { "type": "string" } },
+                  "anyOf": [
+                    { "$ref": "#/$defs/TextBody" },
+                    { "$ref": "#/$defs/BlobBody" }
+                  ]
+                },
+                "ConflictingTypes": {
+                  "type": "object",
+                  "properties": { "marker": { "type": "string" } },
+                  "anyOf": [
+                    {
+                      "allOf": [{ "$ref": "#/$defs/TextBody" }],
+                      "properties": { "extra": { "type": "string" } }
+                    },
+                    {
+                      "allOf": [{ "$ref": "#/$defs/BlobBody" }],
+                      "properties": { "extra": { "type": "integer" } }
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/distinct-union-shapes.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        foreach (var name in new[] { "InlineChoice", "DirectReference", "ConflictingTypes" })
+        {
+            Assert.Contains(result.GeneratedSources, source =>
+                source.Contains("union " + name + "(", StringComparison.Ordinal));
+            Assert.DoesNotContain(result.GeneratedSources, source =>
+                ContainsClassDeclaration(source, name));
+        }
+    }
+
+    [Fact]
     public void EmitsSerializerContextInPreCompilationWhenOptedIn()
     {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
@@ -644,6 +875,22 @@ public sealed class JsonSchemaSourceGeneratorTests
             source.Contains("class CreateElicitationRequestJsonTypeClassifier", StringComparison.Ordinal));
         Assert.Contains("ValueTextEquals(\"mode\"u8)", elicitationClassifier, StringComparison.Ordinal);
         Assert.DoesNotContain("ValueTextEquals(\"requestedSchema\"u8)", elicitationClassifier, StringComparison.Ordinal);
+        // Each elicitation mode is one flat object, so the mode payload is a class rather than a union, and
+        // the enclosing request is the union that classifies the payload by mode.
+        var elicitationFormMode = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "ElicitationFormMode"));
+        Assert.Contains("public required ElicitationSchema RequestedSchema { get; init; }", elicitationFormMode, StringComparison.Ordinal);
+        Assert.Contains("public string Mode { get; } = \"form\";", elicitationFormMode, StringComparison.Ordinal);
+        Assert.Contains("public required string Message { get; init; }", elicitationFormMode, StringComparison.Ordinal);
+        var elicitationUrlMode = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "ElicitationUrlMode"));
+        Assert.Contains("public required string ElicitationId { get; init; }", elicitationUrlMode, StringComparison.Ordinal);
+        Assert.Contains("public string Mode { get; } = \"url\";", elicitationUrlMode, StringComparison.Ordinal);
+        Assert.Contains(result.GeneratedSources, source => source.Contains(
+            "public union CreateElicitationRequest(ElicitationFormMode, ElicitationUrlMode, CreateElicitationRequestCase2);",
+            StringComparison.Ordinal));
+        Assert.DoesNotContain(result.GeneratedSources, source =>
+            source.Contains("class ElicitationFormModeJsonTypeClassifier", StringComparison.Ordinal));
         var untaggedClassifier = Assert.Single(result.GeneratedSources, source =>
             source.Contains("class MultiSelectItemsJsonTypeClassifier", StringComparison.Ordinal));
         Assert.Contains("ValueTextEquals(\"anyOf\"u8)", untaggedClassifier, StringComparison.Ordinal);
@@ -700,6 +947,21 @@ public sealed class JsonSchemaSourceGeneratorTests
         source.Contains("class " + name, StringComparison.Ordinal) ||
         source.Contains("union " + name + "(", StringComparison.Ordinal) ||
         source.Contains("enum " + name, StringComparison.Ordinal);
+
+    /// <summary>Matches a class declaration for exactly <paramref name="name"/>, never a longer name it prefixes.</summary>
+    private static bool ContainsClassDeclaration(string source, string name)
+    {
+        var token = "class " + name;
+        var index = source.IndexOf(token, StringComparison.Ordinal);
+        while (index >= 0)
+        {
+            var end = index + token.Length;
+            if (end >= source.Length || !(char.IsLetterOrDigit(source[end]) || source[end] == '_')) return true;
+            index = source.IndexOf(token, end, StringComparison.Ordinal);
+        }
+
+        return false;
+    }
 
     private static GeneratorDriver CreateDriver(ImmutableArray<AdditionalText> additionalTexts, bool useSystemTextJsonContext = false)
     {

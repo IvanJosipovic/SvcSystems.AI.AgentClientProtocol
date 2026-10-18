@@ -69,20 +69,6 @@ public sealed class WireJsonTests
             SerializeJson,
             DeserializeJson<EmbeddedResourceResource>);
 
-        ElicitationFormMode sessionMode = new ElicitationSessionScope { SessionId = "session-1", ToolCallId = "tool-1" };
-        AssertUnionRoundTrip<ElicitationFormMode>(
-            "{\"sessionId\":\"session-1\",\"toolCallId\":\"tool-1\"}",
-            SerializeJson(sessionMode),
-            SerializeJson,
-            DeserializeJson<ElicitationFormMode>);
-
-        ElicitationFormMode requestMode = new ElicitationRequestScope { RequestId = stringId };
-        AssertUnionRoundTrip<ElicitationFormMode>(
-            "{\"requestId\":\"request-1\"}",
-            SerializeJson(requestMode),
-            SerializeJson,
-            DeserializeJson<ElicitationFormMode>);
-
         MultiSelectItems stringItems = new StringMultiSelectItems { Enum = ["red", "blue"] };
         AssertUnionRoundTrip<MultiSelectItems>(
             "{\"enum\":[\"red\",\"blue\"]}",
@@ -107,19 +93,76 @@ public sealed class WireJsonTests
             SerializeJson,
             DeserializeJson<MultiSelectItems>);
 
-        ElicitationUrlMode urlMode = new ElicitationRequestScope { RequestId = numericId };
+    }
+
+    [Fact]
+    public void ElicitationModesRoundTripAsFlatObjectsAndClassifyIntoTheRequestedMode()
+    {
+        var sessionForm = new ElicitationFormMode
+        {
+            Message = "What is your name?",
+            RequestedSchema = new ElicitationSchema { Type = "object" },
+            SessionId = "session-1",
+            ToolCallId = "tool-1"
+        };
+        AssertUnionRoundTrip<ElicitationFormMode>(
+            "{\"requestedSchema\":{\"type\":\"object\"},\"sessionId\":\"session-1\",\"toolCallId\":\"tool-1\",\"mode\":\"form\",\"message\":\"What is your name?\"}",
+            SerializeJson(sessionForm),
+            SerializeJson,
+            DeserializeJson<ElicitationFormMode>);
+
+        RequestId numericRequestId = 42L;
+        var requestForm = new ElicitationFormMode
+        {
+            Message = "Name?",
+            RequestedSchema = new ElicitationSchema { Type = "object" },
+            RequestId = numericRequestId
+        };
+        AssertUnionRoundTrip<ElicitationFormMode>(
+            "{\"requestedSchema\":{\"type\":\"object\"},\"requestId\":42,\"mode\":\"form\",\"message\":\"Name?\"}",
+            SerializeJson(requestForm),
+            SerializeJson,
+            DeserializeJson<ElicitationFormMode>);
+
+        var sessionUrl = new ElicitationUrlMode
+        {
+            Message = "Sign in",
+            ElicitationId = "elicit-1",
+            Url = "https://example.test/login",
+            SessionId = "session-1"
+        };
         AssertUnionRoundTrip<ElicitationUrlMode>(
-            "{\"requestId\":42}",
-            SerializeJson(urlMode),
+            "{\"elicitationId\":\"elicit-1\",\"url\":\"https://example.test/login\",\"sessionId\":\"session-1\",\"mode\":\"url\",\"message\":\"Sign in\"}",
+            SerializeJson(sessionUrl),
             SerializeJson,
             DeserializeJson<ElicitationUrlMode>);
 
-        CreateElicitationRequestCase2 scopedRequest = new ElicitationRequestScope { RequestId = stringId };
+        var customMode = new CreateElicitationRequestCase2
+        {
+            Mode = "_vendor_mode",
+            Message = "Vendor prompt",
+            SessionId = "session-1"
+        };
         AssertUnionRoundTrip<CreateElicitationRequestCase2>(
-            "{\"requestId\":\"request-1\"}",
-            SerializeJson(scopedRequest),
+            "{\"mode\":\"_vendor_mode\",\"sessionId\":\"session-1\",\"message\":\"Vendor prompt\"}",
+            SerializeJson(customMode),
             SerializeJson,
             DeserializeJson<CreateElicitationRequestCase2>);
+
+        // The enclosing union keeps its classifier, so the mode still selects the payload shape.
+        using var formRequest = JsonDocument.Parse(
+            """{"mode":"form","message":"Name?","sessionId":"session-1","requestedSchema":{"type":"object"}}""");
+        var form = DeserializeJson<CreateElicitationRequest>(formRequest.RootElement);
+        Assert.Equal("Name?", Assert.IsType<ElicitationFormMode>(form.Value).Message);
+
+        using var urlRequest = JsonDocument.Parse(
+            """{"mode":"url","message":"Sign in","elicitationId":"elicit-1","url":"https://example.test/login"}""");
+        var url = DeserializeJson<CreateElicitationRequest>(urlRequest.RootElement);
+        Assert.Equal("elicit-1", Assert.IsType<ElicitationUrlMode>(url.Value).ElicitationId);
+
+        using var vendorRequest = JsonDocument.Parse("""{"mode":"_vendor","message":"Custom"}""");
+        var vendor = DeserializeJson<CreateElicitationRequest>(vendorRequest.RootElement);
+        Assert.Equal("_vendor", Assert.IsType<CreateElicitationRequestCase2>(vendor.Value).Mode);
     }
 
     [Fact]
@@ -284,12 +327,14 @@ public sealed class WireJsonTests
         Assert.Equal(JsonValueKind.Null, exit.RootElement.GetProperty("exitCode").ValueKind);
         Assert.Equal(JsonValueKind.Null, exit.RootElement.GetProperty("signal").ValueKind);
 
-        using var accepted = JsonDocument.Parse(WireJson.WriteElicitationResponse(new ElicitationResponse(
-            "accept", new Dictionary<string, ElicitationContentValue> { ["answer"] = "yes" })));
+        using var accepted = JsonDocument.Parse(WireJson.WriteElicitationResponse(new ElicitationAcceptAction
+        {
+            Content = new Dictionary<string, ElicitationContentValue> { ["answer"] = "yes" }
+        }));
         Assert.Equal("accept", accepted.RootElement.GetProperty("action").GetString());
         Assert.Equal("yes", accepted.RootElement.GetProperty("content").GetProperty("answer").GetString());
 
-        using var declined = JsonDocument.Parse(WireJson.WriteElicitationResponse(new ElicitationResponse("decline")));
+        using var declined = JsonDocument.Parse(WireJson.WriteElicitationResponse(new CreateElicitationResponseCase1()));
         Assert.Equal("decline", declined.RootElement.GetProperty("action").GetString());
     }
 
@@ -310,13 +355,17 @@ public sealed class WireJsonTests
         Assert.Equal("C:/shared", resume.RootElement.GetProperty("additionalDirectories")[0].GetString());
         Assert.False(resume.RootElement.TryGetProperty("mcpServers", out _));
 
-        using var boolean = JsonDocument.Parse(WireJson.WriteSetConfigOptionRequest("session-2", "confirm", new SetSessionConfigOptionRequestCase0 { Value = true }));
+        using var boolean = JsonDocument.Parse(WireJson.WriteSetConfigOptionRequest(new SetSessionConfigOptionRequest(
+            new SetSessionConfigOptionRequestCase0 { SessionId = "session-2", ConfigId = "confirm", Value = true })));
         Assert.Equal("session-2", boolean.RootElement.GetProperty("sessionId").GetString());
         Assert.Equal("confirm", boolean.RootElement.GetProperty("configId").GetString());
         Assert.Equal("boolean", boolean.RootElement.GetProperty("type").GetString());
         Assert.True(boolean.RootElement.GetProperty("value").GetBoolean());
 
-        using var choice = JsonDocument.Parse(WireJson.WriteSetConfigOptionRequest("session-2", "model", new SetSessionConfigOptionRequestCase1 { Value = "fast" }));
+        using var choice = JsonDocument.Parse(WireJson.WriteSetConfigOptionRequest(new SetSessionConfigOptionRequest(
+            new SetSessionConfigOptionRequestCase1 { SessionId = "session-2", ConfigId = "model", Value = "fast" })));
+        Assert.Equal("session-2", choice.RootElement.GetProperty("sessionId").GetString());
+        Assert.Equal("model", choice.RootElement.GetProperty("configId").GetString());
         Assert.Equal("fast", choice.RootElement.GetProperty("value").GetString());
         Assert.False(choice.RootElement.TryGetProperty("type", out _));
 

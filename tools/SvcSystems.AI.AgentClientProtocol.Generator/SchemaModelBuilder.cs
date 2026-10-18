@@ -222,6 +222,10 @@ internal sealed class SchemaModelBuilder(
             return;
         }
 
+        if (TryMergePropertyBagUnion(name, schema, branches)) return;
+
+        InheritEnclosingPropertiesIntoCaseModels(name, schema, branches, caseNames);
+
         var branchProperties = branches.Select(branch =>
         {
             var branchSchema = Resolve(branch);
@@ -273,6 +277,173 @@ internal sealed class SchemaModelBuilder(
             Description = schema.Description
         });
         AddConstUnionDiscriminator(name, branches.ToArray());
+    }
+
+    /// <summary>
+    /// Merges a union whose branches are all plain property bags into a single class that declares the
+    /// properties of every branch.
+    /// </summary>
+    /// <remarks>
+    /// ACP writes an <c>anyOf</c> of object shapes to describe one flat object that satisfies exactly one
+    /// of them: <c>ElicitationFormMode</c> carries <c>requestedSchema</c> beside either a session or a
+    /// request scope, and both scopes are ordinary objects. Such a union has nothing to discriminate on -
+    /// no constant and no conflicting member - so a union type cannot express the payload either; a class
+    /// that declares the union of the branch properties round trips it exactly, and the properties that
+    /// only some branches declare become optional. Merging also lets an enclosing object such as
+    /// <c>CreateElicitationRequest</c> inherit its <c>message</c>/<c>_meta</c> into the case models that
+    /// reference the merged class.
+    /// </remarks>
+    private bool TryMergePropertyBagUnion(string name, OpenApiSchema schema, IReadOnlyList<IOpenApiSchema> branches)
+    {
+        if (GetMergedPropertyBag(name, schema, branches) is not { } properties) return false;
+
+        _model.Types.Add(new ClassModel(
+            name,
+            properties,
+            hasExtensionData: schema.Properties is { Count: > 0 } && schema.AdditionalPropertiesAllowed && schema.AdditionalProperties is null)
+        {
+            Description = schema.Description
+        });
+        return true;
+    }
+
+    /// <summary>
+    /// Builds the property list a union of plain property bags merges into, or <see langword="null"/> when
+    /// the union carries discriminator information and therefore has to stay a union.
+    /// </summary>
+    private IReadOnlyList<PropertyModel>? GetMergedPropertyBag(string name, OpenApiSchema schema, IReadOnlyList<IOpenApiSchema> branches)
+    {
+        // The union has to carry properties of its own: that is what makes it one flat object rather than
+        // a choice between distinct shapes.
+        if (branches.Count < 2 || schema.Properties is not { Count: > 0 }) return null;
+
+        var ownerProperties = BuildProperties(name, schema, excludedProperties: []);
+        if (ownerProperties.Any(property => property.ConstValue is not null)) return null;
+
+        var branchProperties = new List<IReadOnlyList<PropertyModel>>(branches.Count);
+        foreach (var branch in branches)
+        {
+            // Only the reused-shape form ({allOf: [$ref definition]}) merges: such a branch names a shared
+            // scope or body and adds nothing of its own. Inline variants (a result and an error, text and
+            // blob) describe genuinely different payloads, so they stay a union.
+            if (branch is not OpenApiSchema branchSchema || GetSingleAllOfReferenceName(branchSchema) is null) return null;
+
+            var properties = BuildProperties(name, branchSchema, excludedProperties: []);
+            if (properties.Count == 0) return null;
+            if (properties.Any(property => property.ConstValue is not null)) return null;
+            branchProperties.Add(properties);
+        }
+
+        var order = ownerProperties.Select(property => property.WireName).ToList();
+        var merged = ownerProperties.ToDictionary(property => property.WireName, StringComparer.Ordinal);
+        var branchOnly = new Dictionary<string, List<PropertyModel>>(StringComparer.Ordinal);
+        foreach (var properties in branchProperties)
+        {
+            foreach (var property in properties)
+            {
+                if (merged.TryGetValue(property.WireName, out var existing))
+                {
+                    if (!string.Equals(existing.TypeName, property.TypeName, StringComparison.Ordinal)) return null;
+                    continue;
+                }
+
+                if (!branchOnly.TryGetValue(property.WireName, out var declarations))
+                {
+                    order.Add(property.WireName);
+                    declarations = [];
+                    branchOnly[property.WireName] = declarations;
+                }
+                declarations.Add(property);
+            }
+        }
+
+        foreach (var declaration in branchOnly)
+        {
+            var declarations = declaration.Value;
+            var first = declarations[0];
+            if (declarations.Any(property => !string.Equals(property.TypeName, first.TypeName, StringComparison.Ordinal))) return null;
+
+            // A member that only some branches declare has to accept being absent, so it cannot stay
+            // required and it has to admit null.
+            var required = declarations.Count == branchProperties.Count && declarations.All(property => property.IsRequired);
+            merged[declaration.Key] = required
+                ? first
+                : new PropertyModel(
+                    first.WireName,
+                    first.Identifier,
+                    ApplyNullability(first.TypeName, nullable: true),
+                    isRequired: false,
+                    isNullable: true,
+                    first.ConstValue,
+                    first.IsIgnored,
+                    first.Description);
+        }
+
+        return [.. order.Select(wireName => merged[wireName])];
+    }
+
+    /// <summary>
+    /// Copies the properties a union's own schema declares next to its branches onto the generated case
+    /// models, along with the properties a branch adds around a reused <c>allOf</c> reference.
+    /// </summary>
+    /// <remarks>
+    /// ACP writes these properties on the enclosing JSON object rather than inside the variant object, so
+    /// they belong to every case model: <c>SetSessionConfigOptionRequest</c> keeps the required
+    /// <c>sessionId</c>/<c>configId</c> beside its value union, and <c>CreateElicitationResponse</c> keeps
+    /// the <c>action</c> discriminator beside the reused <c>ElicitationAcceptAction</c> body. Dropping them
+    /// makes the model unable to express a valid payload (the round trip then has to smuggle them through
+    /// <c>ExtensionData</c>). Only unions that fully own their case models are changed, so a case built from
+    /// a definition that other unions share is left untouched.
+    /// </remarks>
+    private void InheritEnclosingPropertiesIntoCaseModels(
+        string name,
+        OpenApiSchema schema,
+        IReadOnlyList<IOpenApiSchema> branches,
+        IReadOnlyList<string> caseNames)
+    {
+        if (schema.Properties is not { Count: > 0 }) return;
+
+        for (var index = 0; index < caseNames.Count; index++)
+        {
+            var caseName = caseNames[index];
+            var isInlineCase = string.Equals(caseName, name + "Case" + index, StringComparison.Ordinal);
+            var branchSchema = Resolve(branches[index]);
+            var isReusedReference = branchSchema is not null &&
+                string.Equals(caseName, GetReusableAllOfReferenceName(schema, branchSchema), StringComparison.Ordinal);
+            if (!isInlineCase && !isReusedReference) return;
+            if (_model.Types.FindIndex(type => type.Name == caseName && type is ClassModel) < 0) return;
+        }
+
+        var enclosingProperties = BuildProperties(name, schema, excludedProperties: []);
+        for (var index = 0; index < caseNames.Count; index++)
+        {
+            var branchProperties = BuildProperties(caseNames[index], Resolve(branches[index])!, excludedProperties: []);
+            MergePropertiesIntoClass(caseNames[index], [.. branchProperties, .. enclosingProperties]);
+        }
+    }
+
+    private void MergePropertiesIntoClass(string typeName, IReadOnlyList<PropertyModel> inherited)
+    {
+        var index = _model.Types.FindIndex(type => type.Name == typeName);
+        if (index < 0 || _model.Types[index] is not ClassModel model) return;
+
+        var merged = model.Properties
+            .Concat(inherited)
+            .GroupBy(property => property.WireName, StringComparer.Ordinal)
+            .Select(group => group.First())
+            .ToArray();
+        _model.Types[index] = new ClassModel(
+            model.Name,
+            merged,
+            model.BaseType,
+            model.DiscriminatorName,
+            model.DiscriminatorCases,
+            model.HasExtensionData)
+        {
+            Description = model.Description,
+            IsInternal = model.IsInternal,
+            Side = model.Side
+        };
     }
 
     private int FindDefaultCaseWithMissingDiscriminator(IReadOnlyList<Dictionary<string, PropertyEntry>> caseProperties)
@@ -770,7 +941,7 @@ internal sealed class SchemaModelBuilder(
     private string? GetReusableAllOfReferenceName(OpenApiSchema unionSchema, OpenApiSchema schema)
     {
         var name = GetSingleAllOfReferenceName(schema);
-        if (name is null || !_definitions.TryGetValue(name, out var definition)) return null;
+        if (name is null) return null;
 
         var matchingBranches = (unionSchema.OneOf ?? unionSchema.AnyOf ?? [])
             .Select(Resolve)
@@ -782,8 +953,12 @@ internal sealed class SchemaModelBuilder(
             return null;
         }
 
-        var target = Resolve(definition);
-        return target is not null && IsObject(target) && !IsUnion(target) ? name : null;
+        // A plain object definition is reused directly. A union definition only becomes reusable once the
+        // merge turned it into a class, which happens before an enclosing union inherits its properties.
+        var target = _definitions.TryGetValue(name, out var definition) ? Resolve(definition) : null;
+        if (target is null || !IsObject(target)) return null;
+        if (!IsUnion(target)) return name;
+        return _model.Types.Any(type => type.Name == name && type is ClassModel) ? name : null;
     }
 
     private string? GetSingleAllOfReferenceName(OpenApiSchema schema)

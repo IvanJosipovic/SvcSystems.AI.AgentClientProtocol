@@ -400,13 +400,10 @@ public sealed class Client : IClient
             cancellationToken).ConfigureAwait(false);
     }
 
-    internal async Task<IReadOnlyList<SessionConfigOption>> SetSessionConfigOptionAsync(string sessionId, string configId, SetSessionConfigOptionRequest value, CancellationToken cancellationToken)
+    internal async Task<IReadOnlyList<SessionConfigOption>> SetSessionConfigOptionAsync(SetSessionConfigOptionRequest value, CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
-        ArgumentException.ThrowIfNullOrWhiteSpace(configId);
-        if (value.Value is not (SetSessionConfigOptionRequestCase0 or SetSessionConfigOptionRequestCase1))
-            throw new ArgumentException("A string or boolean session configuration value is required.", nameof(value));
-        var response = await _connection.SendRequestAsync(Methods.SessionSetConfigOption, WireJson.WriteSetConfigOptionRequest(sessionId, configId, value), cancellationToken).ConfigureAwait(false);
+        var response = await _connection.SendRequestAsync(Methods.SessionSetConfigOption, WireJson.WriteSetConfigOptionRequest(value), cancellationToken).ConfigureAwait(false);
         return WireJson.ReadConfigOptionsResponse(response);
     }
 
@@ -583,14 +580,17 @@ public sealed class Client : IClient
         {
             requests[Methods.ElicitationCreate] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadElicitationRequest(parameters);
-                if (request.Mode == "form" && !elicitation.SupportsForm || request.Mode == "url" && !elicitation.SupportsUrl)
+                // The mode is checked before the payload is bound so an unsupported mode is reported as
+                // method-not-found even when the request does not carry that mode's required members.
+                var mode = WireJson.ReadElicitationMode(parameters);
+                if (mode == "form" && !elicitation.SupportsForm || mode == "url" && !elicitation.SupportsUrl)
                 {
-                    throw new RpcException(-32601, $"Elicitation mode '{request.Mode}' is not supported by this client.", Methods.ElicitationCreate);
+                    throw new RpcException(-32601, $"Elicitation mode '{mode}' is not supported by this client.", Methods.ElicitationCreate);
                 }
 
+                var request = WireJson.ReadElicitationRequest(parameters);
                 var response = await elicitation.RequestElicitationAsync(request, cancellationToken).ConfigureAwait(false);
-                if (response.Action is not ("accept" or "decline" or "cancel") && !response.Action.StartsWith('_'))
+                if (response.Value is CreateElicitationResponseCase3 extension && !extension.Action.StartsWith('_'))
                 {
                     throw new RpcException(-32602, "Elicitation handler returned an unsupported action.", Methods.ElicitationCreate);
                 }

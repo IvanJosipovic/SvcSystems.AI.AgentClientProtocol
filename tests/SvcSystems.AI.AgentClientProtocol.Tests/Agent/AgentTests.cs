@@ -50,7 +50,7 @@ public sealed class AgentTests
         }
 
         Assert.Equal("hello", handler.PromptText);
-        Assert.Equal("allow", handler.PermissionResponse?.GetProperty("outcome").GetProperty("optionId").GetString());
+        Assert.Equal("allow", Assert.IsType<SelectedPermissionOutcome>(handler.PermissionResponse!.Outcome).OptionId);
         transport.CompleteInput();
         await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
     }
@@ -149,11 +149,189 @@ public sealed class AgentTests
         await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
     }
 
+    [Fact]
+    public async Task TypedClientRequestHelpersExchangeGeneratedModels()
+    {
+        await using var transport = new TestTransport();
+        var handler = new ClientRequestHandler();
+        await using var agent = new AcpAgent(handler, transport);
+        var run = agent.RunAsync(Token);
+
+        transport.Receive("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":1}}""");
+        using (var initialize = await transport.ReadSentAsync())
+        {
+            Assert.Equal(1, initialize.RootElement.GetProperty("result").GetProperty("protocolVersion").GetInt32());
+        }
+
+        transport.Receive("""{"jsonrpc":"2.0","id":2,"method":"session/new","params":{"cwd":"/workspace","mcpServers":[]}}""");
+        using (var newSession = await transport.ReadSentAsync())
+        {
+            Assert.Equal("session", newSession.RootElement.GetProperty("result").GetProperty("sessionId").GetString());
+        }
+
+        transport.Receive("""{"jsonrpc":"2.0","id":3,"method":"session/prompt","params":{"sessionId":"session","prompt":[]}}""");
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("fs/read_text_file", request.RootElement.GetProperty("method").GetString());
+            Assert.Equal("notes.txt", request.RootElement.GetProperty("params").GetProperty("path").GetString());
+            transport.Respond(request, """{"content":"hello"}""");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("fs/write_text_file", request.RootElement.GetProperty("method").GetString());
+            Assert.Equal("done", request.RootElement.GetProperty("params").GetProperty("content").GetString());
+            transport.Respond(request, "{}");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("terminal/create", request.RootElement.GetProperty("method").GetString());
+            Assert.Equal("echo", request.RootElement.GetProperty("params").GetProperty("command").GetString());
+            transport.Respond(request, """{"terminalId":"terminal-1"}""");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("terminal/output", request.RootElement.GetProperty("method").GetString());
+            Assert.Equal("terminal-1", request.RootElement.GetProperty("params").GetProperty("terminalId").GetString());
+            transport.Respond(request, """{"output":"hi","truncated":false}""");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("terminal/wait_for_exit", request.RootElement.GetProperty("method").GetString());
+            transport.Respond(request, """{"exitCode":0}""");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("terminal/kill", request.RootElement.GetProperty("method").GetString());
+            transport.Respond(request, "{}");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("terminal/release", request.RootElement.GetProperty("method").GetString());
+            transport.Respond(request, "{}");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("session/request_permission", request.RootElement.GetProperty("method").GetString());
+            transport.Respond(request, """{"outcome":{"outcome":"selected","optionId":"allow"}}""");
+        }
+
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("elicitation/create", request.RootElement.GetProperty("method").GetString());
+            Assert.Equal("form", request.RootElement.GetProperty("params").GetProperty("mode").GetString());
+            Assert.Equal("Sign in", request.RootElement.GetProperty("params").GetProperty("message").GetString());
+            transport.Respond(request, """{"action":"accept","content":{"answer":"yes"}}""");
+        }
+
+        using (var notification = await transport.ReadSentAsync())
+        {
+            Assert.Equal("elicitation/complete", notification.RootElement.GetProperty("method").GetString());
+            Assert.Equal("elicitation-1", notification.RootElement.GetProperty("params").GetProperty("elicitationId").GetString());
+        }
+
+        using (var prompt = await transport.ReadSentAsync())
+        {
+            Assert.Equal(3, prompt.RootElement.GetProperty("id").GetInt32());
+            Assert.Equal("end_turn", prompt.RootElement.GetProperty("result").GetProperty("stopReason").GetString());
+        }
+
+        Assert.Equal("hello", handler.FileContent);
+        Assert.Equal("terminal-1", handler.TerminalId);
+        Assert.True(handler.TerminalWasTruncated is false);
+        Assert.Equal("hi", handler.TerminalOutput);
+        Assert.Equal(0u, handler.ExitCode);
+        Assert.Equal("allow", handler.PermissionOptionId);
+        Assert.Equal("yes", handler.ElicitationAnswer);
+        Assert.True(handler.ElicitationCompleted);
+
+        transport.CompleteInput();
+        await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
+    private sealed class ClientRequestHandler : IAgentHandler
+    {
+        public string? FileContent { get; private set; }
+
+        public string? TerminalId { get; private set; }
+
+        public string? TerminalOutput { get; private set; }
+
+        public bool? TerminalWasTruncated { get; private set; }
+
+        public uint? ExitCode { get; private set; }
+
+        public string? PermissionOptionId { get; private set; }
+
+        public string? ElicitationAnswer { get; private set; }
+
+        public bool ElicitationCompleted { get; private set; }
+
+        public ValueTask<InitializeResponse> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken) =>
+            ValueTask.FromResult(new InitializeResponse { ProtocolVersion = request.ProtocolVersion });
+
+        public ValueTask<NewSessionResponse> NewSessionAsync(NewSessionRequest request, CancellationToken cancellationToken) =>
+            ValueTask.FromResult(new NewSessionResponse { SessionId = "session" });
+
+        public async ValueTask<PromptResponse> PromptAsync(
+            PromptRequest request,
+            IAgentContext context,
+            CancellationToken cancellationToken)
+        {
+            FileContent = (await context.ReadTextFileAsync(
+                new ReadTextFileRequest { SessionId = request.SessionId, Path = "notes.txt" }, cancellationToken)).Content;
+            await context.WriteTextFileAsync(
+                new WriteTextFileRequest { SessionId = request.SessionId, Path = "out.txt", Content = "done" }, cancellationToken);
+            TerminalId = (await context.CreateTerminalAsync(
+                new CreateTerminalRequest { SessionId = request.SessionId, Command = "echo", Args = ["hi"] }, cancellationToken)).TerminalId;
+            var output = await context.GetTerminalOutputAsync(
+                new TerminalOutputRequest { SessionId = request.SessionId, TerminalId = TerminalId }, cancellationToken);
+            TerminalOutput = output.Output;
+            TerminalWasTruncated = output.Truncated;
+            ExitCode = (await context.WaitForTerminalExitAsync(
+                new WaitForTerminalExitRequest { SessionId = request.SessionId, TerminalId = TerminalId }, cancellationToken)).ExitCode;
+            await context.KillTerminalAsync(
+                new KillTerminalRequest { SessionId = request.SessionId, TerminalId = TerminalId }, cancellationToken);
+            await context.ReleaseTerminalAsync(
+                new ReleaseTerminalRequest { SessionId = request.SessionId, TerminalId = TerminalId }, cancellationToken);
+            var permission = await context.RequestPermissionAsync(
+                new RequestPermissionRequest
+                {
+                    SessionId = request.SessionId,
+                    ToolCall = new ToolCallUpdate { ToolCallId = "tool", Title = "Read" },
+                    Options = [new PermissionOption { OptionId = "allow", Name = "Allow", Kind = "allow_once" }]
+                },
+                cancellationToken);
+            PermissionOptionId = Assert.IsType<SelectedPermissionOutcome>(permission.Outcome).OptionId;
+            var elicitation = await context.CreateElicitationAsync(
+                new ElicitationFormMode
+                {
+                    Message = "Sign in",
+                    RequestedSchema = new ElicitationSchema { Type = "object" },
+                    SessionId = request.SessionId
+                },
+                cancellationToken);
+            ElicitationAnswer = Assert.IsType<string>(
+                Assert.IsType<ElicitationAcceptAction>(elicitation.Value).Content!["answer"].Value);
+            await context.CompleteElicitationAsync(
+                new CompleteElicitationNotification { ElicitationId = "elicitation-1" }, cancellationToken);
+            ElicitationCompleted = true;
+            return new PromptResponse { StopReason = "end_turn" };
+        }
+    }
+
     private sealed class CallbackHandler : IAgentHandler
     {
         public string? PromptText { get; private set; }
 
-        public JsonElement? PermissionResponse { get; private set; }
+        public RequestPermissionResponse? PermissionResponse { get; private set; }
 
         public ValueTask<InitializeResponse> InitializeAsync(InitializeRequest request, CancellationToken cancellationToken) =>
             ValueTask.FromResult(new InitializeResponse
@@ -172,8 +350,14 @@ public sealed class AgentTests
         {
             PromptText = Assert.IsType<TextContent>(Assert.Single(request.Prompt).Value).Text;
             await context.SendSessionUpdateAsync(request.SessionId, new UsageUpdate { Used = 1, Size = 10 }, cancellationToken);
-            using var parameters = JsonDocument.Parse("""{"sessionId":"session","toolCall":{"toolCallId":"tool","title":"Read"},"options":[{"optionId":"allow","name":"Allow","kind":"allow_once"}]}""");
-            PermissionResponse = await context.SendClientRequestAsync("session/request_permission", parameters.RootElement.Clone(), cancellationToken);
+            PermissionResponse = await context.RequestPermissionAsync(
+                new RequestPermissionRequest
+                {
+                    SessionId = request.SessionId,
+                    ToolCall = new ToolCallUpdate { ToolCallId = "tool", Title = "Read" },
+                    Options = [new PermissionOption { OptionId = "allow", Name = "Allow", Kind = "allow_once" }]
+                },
+                cancellationToken);
             return new PromptResponse { StopReason = "end_turn" };
         }
     }
