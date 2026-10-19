@@ -149,7 +149,7 @@ try {
     Write-Host 'Running the .NET client interoperability matrix against the official v1 fixtures.'
     Push-Location $repoRoot
     try {
-        & dotnet test --project $project --filter-trait 'Category=Tck' --results-directory $ReportDirectory |
+        & dotnet test --project $project --filter-trait 'Category=Tck' |
             Tee-Object -FilePath (Join-Path $ReportDirectory 'client-tests.log')
         if ($LASTEXITCODE -ne 0) { throw 'The .NET client ACP TCK interoperability matrix failed.' }
     }
