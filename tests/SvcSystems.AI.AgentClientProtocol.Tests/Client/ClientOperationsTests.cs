@@ -179,6 +179,108 @@ public sealed class ClientOperationsTests
         Assert.Equal(-32601, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
     }
 
+    [Fact]
+    public async Task ConnectRejectsInvalidResourceLimits()
+    {
+        await using var transport = new TestTransport();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => AcpClient.ConnectAsync(transport, new ClientOptions { MaximumConcurrentIncomingRequests = 0 }, Token));
+    }
+
+    [Fact]
+    public async Task ConnectRejectsInvalidSessionUpdateBuffer()
+    {
+        await using var transport = new TestTransport();
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => AcpClient.ConnectAsync(transport, new ClientOptions { MaximumBufferedSessionUpdates = 0 }, Token));
+    }
+
+    [Fact]
+    public async Task SessionCreationRejectsRelativeMcpStdioCommands()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+        var server = new McpServerStdio { Name = "local", Command = "agent", Args = [], Env = [] };
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => client.CreateSessionAsync(Options(server), Token));
+
+        Assert.Contains("absolute", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("http")]
+    [InlineData("sse")]
+    public async Task SessionCreationRejectsMcpUrlsThatAreNotAbsolute(string kind)
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+        McpServer server = kind == "http"
+            ? new McpServerHttp { Name = "remote", Url = "relative/path", Headers = [] }
+            : new McpServerSse { Name = "remote", Url = "relative/path", Headers = [] };
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => client.CreateSessionAsync(Options(server), Token));
+
+        Assert.Contains("absolute", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("http")]
+    [InlineData("sse")]
+    public async Task SessionCreationRejectsMcpTransportsTheAgentDoesNotAdvertise(string kind)
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+        McpServer server = kind == "http"
+            ? new McpServerHttp { Name = "remote", Url = "https://example.test/mcp", Headers = [] }
+            : new McpServerSse { Name = "remote", Url = "https://example.test/mcp", Headers = [] };
+
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(
+            () => client.CreateSessionAsync(Options(server), Token));
+
+        Assert.Contains(kind.ToUpperInvariant(), exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task SessionCreationRejectsUnknownMcpServerTypes()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+
+        var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => client.CreateSessionAsync(Options(new UnknownMcpServer()), Token));
+
+        Assert.Contains("UnknownMcpServer", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task PermissionCallbackRejectsUnadvertisedOptions()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(
+            transport,
+            new ClientOptions { PermissionHandler = new SelectingPermissionHandler("bogus") });
+        transport.Receive("""
+            {"jsonrpc":"2.0","id":44,"method":"session/request_permission","params":{
+              "sessionId":"session","toolCall":{"toolCallId":"call","title":"Run tool"},
+              "options":[{"optionId":"allow","name":"Allow","kind":"allow_once"}]}}
+            """);
+
+        using var response = await transport.ReadSentAsync();
+
+        Assert.Equal(44, response.RootElement.GetProperty("id").GetInt32());
+        Assert.Equal(-32602, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+    }
+
+    private static SessionOptions Options(McpServer server) => new()
+    {
+        WorkingDirectory = Environment.CurrentDirectory,
+        McpServers = [server]
+    };
+
     private static async Task<AcpClient> ConnectAsync(
         TestTransport transport,
         ClientOptions? options = null,
@@ -214,4 +316,6 @@ public sealed class ClientOperationsTests
             return ValueTask.FromResult(PermissionDecision.Select(optionId));
         }
     }
+
+    private sealed class UnknownMcpServer : McpServer;
 }

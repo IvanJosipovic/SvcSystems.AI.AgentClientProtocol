@@ -115,6 +115,51 @@ public sealed class FileSystemCallbackTests
         }
     }
 
+    [Fact]
+    public async Task FileSystemCallbacksRejectInactiveSessionsAndUnresolvablePaths()
+    {
+        var workspace = Directory.CreateTempSubdirectory("acp-workspace-");
+        try
+        {
+            await using var transport = new TestTransport();
+            var handler = new RecordingFileSystemHandler();
+            await using var client = await ConnectAsync(transport, new ClientOptions { FileSystemHandler = handler });
+
+            transport.Receive(FileSystemRequest("inactive", "fs/read_text_file", "missing-session", Path.Combine(workspace.FullName, "notes.txt")));
+            using (var response = await transport.ReadSentAsync())
+            {
+                Assert.Equal(-32602, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+                Assert.Contains(
+                    "active session",
+                    response.RootElement.GetProperty("error").GetProperty("message").GetString(),
+                    StringComparison.Ordinal);
+            }
+
+            var creatingSession = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = workspace.FullName }, Token);
+            using (var request = await transport.ReadSentAsync())
+            {
+                transport.Respond(request, """{"sessionId":"session-1"}""");
+            }
+            _ = await creatingSession.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+            transport.Receive(FileSystemRequest("unresolvable", "fs/read_text_file", "session-1", Path.Combine(workspace.FullName, "bad\0name.txt")));
+            using (var response = await transport.ReadSentAsync())
+            {
+                Assert.Equal(-32602, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+                Assert.Contains(
+                    "resolved safely",
+                    response.RootElement.GetProperty("error").GetProperty("message").GetString(),
+                    StringComparison.Ordinal);
+            }
+
+            Assert.Equal(0, handler.ReadCount);
+        }
+        finally
+        {
+            workspace.Delete(recursive: true);
+        }
+    }
+
     private static async Task<AcpClient> ConnectAsync(TestTransport transport, ClientOptions? options = null)
     {
         var connecting = AcpClient.ConnectAsync(transport, options, Token);

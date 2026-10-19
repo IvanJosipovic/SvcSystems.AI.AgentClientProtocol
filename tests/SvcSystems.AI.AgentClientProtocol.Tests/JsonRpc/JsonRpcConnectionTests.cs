@@ -220,6 +220,120 @@ public sealed class JsonRpcConnectionTests
         Assert.False(JsonSerializer.IsReflectionEnabledByDefault);
     }
 
+    [Fact]
+    public async Task InvalidMaximumConcurrentIncomingRequestsIsRejected()
+    {
+        await using var transport = new FakeTransport();
+
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => new JsonRpcConnection(transport, maximumConcurrentIncomingRequests: 0));
+    }
+
+    [Fact]
+    public async Task RequestWithoutParametersIsDispatchedWithAnEmptyObject()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        connection.RegisterRequestHandler("host/ping", (parameters, _) =>
+            ValueTask.FromResult(Encoding.UTF8.GetBytes($$"""{"kind":"{{parameters.ValueKind}}"}""")));
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"no-params","method":"host/ping"}"""));
+
+        using var response = await ReadMessageAsync(transport.Sent);
+        Assert.Equal("no-params", response.RootElement.GetProperty("id").GetString());
+        Assert.Equal("Object", response.RootElement.GetProperty("result").GetProperty("kind").GetString());
+    }
+
+    [Fact]
+    public async Task NullRequestIdIsEchoedBackAsNull()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        connection.RegisterRequestHandler("host/ping", (_, _) => ValueTask.FromResult(Encoding.UTF8.GetBytes("{}")));
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":null,"method":"host/ping"}"""));
+
+        using var response = await ReadMessageAsync(transport.Sent);
+        Assert.Equal(JsonValueKind.Null, response.RootElement.GetProperty("id").ValueKind);
+    }
+
+    [Theory]
+    [InlineData("[]", "JSON object with jsonrpc")]
+    [InlineData("""{"jsonrpc":"1.0","id":1,"result":{}}""", "JSON object with jsonrpc")]
+    [InlineData("""{"jsonrpc":"2.0","id":"text","result":{}}""", "integer request id")]
+    [InlineData("""{"jsonrpc":"2.0","id":true,"method":"host/ping","params":{}}""", "string, integer, or null")]
+    public async Task MalformedEnvelopesTerminateTheConnectionWithAProtocolError(string frame, string expectedMessage)
+    {
+        await using var transport = new FakeTransport();
+        var connection = new JsonRpcConnection(transport);
+
+        transport.Receive(Json(frame));
+
+        var failure = await connection.Completion.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        var protocolException = Assert.IsType<ProtocolException>(failure);
+        Assert.Contains(expectedMessage, protocolException.Message, StringComparison.Ordinal);
+
+        await connection.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task MalformedErrorResponseFaultsThePendingRequest()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        var requestTask = connection.SendRequestAsync("bad/method", Json("{}"), CancellationToken.None);
+        using var request = await ReadMessageAsync(transport.Sent);
+        var requestId = request.RootElement.GetProperty("id").GetInt64();
+
+        transport.Receive(Json($$"""{"jsonrpc":"2.0","id":{{requestId}},"error":"not-an-object"}"""));
+
+        var exception = await Assert.ThrowsAsync<ProtocolException>(() => requestTask);
+        Assert.Contains("malformed", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ResponseWithoutResultOrErrorFaultsThePendingRequest()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        var requestTask = connection.SendRequestAsync("bad/method", Json("{}"), CancellationToken.None);
+        using var request = await ReadMessageAsync(transport.Sent);
+        var requestId = request.RootElement.GetProperty("id").GetInt64();
+
+        transport.Receive(Json($$"""{"jsonrpc":"2.0","id":{{requestId}}}"""));
+
+        var exception = await Assert.ThrowsAsync<ProtocolException>(() => requestTask);
+        Assert.Contains("result or error", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task HandlerFailuresAreTracedWhenNoDiagnosticsAreConfigured()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        connection.RegisterRequestHandler("host/fail", (_, _) => throw new InvalidOperationException("boom"));
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"failure","method":"host/fail","params":{}}"""));
+
+        using var response = await ReadMessageAsync(transport.Sent);
+        Assert.Equal(-32603, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+    }
+
+    [Fact]
+    public async Task ThrowingDiagnosticCallbackStillReturnsAnErrorResponse()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(
+            transport,
+            requestHandlerException: (_, _) => throw new InvalidOperationException("diagnostic failure"));
+        connection.RegisterRequestHandler("host/fail", (_, _) => throw new InvalidOperationException("boom"));
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","id":"failure","method":"host/fail","params":{}}"""));
+
+        using var response = await ReadMessageAsync(transport.Sent);
+        Assert.Equal(-32603, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+    }
+
     private static byte[] Json(string value) => Encoding.UTF8.GetBytes(value);
 
     private static JsonElement ParseElement(string json)

@@ -136,6 +136,169 @@ public sealed class ClientSessionTests
         Assert.Equal("session/cancel", cancel.RootElement.GetProperty("method").GetString());
     }
 
+    [Theory]
+    [InlineData("image")]
+    [InlineData("audio")]
+    [InlineData("resource")]
+    public async Task PromptRejectsContentTheAgentDoesNotAdvertise(string kind)
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+        var creating = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = Environment.CurrentDirectory }, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        var session = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+        ContentBlock block = kind switch
+        {
+            "image" => new ImageContent { Data = "AAAA", MimeType = "image/png" },
+            "audio" => new AudioContent { Data = "AAAA", MimeType = "audio/wav" },
+            _ => new EmbeddedResource
+            {
+                Resource = new TextResourceContents { Uri = "file:///workspace/notes.txt", Text = "notes" }
+            }
+        };
+
+        var exception = await Assert.ThrowsAsync<NotSupportedException>(
+            () => CollectAsync(session.PromptAsync([block], Token)));
+
+        Assert.Contains(kind == "resource" ? "embedded context" : kind, exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task LoadSessionFailureReleasesTheSessionForRetry()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+        var options = new SessionOptions { WorkingDirectory = Environment.CurrentDirectory };
+
+        var loading = client.LoadSessionAsync("session", options, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            Assert.Equal("session/load", request.RootElement.GetProperty("method").GetString());
+            transport.RespondError(request, -32603, "load failed");
+        }
+
+        await Assert.ThrowsAsync<RpcException>(() => loading.WaitAsync(TimeSpan.FromSeconds(5), Token));
+    }
+
+    [Fact]
+    public async Task DuplicateSessionIdStillFailsWhenCleanupFails()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport);
+        var options = new SessionOptions { WorkingDirectory = Environment.CurrentDirectory };
+
+        var creating = client.CreateSessionAsync(options, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        _ = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+        var duplicate = client.CreateSessionAsync(options, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        using (var close = await transport.ReadSentAsync())
+        {
+            Assert.Equal("session/close", close.RootElement.GetProperty("method").GetString());
+            transport.RespondError(close, -32603, "close failed");
+        }
+
+        var error = await Assert.ThrowsAsync<ProtocolException>(() => duplicate.WaitAsync(TimeSpan.FromSeconds(5), Token));
+        Assert.Contains("duplicate session id", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task UpdateBufferFailureToleratesCancellationTransportFailures()
+    {
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport, new ClientOptions { MaximumBufferedSessionUpdates = 1 });
+
+        var creating = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = Environment.CurrentDirectory }, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        _ = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+        transport.SendGate = message => Encoding.UTF8.GetString(message.Span).Contains("session/cancel", StringComparison.Ordinal)
+            ? Task.FromException(new IOException("transport failure"))
+            : Task.CompletedTask;
+
+        transport.Receive(SessionInfoUpdate("first"));
+        transport.Receive(SessionInfoUpdate("second"));
+        await BarrierAsync(client, transport);
+    }
+
+    [Fact]
+    public async Task PermissionCallbackIsCancelledWhenThePromptIsCancelled()
+    {
+        await using var transport = new TestTransport();
+        var handler = new WaitingPermissionHandler();
+        await using var client = await ConnectAsync(transport, new ClientOptions { PermissionHandler = handler });
+        var creating = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = Environment.CurrentDirectory }, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        var session = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+        var prompting = CollectAsync(session.PromptAsync("hello", Token));
+        using (var prompt = await transport.ReadSentAsync())
+        {
+            Assert.Equal("session/prompt", prompt.RootElement.GetProperty("method").GetString());
+
+            transport.Receive(PermissionRequest(41));
+            await handler.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+            var cancelling = session.CancelAsync(Token);
+            using (var cancel = await transport.ReadSentAsync())
+            {
+                Assert.Equal("session/cancel", cancel.RootElement.GetProperty("method").GetString());
+            }
+            await cancelling.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+            using (var cancelled = await transport.ReadSentAsync())
+            {
+                Assert.Equal(41, cancelled.RootElement.GetProperty("id").GetInt32());
+                Assert.Equal("cancelled", cancelled.RootElement.GetProperty("result").GetProperty("outcome").GetProperty("outcome").GetString());
+            }
+
+            transport.Receive(PermissionRequest(42));
+            using (var alreadyCancelled = await transport.ReadSentAsync())
+            {
+                Assert.Equal(42, alreadyCancelled.RootElement.GetProperty("id").GetInt32());
+                Assert.Equal("cancelled", alreadyCancelled.RootElement.GetProperty("result").GetProperty("outcome").GetProperty("outcome").GetString());
+            }
+
+            transport.Respond(prompt, """{"stopReason":"cancelled"}""");
+        }
+
+        await prompting.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
+    private static string PermissionRequest(int id) =>
+        "{\"jsonrpc\":\"2.0\",\"id\":" + id
+        + ",\"method\":\"session/request_permission\",\"params\":{\"sessionId\":\"session\",\"toolCall\":{\"toolCallId\":\"call\",\"title\":\"Run tool\"},\"options\":[{\"optionId\":\"allow\",\"name\":\"Allow\",\"kind\":\"allow_once\"}]}}";
+
+    private sealed class WaitingPermissionHandler : IPermissionHandler
+    {
+        public TaskCompletionSource Entered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public async ValueTask<PermissionDecision> RequestPermissionAsync(
+            RequestPermissionRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            Entered.TrySetResult();
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
+            return PermissionDecision.Select(request.Options[0].OptionId);
+        }
+    }
+
     private static async Task<AcpClient> ConnectAsync(TestTransport transport, ClientOptions? options = null)
     {
         var connecting = AcpClient.ConnectAsync(transport, options, Token);

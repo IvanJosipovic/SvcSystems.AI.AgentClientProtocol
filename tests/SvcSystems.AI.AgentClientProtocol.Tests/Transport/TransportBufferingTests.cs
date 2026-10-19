@@ -42,4 +42,40 @@ public sealed class TransportBufferingTests
         Assert.False(session.Publish(new CurrentModeUpdate { CurrentModeId = "second" }));
         Assert.False(session.Publish(new CurrentModeUpdate { CurrentModeId = "third" }));
     }
+
+    [Fact]
+    public async Task StdioTransportRejectsMissingExecutable()
+    {
+        var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await StdioTransport.StartAsync(
+                new ProcessOptions { FileName = " " },
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal("options", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task StdioTransportRejectsNonPositiveFrameLimit()
+    {
+        var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            await StdioTransport.StartAsync(
+                new ProcessOptions { FileName = "agent", MaximumMessageBytes = 0 },
+                TestContext.Current.CancellationToken));
+
+        Assert.Equal("options", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task StdioTransportWrapsStartupFailures()
+    {
+        var missing = Path.Combine(Path.GetTempPath(), $"acp-missing-agent-{Guid.NewGuid():N}.exe");
+
+        var exception = await Assert.ThrowsAsync<ProcessException>(async () =>
+            await StdioTransport.StartAsync(
+                new ProcessOptions { FileName = missing },
+                TestContext.Current.CancellationToken));
+
+        Assert.Contains("Failed to start", exception.Message, StringComparison.Ordinal);
+        Assert.NotNull(exception.InnerException);
+    }
 }
