@@ -261,17 +261,6 @@ ACP v2 is not supported (the client test verifies that a v2-only agent is reject
 not cover positive MCP, filesystem, or terminal operations; those remain in the separate Testy
 integration tests.
 
-## Scope
-
-The initial transport is stdio. The library targets stable ACP v1 and keeps the JSON-RPC implementation and generated wire types internal. HTTP/WebSocket transports and agent-specific APIs are not included.
-
-## Future work
-
-Not implemented yet:
-
-- An agent-side runtime host (the mirror of this client) shipped as a separate package.
-- Registry-driven discovery and launching of installed ACP agents.
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
