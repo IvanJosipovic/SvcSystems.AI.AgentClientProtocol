@@ -1,4 +1,4 @@
-using Microsoft.OpenApi;
+﻿using Microsoft.OpenApi;
 using Microsoft.OpenApi.Reader;
 
 namespace SvcSystems.AI.AgentClientProtocol.Generator;

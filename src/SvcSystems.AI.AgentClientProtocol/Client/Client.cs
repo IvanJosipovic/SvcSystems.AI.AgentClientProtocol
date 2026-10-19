@@ -1,11 +1,11 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using SvcSystems.AI.AgentClientProtocol.JsonRpc;
-using SvcSystems.AI.AgentClientProtocol.Generated;
 using SvcSystems.AI.AgentClientProtocol.Serialization;
 using SvcSystems.AI.AgentClientProtocol.Transport;
 
-namespace SvcSystems.AI.AgentClientProtocol;
+namespace SvcSystems.AI.AgentClientProtocol.Client;
 
 /// <summary>Starts and owns an ACP agent process over stdio.</summary>
 public sealed class Client : IClient
@@ -14,7 +14,9 @@ public sealed class Client : IClient
     private readonly JsonRpcConnection _connection;
     private readonly ClientOptions _options;
     private readonly ProcessOptions? _processOptions;
+    private readonly ILogger? _logger;
     private readonly ConcurrentDictionary<string, Session> _sessions = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _fileSystemRoots = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activePromptCancellation = new(StringComparer.Ordinal);
     private AuthenticationStatus? _authenticationStatus;
     private int _disposed;
@@ -25,9 +27,14 @@ public sealed class Client : IClient
         {
             throw new ArgumentOutOfRangeException(nameof(options), "The maximum buffered session update count must be positive.");
         }
+        if (options.MaximumConcurrentIncomingRequests <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "The maximum concurrent incoming request count must be positive.");
+        }
         _connection = connection;
         _processOptions = processOptions;
         _options = options;
+        _logger = options.LoggerFactory?.CreateLogger<Client>();
         RegisterHostCallbacks();
         foreach (var (method, handler) in options.ExtensionRequestHandlers)
         {
@@ -43,13 +50,32 @@ public sealed class Client : IClient
             });
         }
         _connection.UnhandledNotificationReceived = HandleExtensionNotification;
+        // Surface the terminal failure without requiring callers to observe Completion. The continuation
+        // runs on the thread pool rather than the receive loop so a slow handler cannot stall teardown.
+        // CompletedTask only ever reports a result (never faults), but Status is checked rather than
+        // Result so this continuation can never observe an exception and fault unobserved.
+        _ = _connection.Completion.ContinueWith(
+            static (completion, state) =>
+            {
+                if (completion.Status == TaskStatus.RanToCompletion && completion.Result is { } failure)
+                {
+                    ((Client)state!).RaiseTransportFaulted(failure);
+                }
+            },
+            this,
+            CancellationToken.None,
+            TaskContinuationOptions.None,
+            TaskScheduler.Default);
     }
 
     /// <summary>Negotiated agent identity and capabilities.</summary>
-    public AgentInfo Agent { get; private set; } = null!;
+    public InitializeResponse Agent { get; private set; } = null!;
 
     /// <summary>Completes when the underlying connection closes; the result contains the transport failure, if any.</summary>
     public Task<Exception?> Completion => _connection.Completion;
+
+    /// <inheritdoc />
+    public event EventHandler<TransportFaultedEventArgs>? TransportFaulted;
 
     /// <inheritdoc />
     public AuthenticationStatus? AuthenticationStatus => Volatile.Read(ref _authenticationStatus);
@@ -99,7 +125,11 @@ public sealed class Client : IClient
         JsonRpcConnection? connection = null;
         try
         {
-            connection = new JsonRpcConnection(transport);
+            connection = new JsonRpcConnection(
+                transport,
+                clientOptions.MaximumConcurrentIncomingRequests,
+                clientOptions.RequestHandlerException,
+                clientOptions.LoggerFactory);
             var client = new Client(connection, processOptions, clientOptions);
             await client.InitializeAsync(cancellationToken).ConfigureAwait(false);
             return client;
@@ -131,7 +161,11 @@ public sealed class Client : IClient
         JsonRpcConnection? connection = null;
         try
         {
-            connection = new JsonRpcConnection(transport);
+            connection = new JsonRpcConnection(
+                transport,
+                clientOptions.MaximumConcurrentIncomingRequests,
+                clientOptions.RequestHandlerException,
+                clientOptions.LoggerFactory);
             var client = new Client(connection, terminalAuthenticationProcessOptions, clientOptions);
             await client.InitializeAsync(cancellationToken).ConfigureAwait(false);
             return client;
@@ -150,24 +184,43 @@ public sealed class Client : IClient
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(options);
         ValidateSessionOptions(options);
+        var fileSystemRoots = GetFileSystemRoots(options);
 
         var request = new NewSessionRequest
         {
             Cwd = options.WorkingDirectory,
-            McpServers = [],
+            McpServers = [.. options.McpServers],
             AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null,
             Meta = WireJson.CopyMetadata(options.Metadata)
         };
         var response = await _connection.SendRequestAsync(
             Methods.SessionNew,
-            WireJson.WriteNewSessionRequest(request, options.McpServers),
+            WireJson.WriteNewSessionRequest(request),
             cancellationToken).ConfigureAwait(false);
-        var session = new Session(this, WireJson.ReadSessionId(response), _options.MaximumBufferedSessionUpdates);
-        WireJson.ApplySessionInitialState(session, response);
+        var typedResponse = response.Deserialize(JsonContext.Default.NewSessionResponse)!;
+        var session = new Session(this, typedResponse.SessionId, _options.MaximumBufferedSessionUpdates);
+        session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
         if (!_sessions.TryAdd(session.Id, session))
         {
+            // The agent created a second session whose id is already live. Release the agent-side
+            // session before failing so that the duplicate does not leak agent state. The request is
+            // sent directly (rather than through CloseSessionAsync) so that the existing local session
+            // entry, which still owns that id, is left untouched. Best effort: the agent may not
+            // advertise close, in which case it answers with an error that is intentionally ignored.
+            try
+            {
+                _ = await _connection.SendRequestAsync(
+                    Methods.SessionClose,
+                    JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = session.Id }, JsonContext.Default.DeleteSessionRequest),
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // The duplicate session id is the failure that is reported to the caller.
+            }
             throw new ProtocolException($"ACP agent returned duplicate session id '{session.Id}'.");
         }
+        if (fileSystemRoots is not null) _fileSystemRoots[session.Id] = fileSystemRoots;
         return session;
     }
 
@@ -177,11 +230,13 @@ public sealed class Client : IClient
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
         ArgumentNullException.ThrowIfNull(options);
-        if (Agent.Capabilities.LoadSession != true) throw new NotSupportedException("The ACP agent does not advertise session loading.");
+        if (Agent.AgentCapabilities?.LoadSession != true) throw new NotSupportedException("The ACP agent does not advertise session loading.");
         ValidateSessionOptions(options);
 
+        var fileSystemRoots = GetFileSystemRoots(options);
         var created = new Session(this, sessionId, _options.MaximumBufferedSessionUpdates);
         var session = _sessions.GetOrAdd(sessionId, created);
+        if (ReferenceEquals(session, created) && fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
 
         try
         {
@@ -189,17 +244,22 @@ public sealed class Client : IClient
             {
                 SessionId = sessionId,
                 Cwd = options.WorkingDirectory,
-                McpServers = [],
+                McpServers = [.. options.McpServers],
                 AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null,
                 Meta = WireJson.CopyMetadata(options.Metadata)
             };
-            var response = await _connection.SendRequestAsync(Methods.SessionLoad, WireJson.WriteLoadSessionRequest(request, options.McpServers), cancellationToken).ConfigureAwait(false);
-            WireJson.ApplySessionInitialState(session, response);
+            var response = await _connection.SendRequestAsync(Methods.SessionLoad, WireJson.WriteLoadSessionRequest(request), cancellationToken).ConfigureAwait(false);
+            var typedResponse = response.Deserialize(JsonContext.Default.LoadSessionResponse)!;
+            session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
             return session;
         }
         catch
         {
-            if (ReferenceEquals(session, created)) _sessions.TryRemove(sessionId, out _);
+            if (ReferenceEquals(session, created))
+            {
+                _sessions.TryRemove(sessionId, out _);
+                _fileSystemRoots.TryRemove(sessionId, out _);
+            }
             throw;
         }
     }
@@ -209,48 +269,51 @@ public sealed class Client : IClient
     {
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(methodId);
-        var method = Agent.AuthenticationMethods?.FirstOrDefault(method => string.Equals(method.Id, methodId, StringComparison.Ordinal));
+        var method = Agent.AuthMethods?.FirstOrDefault(method => method switch
+        {
+            AuthMethodAgent agent => string.Equals(agent.Id, methodId, StringComparison.Ordinal),
+            AuthMethodTerminal terminal => string.Equals(terminal.Id, methodId, StringComparison.Ordinal),
+            _ => false
+        });
         if (method is null) throw new ArgumentException($"Authentication method '{methodId}' was not advertised by the ACP agent.", nameof(methodId));
-        if (Discriminators.ParseAuthMethodDiscriminator(method.Type) == AuthMethodDiscriminator.Terminal)
+        if (method is AuthMethodTerminal terminalMethod)
         {
             var processOptions = _processOptions
                 ?? throw new NotSupportedException("Terminal authentication requires process options and is unavailable for a caller-provided transport.");
             var handler = _options.TerminalAuthenticationHandler
                 ?? throw new NotSupportedException("This agent requires terminal authentication but no terminal authentication handler is configured.");
             var environment = processOptions.Environment.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
-            if (method.Environment is not null)
+            if (terminalMethod.Env is not null)
             {
-                foreach (var variable in method.Environment) environment[variable.Key] = variable.Value;
+                foreach (var variable in terminalMethod.Env) environment[variable.Key] = variable.Value;
             }
-            var arguments = processOptions.Arguments.Concat(method.Arguments ?? []).ToArray();
+            var arguments = processOptions.Arguments.Concat(terminalMethod.Args ?? []).ToArray();
             var exitCode = await handler.RunAsync(
                 new TerminalAuthenticationRequest(processOptions.FileName, arguments, processOptions.WorkingDirectory ?? Environment.CurrentDirectory, environment),
                 cancellationToken).ConfigureAwait(false);
             if (exitCode != 0) throw new ProcessException($"Terminal authentication exited with code {exitCode}.");
             return;
         }
-        _ = await _connection.SendRequestAsync(Methods.Authenticate, WireJson.WriteAuthenticateRequest(methodId), cancellationToken).ConfigureAwait(false);
+        _ = await _connection.SendRequestAsync(
+            Methods.Authenticate,
+            JsonSerializer.SerializeToUtf8Bytes(new AuthenticateRequest { MethodId = methodId }, JsonContext.Default.AuthenticateRequest),
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task LogoutAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        if (Agent.Capabilities.Auth?.Logout is null) throw new NotSupportedException("The ACP agent does not advertise logout support.");
-        _ = await _connection.SendRequestAsync(Methods.Logout, WireJson.WriteLogoutRequest(), cancellationToken).ConfigureAwait(false);
+        if (Agent.AgentCapabilities?.Auth?.Logout is null) throw new NotSupportedException("The ACP agent does not advertise logout support.");
+        _ = await _connection.SendRequestAsync(Methods.Logout, JsonSerializer.SerializeToUtf8Bytes(new LogoutRequest(), JsonContext.Default.LogoutRequest), cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<SessionInfo>> ListSessionsAsync(
         string? workingDirectory = null,
         string? cursor = null,
-        CancellationToken cancellationToken = default)
-    {
-        ThrowIfDisposed();
-        if (Agent.Capabilities.SessionCapabilities?.List is null) throw new NotSupportedException("The ACP agent does not advertise session listing.");
-        if (workingDirectory is not null) ValidateWorkingDirectory(workingDirectory);
-        return (await ListSessionsPageAsync(workingDirectory, cursor, cancellationToken).ConfigureAwait(false)).Sessions;
-    }
+        CancellationToken cancellationToken = default) =>
+        (await ListSessionsPageAsync(workingDirectory, cursor, cancellationToken).ConfigureAwait(false)).Sessions;
 
     /// <inheritdoc />
     public async Task<ListSessionsResponse> ListSessionsPageAsync(
@@ -259,13 +322,13 @@ public sealed class Client : IClient
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        if (Agent.Capabilities.SessionCapabilities?.List is null) throw new NotSupportedException("The ACP agent does not advertise session listing.");
+        if (Agent.AgentCapabilities?.SessionCapabilities?.List is null) throw new NotSupportedException("The ACP agent does not advertise session listing.");
         if (workingDirectory is not null) ValidateWorkingDirectory(workingDirectory);
         var response = await _connection.SendRequestAsync(
             Methods.SessionList,
-            WireJson.WriteListSessionsRequest(workingDirectory, cursor),
+            JsonSerializer.SerializeToUtf8Bytes(new ListSessionsRequest { Cwd = workingDirectory, Cursor = cursor }, JsonContext.Default.ListSessionsRequest),
             cancellationToken).ConfigureAwait(false);
-        return WireJson.ReadSessionListPage(response);
+        return response.Deserialize(JsonContext.Default.ListSessionsResponse)!;
     }
 
     /// <inheritdoc />
@@ -273,9 +336,13 @@ public sealed class Client : IClient
     {
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
-        if (Agent.Capabilities.SessionCapabilities?.Delete is null) throw new NotSupportedException("The ACP agent does not advertise session deletion.");
-        _ = await _connection.SendRequestAsync(Methods.SessionDelete, WireJson.WriteSessionIdRequest(sessionId), cancellationToken).ConfigureAwait(false);
+        if (Agent.AgentCapabilities?.SessionCapabilities?.Delete is null) throw new NotSupportedException("The ACP agent does not advertise session deletion.");
+        _ = await _connection.SendRequestAsync(
+            Methods.SessionDelete,
+            JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = sessionId }, JsonContext.Default.DeleteSessionRequest),
+            cancellationToken).ConfigureAwait(false);
         _sessions.TryRemove(sessionId, out _);
+        _fileSystemRoots.TryRemove(sessionId, out _);
     }
 
     /// <inheritdoc />
@@ -284,20 +351,27 @@ public sealed class Client : IClient
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
         ArgumentNullException.ThrowIfNull(options);
-        if (Agent.Capabilities.SessionCapabilities?.Resume is null) throw new NotSupportedException("The ACP agent does not advertise session resume.");
+        if (Agent.AgentCapabilities?.SessionCapabilities?.Resume is null) throw new NotSupportedException("The ACP agent does not advertise session resume.");
         ValidateSessionOptions(options);
 
+        var fileSystemRoots = GetFileSystemRoots(options);
         var created = new Session(this, sessionId, _options.MaximumBufferedSessionUpdates);
         var session = _sessions.GetOrAdd(sessionId, created);
+        if (ReferenceEquals(session, created) && fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
         try
         {
             var response = await _connection.SendRequestAsync(Methods.SessionResume, WireJson.WriteResumeSessionRequest(sessionId, options), cancellationToken).ConfigureAwait(false);
-            WireJson.ApplySessionInitialState(session, response);
+            var typedResponse = response.Deserialize(JsonContext.Default.ResumeSessionResponse)!;
+            session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
             return session;
         }
         catch
         {
-            if (ReferenceEquals(session, created)) _sessions.TryRemove(sessionId, out _);
+            if (ReferenceEquals(session, created))
+            {
+                _sessions.TryRemove(sessionId, out _);
+                _fileSystemRoots.TryRemove(sessionId, out _);
+            }
             throw;
         }
     }
@@ -307,42 +381,44 @@ public sealed class Client : IClient
     {
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
-        if (Agent.Capabilities.SessionCapabilities?.Close is null) throw new NotSupportedException("The ACP agent does not advertise session close.");
-        _ = await _connection.SendRequestAsync(Methods.SessionClose, WireJson.WriteSessionIdRequest(sessionId), cancellationToken).ConfigureAwait(false);
+        if (Agent.AgentCapabilities?.SessionCapabilities?.Close is null) throw new NotSupportedException("The ACP agent does not advertise session close.");
+        _ = await _connection.SendRequestAsync(
+            Methods.SessionClose,
+            JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = sessionId }, JsonContext.Default.DeleteSessionRequest),
+            cancellationToken).ConfigureAwait(false);
         _sessions.TryRemove(sessionId, out _);
+        _fileSystemRoots.TryRemove(sessionId, out _);
     }
 
     internal async Task SetSessionModeAsync(string sessionId, string modeId, CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
         ArgumentException.ThrowIfNullOrWhiteSpace(modeId);
-        _ = await _connection.SendRequestAsync(Methods.SessionSetMode, WireJson.WriteSetModeRequest(sessionId, modeId), cancellationToken).ConfigureAwait(false);
+        _ = await _connection.SendRequestAsync(
+            Methods.SessionSetMode,
+            JsonSerializer.SerializeToUtf8Bytes(new SetSessionModeRequest { SessionId = sessionId, ModeId = modeId }, JsonContext.Default.SetSessionModeRequest),
+            cancellationToken).ConfigureAwait(false);
     }
 
-    internal async Task<IReadOnlyList<SessionConfigOption>> SetSessionConfigOptionAsync(string sessionId, string configId, ConfigValue value, CancellationToken cancellationToken)
+    internal async Task<IReadOnlyList<SessionConfigOption>> SetSessionConfigOptionAsync(SetSessionConfigOptionRequest value, CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
-        ArgumentException.ThrowIfNullOrWhiteSpace(configId);
-        if ((value.ValueId is null) == (value.Boolean is null))
-            throw new ArgumentException("Provide exactly one of a string value id or a boolean value.", nameof(value));
-        var response = await _connection.SendRequestAsync(Methods.SessionSetConfigOption, WireJson.WriteSetConfigOptionRequest(sessionId, configId, value), cancellationToken).ConfigureAwait(false);
+        var response = await _connection.SendRequestAsync(Methods.SessionSetConfigOption, WireJson.WriteSetConfigOptionRequest(value), cancellationToken).ConfigureAwait(false);
         return WireJson.ReadConfigOptionsResponse(response);
     }
 
-    internal async Task<(string StopReason, JsonElement RawPayload)> PromptAsync(string sessionId, IReadOnlyList<AgentContentBlock> content, CancellationToken cancellationToken, PromptOptions? options = null)
+    internal async Task<PromptResponse> PromptAsync(string sessionId, IReadOnlyList<ContentBlock> content, CancellationToken cancellationToken, PromptOptions? options = null)
     {
         ThrowIfDisposed();
         ValidatePromptContent(content);
+        // Session serializes prompts per session, so at most one is active at a time. Registering the
+        // cancellation source lets a pending permission request observe prompt cancellation.
         var permissionCancellation = new CancellationTokenSource();
-        if (!_activePromptCancellation.TryAdd(sessionId, permissionCancellation))
-        {
-            permissionCancellation.Dispose();
-            throw new InvalidOperationException($"Session '{sessionId}' already has an active prompt.");
-        }
+        _activePromptCancellation[sessionId] = permissionCancellation;
         try
         {
             var response = await _connection.SendRequestAsync(Methods.SessionPrompt, WireJson.WritePromptRequest(sessionId, content, options), cancellationToken).ConfigureAwait(false);
-            return (WireJson.ReadStopReason(response), response.Clone());
+            return response.Deserialize(JsonContext.Default.PromptResponse)!;
         }
         finally
         {
@@ -360,7 +436,7 @@ public sealed class Client : IClient
             catch (ObjectDisposedException) { }
         }
         var notification = new CancelNotification { SessionId = sessionId };
-        await _connection.SendNotificationAsync(Methods.SessionCancel, WireJson.WriteCancelNotification(notification), cancellationToken).ConfigureAwait(false);
+        await _connection.SendNotificationAsync(Methods.SessionCancel, JsonSerializer.SerializeToUtf8Bytes(notification, JsonContext.Default.CancelNotification), cancellationToken).ConfigureAwait(false);
     }
 
     private async Task InitializeAsync(CancellationToken cancellationToken)
@@ -384,7 +460,7 @@ public sealed class Client : IClient
         };
 
         var response = await _connection.SendRequestAsync(Methods.Initialize, WireJson.WriteInitializeRequest(request, _options.ClientInfo, _options), cancellationToken).ConfigureAwait(false);
-        Agent = WireJson.ReadAgentInfo(response);
+        Agent = response.Deserialize(JsonContext.Default.InitializeResponse)!;
         if (Agent.ProtocolVersion != ProtocolVersion)
         {
             throw new ProtocolException($"ACP protocol version {Agent.ProtocolVersion} was negotiated, but this client supports version {ProtocolVersion}.");
@@ -393,7 +469,7 @@ public sealed class Client : IClient
 
     private async ValueTask<byte[]> HandlePermissionRequestAsync(JsonElement parameters, CancellationToken cancellationToken)
     {
-        var request = WireJson.ReadPermissionRequest(parameters);
+        var request = parameters.Deserialize(JsonContext.Default.RequestPermissionRequest)!;
         PermissionDecision decision;
         var promptCancellation = _activePromptCancellation.TryGetValue(request.SessionId, out var activeCancellation)
             ? activeCancellation.Token
@@ -448,17 +524,19 @@ public sealed class Client : IClient
         {
             requests[Methods.FsReadTextFile] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTextFileReadRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.ReadTextFileRequest)!;
                 ValidateAbsolutePath(request.Path, "path");
+                ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsReadTextFile);
                 var content = await fileSystem.ReadTextFileAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteTextFileReadResponse(content);
+                return JsonSerializer.SerializeToUtf8Bytes(new ReadTextFileResponse { Content = content }, JsonContext.Default.ReadTextFileResponse);
             };
             requests[Methods.FsWriteTextFile] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTextFileWriteRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.WriteTextFileRequest)!;
                 ValidateAbsolutePath(request.Path, "path");
+                ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsWriteTextFile);
                 await fileSystem.WriteTextFileAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteEmptyResponse();
+                return WireJson.WriteEmptyObject();
             };
         }
 
@@ -466,35 +544,35 @@ public sealed class Client : IClient
         {
             requests[Methods.TerminalCreate] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalCreateRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.CreateTerminalRequest)!;
                 if (request.Cwd is not null) ValidateAbsolutePath(request.Cwd, "cwd");
                 if (string.IsNullOrWhiteSpace(request.Command)) throw new RpcException(-32602, "Terminal command must not be empty.", Methods.TerminalCreate);
                 var terminalId = await terminal.CreateAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteTerminalCreateResponse(terminalId);
+                return JsonSerializer.SerializeToUtf8Bytes(new CreateTerminalResponse { TerminalId = terminalId }, JsonContext.Default.CreateTerminalResponse);
             };
             requests[Methods.TerminalOutput] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalOutputRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.TerminalOutputRequest)!;
                 var output = await terminal.GetOutputAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteTerminalOutputResponse(output);
+                return JsonSerializer.SerializeToUtf8Bytes(output, JsonContext.Default.TerminalOutputResponse);
             };
             requests[Methods.TerminalWaitForExit] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalExitRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.WaitForTerminalExitRequest)!;
                 var status = await terminal.WaitForExitAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteTerminalExitStatusResponse(status);
             };
             requests[Methods.TerminalKill] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalKillRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.KillTerminalRequest)!;
                 await terminal.KillAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteEmptyResponse();
+                return WireJson.WriteEmptyObject();
             };
             requests[Methods.TerminalRelease] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadTerminalReleaseRequest(parameters);
+                var request = parameters.Deserialize(JsonContext.Default.ReleaseTerminalRequest)!;
                 await terminal.ReleaseAsync(request, cancellationToken).ConfigureAwait(false);
-                return WireJson.WriteEmptyResponse();
+                return WireJson.WriteEmptyObject();
             };
         }
 
@@ -502,14 +580,17 @@ public sealed class Client : IClient
         {
             requests[Methods.ElicitationCreate] = async (parameters, cancellationToken) =>
             {
-                var request = WireJson.ReadElicitationRequest(parameters);
-                if (request.Mode == "form" && !elicitation.SupportsForm || request.Mode == "url" && !elicitation.SupportsUrl)
+                // The mode is checked before the payload is bound so an unsupported mode is reported as
+                // method-not-found even when the request does not carry that mode's required members.
+                var mode = WireJson.ReadElicitationMode(parameters);
+                if (mode == "form" && !elicitation.SupportsForm || mode == "url" && !elicitation.SupportsUrl)
                 {
-                    throw new RpcException(-32601, $"Elicitation mode '{request.Mode}' is not supported by this client.", Methods.ElicitationCreate);
+                    throw new RpcException(-32601, $"Elicitation mode '{mode}' is not supported by this client.", Methods.ElicitationCreate);
                 }
 
+                var request = WireJson.ReadElicitationRequest(parameters);
                 var response = await elicitation.RequestElicitationAsync(request, cancellationToken).ConfigureAwait(false);
-                if (response.Action is not ("accept" or "decline" or "cancel") && !response.Action.StartsWith('_'))
+                if (response.Value is CreateElicitationResponseCase3 extension && !extension.Action.StartsWith('_'))
                 {
                     throw new RpcException(-32602, "Elicitation handler returned an unsupported action.", Methods.ElicitationCreate);
                 }
@@ -522,34 +603,55 @@ public sealed class Client : IClient
             _options.ElicitationCompleted?.Invoke(WireJson.ReadElicitationCompleted(parameters));
             return ValueTask.CompletedTask;
         };
-        CallbackRoutes.Register(_connection, requests, notifications);
+
+        foreach (var (method, handler) in requests) _connection.RegisterRequestHandler(method, handler);
+        foreach (var (method, handler) in notifications) _connection.RegisterNotificationHandler(method, handler);
     }
 
-    private async ValueTask HandleSessionUpdateAsync(JsonElement parameters)
+    private ValueTask HandleSessionUpdateAsync(JsonElement parameters)
     {
         var sessionId = WireJson.ReadNotificationSessionId(parameters);
-        if (!_sessions.TryGetValue(sessionId, out var session)) return;
+        if (!_sessions.TryGetValue(sessionId, out var session)) return ValueTask.CompletedTask;
         var update = WireJson.ReadSessionUpdate(parameters);
         var published = session.Publish(update);
-        if (update is SessionMetadataUpdate { PromptSuggestions: { } suggestions })
+        var suggestions = update.Value is SessionInfoUpdate sessionInfo
+            ? WireJson.ReadPromptSuggestions(sessionInfo.Meta)
+            : null;
+        if (suggestions is not null)
             _options.PromptSuggestionsChanged?.Invoke(sessionId, suggestions);
         if (!published)
         {
-            try { await CancelSessionAsync(sessionId, CancellationToken.None).ConfigureAwait(false); }
-            catch { /* The update stream already carries the failure; cancellation is best effort. */ }
+            // Notification handlers run inline on the receive loop, so this one must not await a
+            // transport send: a peer that has stopped reading its stdin would stall response
+            // processing for the whole connection. The update stream already carries the failure,
+            // so cancellation is best effort and detached from the dispatch path.
+            _ = CancelSessionBestEffortAsync(sessionId);
+        }
+        return ValueTask.CompletedTask;
+    }
+
+    private async Task CancelSessionBestEffortAsync(string sessionId)
+    {
+        try
+        {
+            await CancelSessionAsync(sessionId, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch
+        {
+            // The update stream already carries the failure; cancellation is best effort.
         }
     }
 
-    private void ValidatePromptContent(IReadOnlyList<AgentContentBlock> content)
+    private void ValidatePromptContent(IReadOnlyList<ContentBlock> content)
     {
         ArgumentNullException.ThrowIfNull(content);
         foreach (var block in content)
         {
-            if (block is PromptImageContent && Agent.Capabilities.PromptCapabilities?.Image != true)
+            if (block.Value is ImageContent && Agent.AgentCapabilities?.PromptCapabilities?.Image != true)
                 throw new NotSupportedException("The ACP agent does not advertise image prompt support.");
-            if (block is PromptAudioContent && Agent.Capabilities.PromptCapabilities?.Audio != true)
+            if (block.Value is AudioContent && Agent.AgentCapabilities?.PromptCapabilities?.Audio != true)
                 throw new NotSupportedException("The ACP agent does not advertise audio prompt support.");
-            if (block is EmbeddedResourceContent && Agent.Capabilities.PromptCapabilities?.EmbeddedContext != true)
+            if (block.Value is EmbeddedResource && Agent.AgentCapabilities?.PromptCapabilities?.EmbeddedContext != true)
                 throw new NotSupportedException("The ACP agent does not advertise embedded context support.");
         }
     }
@@ -558,11 +660,35 @@ public sealed class Client : IClient
     {
         ValidateWorkingDirectory(options.WorkingDirectory);
         ValidateAdditionalDirectories(options.AdditionalDirectories);
-        ValidateMcpServers(options.McpServers, Agent.Capabilities.McpCapabilities);
-        if (options.AdditionalDirectories.Count > 0 && Agent.Capabilities.SessionCapabilities?.AdditionalDirectories is null)
+        ValidateMcpServers(options.McpServers, Agent.AgentCapabilities?.McpCapabilities);
+        if (options.AdditionalDirectories.Count > 0 && Agent.AgentCapabilities?.SessionCapabilities?.AdditionalDirectories is null)
         {
             throw new NotSupportedException("The ACP agent does not advertise additionalDirectories support.");
         }
+    }
+
+    private IReadOnlyList<string>? GetFileSystemRoots(SessionOptions options) =>
+        _options.FileSystemHandler is null
+            ? null
+            : WorkspacePathPolicy.CreateRoots(options.WorkingDirectory, options.AdditionalDirectories);
+
+    private void ValidateFileSystemPath(string sessionId, string path, string method)
+    {
+        if (!_fileSystemRoots.TryGetValue(sessionId, out var roots))
+        {
+            throw new RpcException(-32602, "Filesystem access requires an active session with an authorized workspace.", method);
+        }
+
+        try
+        {
+            if (WorkspacePathPolicy.AllowsPath(path, roots)) return;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or System.Security.SecurityException)
+        {
+            throw new RpcException(-32602, "Filesystem path could not be resolved safely.", method);
+        }
+
+        throw new RpcException(-32602, "Filesystem path is outside the session's authorized workspace.", method);
     }
 
     private static void ValidateWorkingDirectory(string directory)
@@ -579,22 +705,24 @@ public sealed class Client : IClient
         }
     }
 
-    private static void ValidateMcpServers(IReadOnlyList<McpServerOptions> servers, McpCapabilities? capabilities)
+    private static void ValidateMcpServers(IReadOnlyList<McpServer> servers, McpCapabilities? capabilities)
     {
         foreach (var server in servers)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(server.Name);
             switch (server)
             {
-                case StdioMcpServerOptions stdio:
+                case McpServerStdio stdio:
+                    ArgumentException.ThrowIfNullOrWhiteSpace(stdio.Name);
                     ArgumentException.ThrowIfNullOrWhiteSpace(stdio.Command);
                     if (!Path.IsPathFullyQualified(stdio.Command)) throw new ArgumentException("MCP stdio command must be an absolute path.", nameof(servers));
                     break;
-                case HttpMcpServerOptions http:
+                case McpServerHttp http:
+                    ArgumentException.ThrowIfNullOrWhiteSpace(http.Name);
                     if (!Uri.TryCreate(http.Url, UriKind.Absolute, out _)) throw new ArgumentException("MCP HTTP URL must be absolute.", nameof(servers));
                     if (capabilities?.Http != true) throw new NotSupportedException("The ACP agent does not advertise HTTP MCP support.");
                     break;
-                case SseMcpServerOptions sse:
+                case McpServerSse sse:
+                    ArgumentException.ThrowIfNullOrWhiteSpace(sse.Name);
                     if (!Uri.TryCreate(sse.Url, UriKind.Absolute, out _)) throw new ArgumentException("MCP SSE URL must be absolute.", nameof(servers));
                     if (capabilities?.Sse != true) throw new NotSupportedException("The ACP agent does not advertise SSE MCP support.");
                     break;
@@ -612,8 +740,37 @@ public sealed class Client : IClient
         }
     }
 
+    private void RaiseTransportFaulted(Exception failure)
+    {
+        // A fault can race with disposal; do not notify subscribers after the client is torn down.
+        if (Volatile.Read(ref _disposed) != 0) return;
+        if (TransportFaulted is not { } subscribers) return;
+        var args = new TransportFaultedEventArgs(failure);
+        // Invoke each subscriber in isolation: a throwing handler must not prevent the remaining
+        // subscribers from learning that the connection has gone away.
+        foreach (var subscriber in subscribers.GetInvocationList())
+        {
+            try
+            {
+                ((EventHandler<TransportFaultedEventArgs>)subscriber).Invoke(this, args);
+            }
+            catch (Exception handlerException)
+            {
+                try
+                {
+                    _logger?.LogWarning(handlerException, "An ACP transport-fault handler threw.");
+                }
+                catch
+                {
+                    // A failing diagnostic sink must never fault connection teardown.
+                }
+            }
+        }
+    }
+
     private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
 
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
@@ -622,6 +779,7 @@ public sealed class Client : IClient
             try { await cancellation.CancelAsync().ConfigureAwait(false); }
             catch (ObjectDisposedException) { }
         }
+        _fileSystemRoots.Clear();
         await _connection.DisposeAsync().ConfigureAwait(false);
     }
 }

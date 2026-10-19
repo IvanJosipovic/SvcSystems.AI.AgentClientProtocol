@@ -1,4 +1,4 @@
-namespace SvcSystems.AI.AgentClientProtocol;
+﻿namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Runs an agent authentication flow that requires an interactive terminal.</summary>
 public interface ITerminalAuthenticationHandler

@@ -1,7 +1,8 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading.Channels;
-using SvcSystems.AI.AgentClientProtocol.Generated;
+using SvcSystems.AI.AgentClientProtocol.Serialization;
+using AcpClient = SvcSystems.AI.AgentClientProtocol.Client.Client;
 
 namespace SvcSystems.AI.AgentClientProtocol;
 
@@ -9,14 +10,16 @@ namespace SvcSystems.AI.AgentClientProtocol;
 public sealed class Session
 {
     private static readonly TimeSpan CancellationDrainTimeout = TimeSpan.FromSeconds(15);
-    private readonly Client _client;
+    private readonly AcpClient _client;
     private readonly Channel<SessionEvent> _updates;
     private readonly int _maximumBufferedUpdates;
     private Exception? _updateBufferFailure;
     private IReadOnlyList<string>? _promptSuggestions;
+    private SessionModeState? _modeState;
+    private IReadOnlyList<SessionConfigOption> _configOptions = Array.Empty<SessionConfigOption>();
     private readonly SemaphoreSlim _promptLock = new(1, 1);
 
-    internal Session(Client client, string id, int maximumBufferedUpdates = 1024)
+    internal Session(AcpClient client, string id, int maximumBufferedUpdates = 1024)
     {
         if (maximumBufferedUpdates <= 0) throw new ArgumentOutOfRangeException(nameof(maximumBufferedUpdates));
         _client = client;
@@ -35,13 +38,17 @@ public sealed class Session
     public string Id { get; }
 
     /// <summary>The complete most recent session creation, load, or resume response.</summary>
+    /// <remarks>
+    /// Typed members cover the members ACP defines; this is the documented escape hatch for the
+    /// vendor-specific <c>_meta</c> and extension data an agent may add to the same payload.
+    /// </remarks>
     public JsonElement? RawPayload { get; private set; }
 
     /// <summary>The agent's initial or most recently reported mode state.</summary>
-    public SessionModeState? ModeState { get; private set; }
+    public SessionModeState? ModeState => Volatile.Read(ref _modeState);
 
     /// <summary>The agent's initial or most recently reported configuration options.</summary>
-    public IReadOnlyList<SessionConfigOption> ConfigOptions { get; private set; } = Array.Empty<SessionConfigOption>();
+    public IReadOnlyList<SessionConfigOption> ConfigOptions => Volatile.Read(ref _configOptions);
 
     /// <summary>Latest suggested next prompts, or null when no suggestions have been reported.</summary>
     public IReadOnlyList<string>? PromptSuggestions => Volatile.Read(ref _promptSuggestions);
@@ -50,7 +57,7 @@ public sealed class Session
     public IAsyncEnumerable<SessionEvent> PromptAsync(string prompt, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(prompt);
-        return PromptAsync([new PromptTextContent(prompt)], cancellationToken);
+        return PromptAsync([new TextContent { Text = prompt }], cancellationToken);
     }
 
     /// <summary>Sends a text prompt with request-scoped extension metadata.</summary>
@@ -58,31 +65,31 @@ public sealed class Session
     {
         ArgumentNullException.ThrowIfNull(prompt);
         ArgumentNullException.ThrowIfNull(options);
-        return PromptCoreAsync([new PromptTextContent(prompt)], options, cancellationToken);
+        return PromptCoreAsync([new TextContent { Text = prompt }], options, cancellationToken);
     }
 
     /// <summary>Sends typed prompt content and streams normalized ACP updates until the turn finishes.</summary>
     public IAsyncEnumerable<SessionEvent> PromptAsync(
-        IReadOnlyList<AgentContentBlock> content,
+        IReadOnlyList<ContentBlock> content,
         CancellationToken cancellationToken = default) =>
         PromptCoreAsync(content, null, cancellationToken);
 
     /// <summary>Sends typed prompt content with request-scoped extension metadata.</summary>
     public IAsyncEnumerable<SessionEvent> PromptAsync(
-        IReadOnlyList<AgentContentBlock> content, CancellationToken cancellationToken, PromptOptions options)
+        IReadOnlyList<ContentBlock> content, CancellationToken cancellationToken, PromptOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
         return PromptCoreAsync(content, options, cancellationToken);
     }
 
     private async IAsyncEnumerable<SessionEvent> PromptCoreAsync(
-        IReadOnlyList<AgentContentBlock> content,
+        IReadOnlyList<ContentBlock> content,
         PromptOptions? options,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(content);
         await _promptLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-        Task<(string StopReason, JsonElement RawPayload)>? promptTask = null;
+        Task<PromptResponse>? promptTask = null;
         using var promptRequestCancellation = new CancellationTokenSource();
         var completed = false;
         try
@@ -107,7 +114,7 @@ public sealed class Session
                 while (_updates.Reader.TryRead(out var update)) yield return update;
                 ThrowIfUpdateBufferFailed();
                 completed = true;
-                yield return new Completed(promptResult.StopReason) { RawPayload = promptResult.RawPayload };
+                yield return new Completed(promptResult);
                 break;
             }
         }
@@ -144,44 +151,49 @@ public sealed class Session
     /// <summary>Sets a string-valued session configuration option.</summary>
     public async Task<IReadOnlyList<SessionConfigOption>> SetConfigOptionAsync(string configId, string valueId, CancellationToken cancellationToken = default)
     {
-        var options = await _client.SetSessionConfigOptionAsync(Id, configId, ConfigValue.FromValueId(valueId), cancellationToken).ConfigureAwait(false);
-        ConfigOptions = options;
+        var options = await _client.SetSessionConfigOptionAsync(
+            new SetSessionConfigOptionRequestCase1 { SessionId = Id, ConfigId = configId, Value = valueId },
+            cancellationToken).ConfigureAwait(false);
+        Volatile.Write(ref _configOptions, options);
         return options;
     }
 
     /// <summary>Sets a boolean-valued session configuration option.</summary>
     public async Task<IReadOnlyList<SessionConfigOption>> SetConfigOptionAsync(string configId, bool value, CancellationToken cancellationToken = default)
     {
-        var options = await _client.SetSessionConfigOptionAsync(Id, configId, ConfigValue.FromBoolean(value), cancellationToken).ConfigureAwait(false);
-        ConfigOptions = options;
+        var options = await _client.SetSessionConfigOptionAsync(
+            new SetSessionConfigOptionRequestCase0 { SessionId = Id, ConfigId = configId, Value = value },
+            cancellationToken).ConfigureAwait(false);
+        Volatile.Write(ref _configOptions, options);
         return options;
     }
 
-    internal bool Publish(SessionEvent update)
+    internal bool Publish(SessionUpdate update)
     {
         if (Volatile.Read(ref _updateBufferFailure) is not null) return false;
-        switch (update)
+        switch (update.Value)
         {
-            case SessionMetadataUpdate { PromptSuggestions: { } suggestions }:
+            case SessionInfoUpdate sessionInfo
+                when WireJson.ReadPromptSuggestions(sessionInfo.Meta) is { } suggestions:
                 Volatile.Write(ref _promptSuggestions, suggestions);
                 break;
-            case ModeUpdate mode when ModeState is { } state:
-                ModeState = new SessionModeState
+            case CurrentModeUpdate mode when ModeState is { } state:
+                Volatile.Write(ref _modeState, new SessionModeState
                 {
                     CurrentModeId = mode.CurrentModeId,
                     AvailableModes = state.AvailableModes,
                     Meta = state.Meta,
                     ExtensionData = state.ExtensionData
-                };
+                });
                 break;
-            case ModeUpdate mode:
-                ModeState = new SessionModeState { CurrentModeId = mode.CurrentModeId, AvailableModes = [] };
+            case CurrentModeUpdate mode:
+                Volatile.Write(ref _modeState, new SessionModeState { CurrentModeId = mode.CurrentModeId, AvailableModes = [] });
                 break;
-            case ConfigOptionsUpdate config:
-                ConfigOptions = config.Options;
+            case ConfigOptionUpdate config:
+                Volatile.Write(ref _configOptions, config.ConfigOptions);
                 break;
         }
-        if (_updates.Writer.TryWrite(update)) return true;
+        if (_updates.Writer.TryWrite(new SessionUpdateEvent(update))) return true;
 
         var failure = new ProtocolException(
             $"Session '{Id}' produced more than {_maximumBufferedUpdates} unread updates; its update stream is no longer usable.");
@@ -202,8 +214,8 @@ public sealed class Session
 
     internal void SetInitialState(SessionModeState? modeState, IReadOnlyList<SessionConfigOption>? configOptions, JsonElement rawPayload)
     {
-        if (modeState is not null) ModeState = modeState;
-        if (configOptions is not null) ConfigOptions = configOptions;
+        if (modeState is not null) Volatile.Write(ref _modeState, modeState);
+        if (configOptions is not null) Volatile.Write(ref _configOptions, configOptions);
         RawPayload = rawPayload.Clone();
     }
 }

@@ -1,4 +1,4 @@
-root = true
+﻿root = true
 
 [*]
 charset = utf-8-bom
@@ -16,7 +16,17 @@ dotnet_style_qualification_for_method = false:suggestion
 dotnet_style_qualification_for_event = false:suggestion
 csharp_style_namespace_declarations = file_scoped:warning
 csharp_style_prefer_primary_constructors = false:suggestion
-dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0005.severity = error
 
 [*.{json,yml,yaml,md}]
+end_of_line = lf
 insert_final_newline = true
+
+[*.{csproj,props}]
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+
+[**/*.g.cs]
+generated_code = true
+

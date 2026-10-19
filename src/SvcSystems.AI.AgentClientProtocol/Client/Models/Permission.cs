@@ -1,6 +1,4 @@
-using SvcSystems.AI.AgentClientProtocol.Generated;
-
-namespace SvcSystems.AI.AgentClientProtocol;
+﻿namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Decision returned for an agent permission request.</summary>
 public sealed record PermissionDecision(string? SelectedOptionId, bool Cancelled = false)

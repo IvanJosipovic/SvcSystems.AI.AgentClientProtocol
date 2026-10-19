@@ -5,4 +5,5 @@
   <Project Path="tests/SvcSystems.AI.AgentClientProtocol.Generator.Tests/SvcSystems.AI.AgentClientProtocol.Generator.Tests.csproj" />
   <Project Path="tests/SvcSystems.AI.AgentClientProtocol.IntegrationTests/SvcSystems.AI.AgentClientProtocol.IntegrationTests.csproj" />
   <Project Path="samples/SvcSystems.AI.AgentClientProtocol.Console/SvcSystems.AI.AgentClientProtocol.Console.csproj" />
+  <Project Path="samples/SvcSystems.AI.AgentClientProtocol.SampleAgent/SvcSystems.AI.AgentClientProtocol.SampleAgent.csproj" />
 </Solution>
