@@ -107,9 +107,18 @@ public sealed class Client : IClient
     {
         if (method == "_auth/status_update")
         {
-            var status = WireJson.ReadAuthenticationStatus(parameters);
-            Volatile.Write(ref _authenticationStatus, status);
-            _options.AuthenticationStatusChanged?.Invoke(status);
+            // A vendor extension must not be able to terminate the connection with a payload this
+            // client cannot interpret. An unexpected shape is reported and ignored.
+            try
+            {
+                var status = WireJson.ReadAuthenticationStatus(parameters);
+                Volatile.Write(ref _authenticationStatus, status);
+                _options.AuthenticationStatusChanged?.Invoke(status);
+            }
+            catch (ProtocolException exception)
+            {
+                _logger?.LogWarning(exception, "An ACP authentication status update was ignored because it was malformed.");
+            }
         }
         _options.ExtensionNotificationReceived?.Invoke(new ExtensionNotification(method, parameters));
     }
@@ -193,35 +202,81 @@ public sealed class Client : IClient
             AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null,
             Meta = WireJson.CopyMetadata(options.Metadata)
         };
+        // The session is registered from the response observer, which the connection runs on the
+        // receive loop before it delivers the result. An agent that answers session/new and then
+        // streams an update for the new session therefore cannot lose that update to a race
+        // between the response arriving and the session being registered.
+        Session? registered = null;
+        string? duplicateSessionId = null;
         var response = await _connection.SendRequestAsync(
             Methods.SessionNew,
             WireJson.WriteNewSessionRequest(request),
-            cancellationToken).ConfigureAwait(false);
-        var typedResponse = response.Deserialize(JsonContext.Default.NewSessionResponse)!;
+            cancellationToken,
+            result =>
+            {
+                try
+                {
+                    registered = RegisterSession(result, fileSystemRoots);
+                }
+                catch (DuplicateSessionIdException exception)
+                {
+                    // Recorded here so the agent-side cleanup can be awaited on the caller's
+                    // thread; the receive loop must not block on a transport write.
+                    duplicateSessionId = exception.SessionId;
+                }
+            }).ConfigureAwait(false);
+
+        if (duplicateSessionId is not null)
+        {
+            await ReleaseDuplicateSessionAsync(duplicateSessionId, cancellationToken).ConfigureAwait(false);
+            throw new ProtocolException($"ACP agent returned duplicate session id '{duplicateSessionId}'.");
+        }
+
+        return registered ?? RegisterSession(response, fileSystemRoots);
+    }
+
+    /// <summary>Registers a live session so that its updates are routed to it.</summary>
+    private Session RegisterSession(JsonElement response, IReadOnlyList<string>? fileSystemRoots)
+    {
+        var typedResponse = response.Deserialize(JsonContext.Default.NewSessionResponse)
+            ?? throw new ProtocolException("The ACP agent returned an empty session/new response.");
         var session = new Session(this, typedResponse.SessionId, _options.MaximumBufferedSessionUpdates);
         session.SetInitialState(typedResponse.Modes, typedResponse.ConfigOptions, response);
         if (!_sessions.TryAdd(session.Id, session))
         {
-            // The agent created a second session whose id is already live. Release the agent-side
-            // session before failing so that the duplicate does not leak agent state. The request is
-            // sent directly (rather than through CloseSessionAsync) so that the existing local session
-            // entry, which still owns that id, is left untouched. Best effort: the agent may not
-            // advertise close, in which case it answers with an error that is intentionally ignored.
-            try
-            {
-                _ = await _connection.SendRequestAsync(
-                    Methods.SessionClose,
-                    JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = session.Id }, JsonContext.Default.DeleteSessionRequest),
-                    cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                // The duplicate session id is the failure that is reported to the caller.
-            }
-            throw new ProtocolException($"ACP agent returned duplicate session id '{session.Id}'.");
+            throw new DuplicateSessionIdException(session.Id);
         }
         if (fileSystemRoots is not null) _fileSystemRoots[session.Id] = fileSystemRoots;
         return session;
+    }
+
+    /// <summary>
+    /// Releases an agent-side session whose id duplicates a live session.
+    /// </summary>
+    /// <remarks>
+    /// The request is sent directly rather than through <see cref="CloseSessionAsync"/> so that the
+    /// existing local session entry, which still owns that id, is left untouched. Best effort: the
+    /// agent may not advertise close, in which case it answers with an error that is ignored.
+    /// </remarks>
+    private async Task ReleaseDuplicateSessionAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _ = await _connection.SendRequestAsync(
+                Methods.SessionClose,
+                JsonSerializer.SerializeToUtf8Bytes(new CloseSessionRequest { SessionId = sessionId }, JsonContext.Default.CloseSessionRequest),
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // The duplicate session id is the failure that is reported to the caller.
+        }
+    }
+
+    private sealed class DuplicateSessionIdException(string sessionId)
+        : Exception($"ACP agent returned duplicate session id '{sessionId}'.")
+    {
+        public string SessionId { get; } = sessionId;
     }
 
     /// <inheritdoc />
@@ -384,7 +439,7 @@ public sealed class Client : IClient
         if (Agent.AgentCapabilities?.SessionCapabilities?.Close is null) throw new NotSupportedException("The ACP agent does not advertise session close.");
         _ = await _connection.SendRequestAsync(
             Methods.SessionClose,
-            JsonSerializer.SerializeToUtf8Bytes(new DeleteSessionRequest { SessionId = sessionId }, JsonContext.Default.DeleteSessionRequest),
+            JsonSerializer.SerializeToUtf8Bytes(new CloseSessionRequest { SessionId = sessionId }, JsonContext.Default.CloseSessionRequest),
             cancellationToken).ConfigureAwait(false);
         _sessions.TryRemove(sessionId, out _);
         _fileSystemRoots.TryRemove(sessionId, out _);
@@ -460,7 +515,8 @@ public sealed class Client : IClient
         };
 
         var response = await _connection.SendRequestAsync(Methods.Initialize, WireJson.WriteInitializeRequest(request, _options.ClientInfo, _options), cancellationToken).ConfigureAwait(false);
-        Agent = response.Deserialize(JsonContext.Default.InitializeResponse)!;
+        Agent = response.Deserialize(JsonContext.Default.InitializeResponse)
+            ?? throw new ProtocolException("The ACP agent returned an empty initialize response.");
         if (Agent.ProtocolVersion != ProtocolVersion)
         {
             throw new ProtocolException($"ACP protocol version {Agent.ProtocolVersion} was negotiated, but this client supports version {ProtocolVersion}.");
@@ -469,7 +525,14 @@ public sealed class Client : IClient
 
     private async ValueTask<byte[]> HandlePermissionRequestAsync(JsonElement parameters, CancellationToken cancellationToken)
     {
-        var request = parameters.Deserialize(JsonContext.Default.RequestPermissionRequest)!;
+        var request = parameters.Deserialize(JsonContext.Default.RequestPermissionRequest)
+            ?? throw new RpcException(-32602, "A session/request_permission request must include its parameters.", Methods.SessionRequestPermission);
+        // A permission request must belong to a session this client tracks. Otherwise a rogue or
+        // confused agent could obtain a decision for a session the host never opened.
+        if (!_sessions.ContainsKey(request.SessionId))
+        {
+            throw new RpcException(-32602, "Permission requests must reference an active session.", Methods.SessionRequestPermission);
+        }
         PermissionDecision decision;
         var promptCancellation = _activePromptCancellation.TryGetValue(request.SessionId, out var activeCancellation)
             ? activeCancellation.Token
@@ -545,6 +608,9 @@ public sealed class Client : IClient
             requests[Methods.TerminalCreate] = async (parameters, cancellationToken) =>
             {
                 var request = parameters.Deserialize(JsonContext.Default.CreateTerminalRequest)!;
+                // The terminal's working directory must be absolute. Its security policy -- which
+                // directories and commands are permitted -- belongs to the configured terminal
+                // handler; the client only guarantees that the path is well formed.
                 if (request.Cwd is not null) ValidateAbsolutePath(request.Cwd, "cwd");
                 if (string.IsNullOrWhiteSpace(request.Command)) throw new RpcException(-32602, "Terminal command must not be empty.", Methods.TerminalCreate);
                 var terminalId = await terminal.CreateAsync(request, cancellationToken).ConfigureAwait(false);
@@ -614,8 +680,10 @@ public sealed class Client : IClient
         if (!_sessions.TryGetValue(sessionId, out var session)) return ValueTask.CompletedTask;
         var update = WireJson.ReadSessionUpdate(parameters);
         var published = session.Publish(update);
+        // Prompt suggestions are a vendor extension. A payload this client cannot interpret is
+        // reported and ignored rather than failing the update or the connection.
         var suggestions = update.Value is SessionInfoUpdate sessionInfo
-            ? WireJson.ReadPromptSuggestions(sessionInfo.Meta)
+            ? ReadPromptSuggestionsSafely(sessionInfo.Meta)
             : null;
         if (suggestions is not null)
             _options.PromptSuggestionsChanged?.Invoke(sessionId, suggestions);
@@ -639,6 +707,19 @@ public sealed class Client : IClient
         catch
         {
             // The update stream already carries the failure; cancellation is best effort.
+        }
+    }
+
+    private IReadOnlyList<string>? ReadPromptSuggestionsSafely(IReadOnlyDictionary<string, JsonElement>? meta)
+    {
+        try
+        {
+            return WireJson.ReadPromptSuggestions(meta);
+        }
+        catch (ProtocolException exception)
+        {
+            _logger?.LogWarning(exception, "ACP prompt suggestions were ignored because they were malformed.");
+            return null;
         }
     }
 

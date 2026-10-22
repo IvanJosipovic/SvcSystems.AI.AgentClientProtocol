@@ -174,7 +174,7 @@ public sealed class Session
         switch (update.Value)
         {
             case SessionInfoUpdate sessionInfo
-                when WireJson.ReadPromptSuggestions(sessionInfo.Meta) is { } suggestions:
+                when ReadPromptSuggestionsSafely(sessionInfo.Meta) is { } suggestions:
                 Volatile.Write(ref _promptSuggestions, suggestions);
                 break;
             case CurrentModeUpdate mode when ModeState is { } state:
@@ -209,6 +209,20 @@ public sealed class Session
         if (Volatile.Read(ref _updateBufferFailure) is { } failure)
         {
             throw new ProtocolException($"Session '{Id}' update buffering failed.", failure);
+        }
+    }
+
+    /// <summary>Reads prompt suggestions, ignoring a vendor payload this client cannot interpret.</summary>
+    private static IReadOnlyList<string>? ReadPromptSuggestionsSafely(IReadOnlyDictionary<string, JsonElement>? meta)
+    {
+        try
+        {
+            return WireJson.ReadPromptSuggestions(meta);
+        }
+        catch (ProtocolException)
+        {
+            // Prompt suggestions are a vendor extension; a malformed payload must not fail the update.
+            return null;
         }
     }
 

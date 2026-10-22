@@ -14,16 +14,19 @@ internal sealed class RegistryBinaryInstaller
 
     private readonly HttpClient _httpClient;
     private readonly string? _configuredAgentsDirectory;
+    private readonly bool _requireChecksum;
     private readonly Func<string, CancellationToken, Task<string?>> _findUsableCommand;
 
     public RegistryBinaryInstaller(
         HttpClient httpClient,
         string? agentsDirectory,
-        Func<string, CancellationToken, Task<string?>> findUsableCommand)
+        Func<string, CancellationToken, Task<string?>> findUsableCommand,
+        bool requireChecksum = false)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _configuredAgentsDirectory = string.IsNullOrWhiteSpace(agentsDirectory) ? null : Path.GetFullPath(agentsDirectory);
         _findUsableCommand = findUsableCommand ?? throw new ArgumentNullException(nameof(findUsableCommand));
+        _requireChecksum = requireChecksum;
     }
     internal async Task<string> EnsureInstalledAsync(
         RegistryAgent agent,
@@ -41,6 +44,11 @@ internal sealed class RegistryBinaryInstaller
         var agentId = ValidatePathSegment(agent.Id, nameof(agent.Id));
         version = ValidatePathSegment(version, nameof(version));
         var platformPath = ValidatePathSegment(platform.RuntimeIdentifier, nameof(platform.RuntimeIdentifier));
+        if (_requireChecksum && string.IsNullOrWhiteSpace(target.Sha256))
+        {
+            throw new RegistryAgentLaunchException(
+                $"Agent '{agent.Id}' does not publish a SHA-256 checksum for its binary archive, and checksum verification is required.");
+        }
         var agentsDirectory = _configuredAgentsDirectory ?? Path.GetFullPath(Path.Combine(workingDirectory ?? Environment.CurrentDirectory, "agents"));
         var agentDirectory = Path.GetFullPath(Path.Combine(agentsDirectory, agentId));
         EnsureContainedPath(agentsDirectory, agentDirectory);

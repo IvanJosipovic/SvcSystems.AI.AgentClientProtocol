@@ -11,6 +11,9 @@ namespace SvcSystems.AI.AgentClientProtocol.Agent;
 /// <summary>Hosts an ACP agent over a caller-provided transport or the process stdio streams.</summary>
 public sealed class Agent : IAsyncDisposable
 {
+    /// <summary>The ACP protocol version this host speaks.</summary>
+    private const int ProtocolVersion = 1;
+
     private readonly IAgentHandler _handler;
     private readonly DeferredTransport _transport;
     private readonly JsonRpcConnection _connection;
@@ -107,37 +110,52 @@ public sealed class Agent : IAsyncDisposable
 
     private void RegisterHandlers()
     {
-        _connection.RegisterRequestHandler("initialize", async (parameters, cancellationToken) =>
+        _connection.RegisterRequestHandler(Methods.Initialize, async (parameters, cancellationToken) =>
         {
             var request = parameters.Deserialize(JsonContext.Default.InitializeRequest)
-                ?? throw new RpcException(-32602, "initialize params are required.", "initialize");
+                ?? throw new RpcException(-32602, "initialize params are required.", Methods.Initialize);
             var response = await _handler.InitializeAsync(request, cancellationToken).ConfigureAwait(false);
-            return JsonSerializer.SerializeToUtf8Bytes(response, JsonContext.Default.InitializeResponse);
+            // ACP requires the agent to answer with "the protocol version the client specified if
+            // supported by the agent, or the latest protocol version supported by the agent".
+            // Echoing an unsupported version verbatim is not conformant, so the host reports the
+            // version it actually speaks. The client disconnects when it cannot speak that version.
+            var negotiated = response.ProtocolVersion == ProtocolVersion
+                ? response
+                : new InitializeResponse
+                {
+                    ProtocolVersion = ProtocolVersion,
+                    AgentCapabilities = response.AgentCapabilities,
+                    AuthMethods = response.AuthMethods,
+                    AgentInfo = response.AgentInfo,
+                    Meta = response.Meta,
+                    ExtensionData = response.ExtensionData,
+                };
+            return JsonSerializer.SerializeToUtf8Bytes(negotiated, JsonContext.Default.InitializeResponse);
         });
 
-        _connection.RegisterRequestHandler("session/new", async (parameters, cancellationToken) =>
+        _connection.RegisterRequestHandler(Methods.SessionNew, async (parameters, cancellationToken) =>
         {
             var request = parameters.Deserialize(JsonContext.Default.NewSessionRequest)
-                ?? throw new RpcException(-32602, "session/new params are required.", "session/new");
+                ?? throw new RpcException(-32602, "session/new params are required.", Methods.SessionNew);
             var response = await _handler.NewSessionAsync(request, cancellationToken).ConfigureAwait(false);
             return JsonSerializer.SerializeToUtf8Bytes(response, JsonContext.Default.NewSessionResponse);
         });
 
-        _connection.RegisterRequestHandler("session/prompt", HandlePromptAsync);
-        RegisterRequestHandler("session/load", JsonContext.Default.LoadSessionRequest, JsonContext.Default.LoadSessionResponse, _handler.LoadSessionAsync);
-        RegisterRequestHandler("session/resume", JsonContext.Default.ResumeSessionRequest, JsonContext.Default.ResumeSessionResponse, _handler.ResumeSessionAsync);
-        RegisterRequestHandler("session/list", JsonContext.Default.ListSessionsRequest, JsonContext.Default.ListSessionsResponse, _handler.ListSessionsAsync);
-        RegisterRequestHandler("session/delete", JsonContext.Default.DeleteSessionRequest, JsonContext.Default.DeleteSessionResponse, _handler.DeleteSessionAsync);
-        RegisterRequestHandler("session/close", JsonContext.Default.CloseSessionRequest, JsonContext.Default.CloseSessionResponse, _handler.CloseSessionAsync);
-        RegisterRequestHandler("session/set_mode", JsonContext.Default.SetSessionModeRequest, JsonContext.Default.SetSessionModeResponse, _handler.SetSessionModeAsync);
+        _connection.RegisterRequestHandler(Methods.SessionPrompt, HandlePromptAsync);
+        RegisterRequestHandler(Methods.SessionLoad, JsonContext.Default.LoadSessionRequest, JsonContext.Default.LoadSessionResponse, _handler.LoadSessionAsync);
+        RegisterRequestHandler(Methods.SessionResume, JsonContext.Default.ResumeSessionRequest, JsonContext.Default.ResumeSessionResponse, _handler.ResumeSessionAsync);
+        RegisterRequestHandler(Methods.SessionList, JsonContext.Default.ListSessionsRequest, JsonContext.Default.ListSessionsResponse, _handler.ListSessionsAsync);
+        RegisterRequestHandler(Methods.SessionDelete, JsonContext.Default.DeleteSessionRequest, JsonContext.Default.DeleteSessionResponse, _handler.DeleteSessionAsync);
+        RegisterRequestHandler(Methods.SessionClose, JsonContext.Default.CloseSessionRequest, JsonContext.Default.CloseSessionResponse, _handler.CloseSessionAsync);
+        RegisterRequestHandler(Methods.SessionSetMode, JsonContext.Default.SetSessionModeRequest, JsonContext.Default.SetSessionModeResponse, _handler.SetSessionModeAsync);
         RegisterRequestHandler(
-            "session/set_config_option",
+            Methods.SessionSetConfigOption,
             JsonContext.Default.SetSessionConfigOptionRequest,
             JsonContext.Default.SetSessionConfigOptionResponse,
             _handler.SetSessionConfigOptionAsync);
-        RegisterRequestHandler("authenticate", JsonContext.Default.AuthenticateRequest, JsonContext.Default.AuthenticateResponse, _handler.AuthenticateAsync);
-        RegisterRequestHandler("logout", JsonContext.Default.LogoutRequest, JsonContext.Default.LogoutResponse, _handler.LogoutAsync);
-        _connection.RegisterNotificationHandler("session/cancel", HandleCancelAsync);
+        RegisterRequestHandler(Methods.Authenticate, JsonContext.Default.AuthenticateRequest, JsonContext.Default.AuthenticateResponse, _handler.AuthenticateAsync);
+        RegisterRequestHandler(Methods.Logout, JsonContext.Default.LogoutRequest, JsonContext.Default.LogoutResponse, _handler.LogoutAsync);
+        _connection.RegisterNotificationHandler(Methods.SessionCancel, HandleCancelAsync);
     }
 
     private void RegisterRequestHandler<TRequest, TResponse>(

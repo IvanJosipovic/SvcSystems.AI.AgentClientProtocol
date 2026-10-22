@@ -33,7 +33,7 @@ public sealed class RegistryAgentLauncher : IDisposable
         _ownsHttpClient = httpClient is null;
         _findUsableCommand = findUsableCommand ?? throw new ArgumentNullException(nameof(findUsableCommand));
         _releaseChannel = options?.ReleaseChannel ?? RegistryAgentReleaseChannel.Stable;
-        _binaryInstaller = new RegistryBinaryInstaller(_httpClient, options?.AgentsDirectory, _findUsableCommand);
+        _binaryInstaller = new RegistryBinaryInstaller(_httpClient, options?.AgentsDirectory, _findUsableCommand, options?.RequireChecksum ?? false);
     }
 
     /// <summary>

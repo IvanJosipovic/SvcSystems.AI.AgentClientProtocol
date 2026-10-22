@@ -66,6 +66,43 @@ public sealed class AgentHostBehaviourTests
         await Assert.ThrowsAsync<ProtocolException>(() => run.WaitAsync(TimeSpan.FromSeconds(5), Token));
     }
 
+    [Fact]
+    public async Task AnUnsupportedProtocolVersionIsAnsweredWithTheSupportedVersion()
+    {
+        await using var transport = new ChannelTransport();
+        await using var agent = new AcpAgent(new MinimalHandler(), transport);
+        var run = agent.RunAsync(Token);
+
+        // The client asks for a protocol version this host does not speak. ACP requires a
+        // successful result carrying the agent's own version, not an error and not an echo of
+        // the unsupported version.
+        transport.Receive("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":65535}}""");
+
+        using var response = await transport.ReadSentAsync();
+        Assert.True(response.RootElement.TryGetProperty("result", out var result));
+        Assert.Equal(1, result.GetProperty("protocolVersion").GetInt32());
+
+        transport.CompleteInput();
+        await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
+    [Fact]
+    public async Task TheSupportedProtocolVersionIsAccepted()
+    {
+        await using var transport = new ChannelTransport();
+        await using var agent = new AcpAgent(new MinimalHandler(), transport);
+        var run = agent.RunAsync(Token);
+
+        transport.Receive("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":1}}""");
+
+        using var response = await transport.ReadSentAsync();
+        Assert.True(response.RootElement.TryGetProperty("result", out var result));
+        Assert.Equal(1, result.GetProperty("protocolVersion").GetInt32());
+
+        transport.CompleteInput();
+        await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
     [Theory]
     [InlineData("session/delete", "null")]
     [InlineData("session/resume", "\"text\"")]
