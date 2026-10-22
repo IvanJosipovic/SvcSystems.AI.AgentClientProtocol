@@ -94,7 +94,7 @@ public sealed class ClientOperationsTests
     }
 
     [Fact]
-    public async Task TerminalAuthenticationRunsConfiguredCommandWithAgentOverrides()
+    public async Task TerminalAuthenticationKeepsAgentOverridesOutOfTheHostEnvironment()
     {
         await using var transport = new TestTransport();
         var terminal = new RecordingTerminalAuthenticationHandler();
@@ -129,9 +129,17 @@ public sealed class ClientOperationsTests
         Assert.Equal("agent", terminal.Request.FileName);
         Assert.Equal(["--acp", "auth", "--interactive"], terminal.Request.Arguments);
         Assert.Equal(Path.GetTempPath(), terminal.Request.WorkingDirectory);
-        Assert.Equal("terminal", terminal.Request.Environment["SHARED"]);
+
+        // The agent is an untrusted peer. Its environment overrides are handed to the handler
+        // separately so the handler can decide whether to apply them, and the host environment is
+        // never silently rewritten by the agent.
+        Assert.Equal("base", terminal.Request.Environment["SHARED"]);
         Assert.Equal("yes", terminal.Request.Environment["BASE_ONLY"]);
-        Assert.Equal("yes", terminal.Request.Environment["TERMINAL_ONLY"]);
+        Assert.False(terminal.Request.Environment.ContainsKey("TERMINAL_ONLY"));
+
+        Assert.Equal("terminal", terminal.Request.AgentEnvironment["SHARED"]);
+        Assert.Equal("yes", terminal.Request.AgentEnvironment["TERMINAL_ONLY"]);
+        Assert.Equal(["auth", "--interactive"], terminal.Request.AgentArguments);
     }
 
     [Fact]

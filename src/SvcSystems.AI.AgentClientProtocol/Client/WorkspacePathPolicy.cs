@@ -22,6 +22,35 @@ internal static class WorkspacePathPolicy
         return roots.Any(root => IsWithinRoot(resolvedPath, root));
     }
 
+    /// <summary>
+    /// Resolves a path and confirms that it stays inside one of the workspace roots.
+    /// </summary>
+    /// <param name="path">The absolute path to resolve.</param>
+    /// <param name="roots">The workspace roots the path must stay inside.</param>
+    /// <returns>The fully resolved path, with every symbolic link and <c>..</c> segment applied.</returns>
+    /// <exception cref="ArgumentException">The path is not absolute.</exception>
+    /// <exception cref="IOException">A link in the path could not be resolved.</exception>
+    /// <remarks>
+    /// The resolved path is what the host should open. Opening the unresolved path instead leaves
+    /// a window in which a link in the path can be swapped for one that points outside the
+    /// workspace after the check has passed.
+    /// </remarks>
+    public static string ResolveWithinRoots(string path, IReadOnlyList<string> roots)
+    {
+        if (!Path.IsPathFullyQualified(path))
+        {
+            throw new ArgumentException("Workspace paths must be absolute.", nameof(path));
+        }
+
+        var resolvedPath = ResolvePath(path);
+        if (!roots.Any(root => IsWithinRoot(resolvedPath, root)))
+        {
+            throw new UnauthorizedAccessException("The path is outside the session's authorized workspace.");
+        }
+
+        return resolvedPath;
+    }
+
     private static string ResolvePath(string path)
     {
         if (!Path.IsPathFullyQualified(path))

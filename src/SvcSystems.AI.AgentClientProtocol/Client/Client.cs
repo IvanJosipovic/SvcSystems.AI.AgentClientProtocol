@@ -18,6 +18,7 @@ public sealed class Client : IClient
     private readonly ConcurrentDictionary<string, Session> _sessions = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _fileSystemRoots = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _activePromptCancellation = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, ulong> _terminalOutputLimits = new(StringComparer.Ordinal);
     private AuthenticationStatus? _authenticationStatus;
     private int _disposed;
 
@@ -30,6 +31,10 @@ public sealed class Client : IClient
         if (options.MaximumConcurrentIncomingRequests <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(options), "The maximum concurrent incoming request count must be positive.");
+        }
+        if (options.MaximumSessions <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "The maximum session count must be positive.");
         }
         _connection = connection;
         _processOptions = processOptions;
@@ -246,6 +251,14 @@ public sealed class Client : IClient
         {
             throw new DuplicateSessionIdException(session.Id);
         }
+        // Each live session holds a bounded update buffer, so the number of live sessions is capped
+        // to keep a misbehaving agent from exhausting the host's memory.
+        if (_sessions.Count > _options.MaximumSessions)
+        {
+            _sessions.TryRemove(session.Id, out _);
+            _fileSystemRoots.TryRemove(session.Id, out _);
+            throw new ProtocolException($"The agent exceeded the maximum of {_options.MaximumSessions} live sessions.");
+        }
         if (fileSystemRoots is not null) _fileSystemRoots[session.Id] = fileSystemRoots;
         return session;
     }
@@ -253,6 +266,11 @@ public sealed class Client : IClient
     /// <summary>
     /// Releases an agent-side session whose id duplicates a live session.
     /// </summary>
+    /// <remarks>
+    /// The request is sent directly rather than through <see cref="CloseSessionAsync"/> so that the
+    /// existing local session entry, which still owns that id, is left untouched. Best effort: the
+    /// agent may not advertise close, in which case it answers with an error that is ignored.
+    /// </remarks>
     /// <remarks>
     /// The request is sent directly rather than through <see cref="CloseSessionAsync"/> so that the
     /// existing local session entry, which still owns that id, is left untouched. Best effort: the
@@ -291,7 +309,10 @@ public sealed class Client : IClient
         var fileSystemRoots = GetFileSystemRoots(options);
         var created = new Session(this, sessionId, _options.MaximumBufferedSessionUpdates);
         var session = _sessions.GetOrAdd(sessionId, created);
-        if (ReferenceEquals(session, created) && fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
+        // A load may address a session that is already live, which the ACP session setup flow
+        // allows. The workspace roots of the load request replace the previous ones so the
+        // session is not left with the roots of the session it was first created with.
+        if (fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
 
         try
         {
@@ -338,13 +359,23 @@ public sealed class Client : IClient
             var handler = _options.TerminalAuthenticationHandler
                 ?? throw new NotSupportedException("This agent requires terminal authentication but no terminal authentication handler is configured.");
             var environment = processOptions.Environment.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
-            if (terminalMethod.Env is not null)
-            {
-                foreach (var variable in terminalMethod.Env) environment[variable.Key] = variable.Value;
-            }
-            var arguments = processOptions.Arguments.Concat(terminalMethod.Args ?? []).ToArray();
+            // The agent is an untrusted peer. Its requested environment variables and arguments are
+            // passed separately instead of being merged into the host configuration, so a handler can
+            // tell them apart and decide what to apply. Merging them here would let an agent
+            // override host variables such as PATH, HOME or LD_PRELOAD on the host's own process.
+            var agentEnvironment = terminalMethod.Env is null
+                ? new Dictionary<string, string>(StringComparer.Ordinal)
+                : new Dictionary<string, string>(terminalMethod.Env, StringComparer.Ordinal);
+            var agentArguments = terminalMethod.Args is null ? [] : (IReadOnlyList<string>)[.. terminalMethod.Args];
+            var arguments = processOptions.Arguments.Concat(agentArguments).ToArray();
             var exitCode = await handler.RunAsync(
-                new TerminalAuthenticationRequest(processOptions.FileName, arguments, processOptions.WorkingDirectory ?? Environment.CurrentDirectory, environment),
+                new TerminalAuthenticationRequest(
+                    processOptions.FileName,
+                    arguments,
+                    processOptions.WorkingDirectory ?? Environment.CurrentDirectory,
+                    environment,
+                    agentArguments,
+                    agentEnvironment),
                 cancellationToken).ConfigureAwait(false);
             if (exitCode != 0) throw new ProcessException($"Terminal authentication exited with code {exitCode}.");
             return;
@@ -412,7 +443,10 @@ public sealed class Client : IClient
         var fileSystemRoots = GetFileSystemRoots(options);
         var created = new Session(this, sessionId, _options.MaximumBufferedSessionUpdates);
         var session = _sessions.GetOrAdd(sessionId, created);
-        if (ReferenceEquals(session, created) && fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
+        // A resume may address a session that is already live, which the ACP session setup flow
+        // allows. The workspace roots of the resume request replace the previous ones so the
+        // session is not left with the roots of the session it was first created with.
+        if (fileSystemRoots is not null) _fileSystemRoots[sessionId] = fileSystemRoots;
         try
         {
             var response = await _connection.SendRequestAsync(Methods.SessionResume, WireJson.WriteResumeSessionRequest(sessionId, options), cancellationToken).ConfigureAwait(false);
@@ -602,16 +636,35 @@ public sealed class Client : IClient
             {
                 var request = parameters.Deserialize(JsonContext.Default.ReadTextFileRequest)!;
                 ValidateAbsolutePath(request.Path, "path");
-                ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsReadTextFile);
-                var content = await fileSystem.ReadTextFileAsync(request, cancellationToken).ConfigureAwait(false);
+                // The handler is given the resolved path, so it opens the file the policy approved
+                // rather than the path the agent supplied. Opening the unresolved path would leave a
+                // window in which a link inside the workspace is swapped for one that points out of
+                // it after the check has passed.
+                var resolved = ResolveFileSystemPath(request.SessionId, request.Path, Methods.FsReadTextFile);
+                var resolvedRequest = new ReadTextFileRequest
+                {
+                    SessionId = request.SessionId,
+                    Path = resolved,
+                    Line = request.Line,
+                    Limit = request.Limit,
+                    Meta = request.Meta
+                };
+                var content = await fileSystem.ReadTextFileAsync(resolvedRequest, cancellationToken).ConfigureAwait(false);
                 return JsonSerializer.SerializeToUtf8Bytes(new ReadTextFileResponse { Content = content }, JsonContext.Default.ReadTextFileResponse);
             };
             requests[Methods.FsWriteTextFile] = async (parameters, cancellationToken) =>
             {
                 var request = parameters.Deserialize(JsonContext.Default.WriteTextFileRequest)!;
                 ValidateAbsolutePath(request.Path, "path");
-                ValidateFileSystemPath(request.SessionId, request.Path, Methods.FsWriteTextFile);
-                await fileSystem.WriteTextFileAsync(request, cancellationToken).ConfigureAwait(false);
+                var resolved = ResolveFileSystemPath(request.SessionId, request.Path, Methods.FsWriteTextFile);
+                var resolvedRequest = new WriteTextFileRequest
+                {
+                    SessionId = request.SessionId,
+                    Path = resolved,
+                    Content = request.Content,
+                    Meta = request.Meta
+                };
+                await fileSystem.WriteTextFileAsync(resolvedRequest, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyObject();
             };
         }
@@ -626,30 +679,46 @@ public sealed class Client : IClient
                 // handler; the client only guarantees that the path is well formed.
                 if (request.Cwd is not null) ValidateAbsolutePath(request.Cwd, "cwd");
                 if (string.IsNullOrWhiteSpace(request.Command)) throw new RpcException(-32602, "Terminal command must not be empty.", Methods.TerminalCreate);
+                ValidateTerminalSession(request.SessionId, Methods.TerminalCreate);
+                // The agent chooses the command, so the host must approve it. Without this the
+                // agent gets command execution with no user prompt, because terminal/create does
+                // not route through the permission handler.
+                if (!_options.SecurityPolicy.TerminalCommandAllowed(request.Command, request.Args ?? []))
+                {
+                    throw new RpcException(-32602, $"The terminal command '{request.Command}' is not permitted by the configured security policy.", Methods.TerminalCreate);
+                }
                 var terminalId = await terminal.CreateAsync(request, cancellationToken).ConfigureAwait(false);
+                if (request.OutputByteLimit is { } limit)
+                {
+                    _terminalOutputLimits[terminalId] = limit;
+                }
                 return JsonSerializer.SerializeToUtf8Bytes(new CreateTerminalResponse { TerminalId = terminalId }, JsonContext.Default.CreateTerminalResponse);
             };
             requests[Methods.TerminalOutput] = async (parameters, cancellationToken) =>
             {
                 var request = parameters.Deserialize(JsonContext.Default.TerminalOutputRequest)!;
+                ValidateTerminalSession(request.SessionId, Methods.TerminalOutput);
                 var output = await terminal.GetOutputAsync(request, cancellationToken).ConfigureAwait(false);
-                return JsonSerializer.SerializeToUtf8Bytes(output, JsonContext.Default.TerminalOutputResponse);
+                return JsonSerializer.SerializeToUtf8Bytes(TruncateTerminalOutput(output, request), JsonContext.Default.TerminalOutputResponse);
             };
             requests[Methods.TerminalWaitForExit] = async (parameters, cancellationToken) =>
             {
                 var request = parameters.Deserialize(JsonContext.Default.WaitForTerminalExitRequest)!;
+                ValidateTerminalSession(request.SessionId, Methods.TerminalWaitForExit);
                 var status = await terminal.WaitForExitAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteTerminalExitStatusResponse(status);
             };
             requests[Methods.TerminalKill] = async (parameters, cancellationToken) =>
             {
                 var request = parameters.Deserialize(JsonContext.Default.KillTerminalRequest)!;
+                ValidateTerminalSession(request.SessionId, Methods.TerminalKill);
                 await terminal.KillAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyObject();
             };
             requests[Methods.TerminalRelease] = async (parameters, cancellationToken) =>
             {
                 var request = parameters.Deserialize(JsonContext.Default.ReleaseTerminalRequest)!;
+                ValidateTerminalSession(request.SessionId, Methods.TerminalRelease);
                 await terminal.ReleaseAsync(request, cancellationToken).ConfigureAwait(false);
                 return WireJson.WriteEmptyObject();
             };
@@ -785,6 +854,80 @@ public sealed class Client : IClient
         throw new RpcException(-32602, "Filesystem path is outside the session's authorized workspace.", method);
     }
 
+    /// <summary>
+    /// Resolves a filesystem path and confirms that it stays inside the session's workspace.
+    /// </summary>
+    /// <param name="sessionId">The session that owns the workspace.</param>
+    /// <param name="path">The path the agent asked for.</param>
+    /// <param name="method">The method being handled, used in the error.</param>
+    /// <returns>The resolved path, which the host should open.</returns>
+    private string ResolveFileSystemPath(string sessionId, string path, string method)
+    {
+        if (!_fileSystemRoots.TryGetValue(sessionId, out var roots))
+        {
+            throw new RpcException(-32602, "Filesystem access requires an active session with an authorized workspace.", method);
+        }
+
+        try
+        {
+            return WorkspacePathPolicy.ResolveWithinRoots(path, roots);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or System.Security.SecurityException)
+        {
+            throw new RpcException(-32602, "Filesystem path could not be resolved safely.", method);
+        }
+    }
+
+    /// <summary>
+    /// Requires that a terminal request names a session this client owns.
+    /// </summary>
+    /// <remarks>
+    /// The agent is an untrusted peer, so a terminal request that names an unknown session is
+    /// rejected before it reaches the host handler. Without this check an agent could ask the
+    /// handler to act on a terminal id it never created.
+    /// </remarks>
+    private void ValidateTerminalSession(string sessionId, string method)
+    {
+        if (!_sessions.ContainsKey(sessionId))
+        {
+            throw new RpcException(-32602, "Terminal access requires an active session.", method);
+        }
+    }
+
+    /// <summary>
+    /// Applies the ACP output byte limit to a terminal output response.
+    /// </summary>
+    /// <remarks>
+    /// The ACP schema requires the client to truncate terminal output to the requested byte
+    /// limit, from the beginning of the output, at a character boundary. The limit is carried by
+    /// the terminal/create request, so the created terminal's limit is remembered here.
+    /// </remarks>
+    private TerminalOutputResponse TruncateTerminalOutput(TerminalOutputResponse output, TerminalOutputRequest request)
+    {
+        var limit = _terminalOutputLimits.TryGetValue(request.TerminalId, out var value) ? value : (ulong?)null;
+        if (limit is null or 0) return output;
+
+        var text = output.Output;
+        var budget = (long)limit.Value;
+        if (System.Text.Encoding.UTF8.GetByteCount(text) <= budget) return output;
+
+        // The ACP schema truncates from the beginning of the output to stay within the limit, and
+        // requires the truncation to land on a character boundary so the retained output stays a
+        // valid string. The boundary is found by walking back from the byte budget.
+        var end = (int)Math.Min((long)text.Length, budget);
+        while (end > 0 && System.Text.Encoding.UTF8.GetByteCount(text.AsSpan(0, end)) > budget)
+        {
+            end--;
+        }
+
+        return new TerminalOutputResponse
+        {
+            Output = text[..end],
+            Truncated = true,
+            ExitStatus = output.ExitStatus
+        };
+    }
+
     private static void ValidateWorkingDirectory(string directory)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);
@@ -799,7 +942,7 @@ public sealed class Client : IClient
         }
     }
 
-    private static void ValidateMcpServers(IReadOnlyList<McpServer> servers, McpCapabilities? capabilities)
+    private void ValidateMcpServers(IReadOnlyList<McpServer> servers, McpCapabilities? capabilities)
     {
         foreach (var server in servers)
         {
@@ -809,20 +952,52 @@ public sealed class Client : IClient
                     ArgumentException.ThrowIfNullOrWhiteSpace(stdio.Name);
                     ArgumentException.ThrowIfNullOrWhiteSpace(stdio.Command);
                     if (!Path.IsPathFullyQualified(stdio.Command)) throw new ArgumentException("MCP stdio command must be an absolute path.", nameof(servers));
+                    // The agent launches this command, so a host that forwards untrusted MCP
+                    // configuration would otherwise hand the agent arbitrary process execution.
+                    if (!_options.SecurityPolicy.McpCommandAllowed(stdio.Command))
+                    {
+                        throw new ArgumentException($"The MCP command '{stdio.Command}' is not permitted by the configured security policy.", nameof(servers));
+                    }
                     break;
                 case McpServerHttp http:
                     ArgumentException.ThrowIfNullOrWhiteSpace(http.Name);
-                    if (!Uri.TryCreate(http.Url, UriKind.Absolute, out _)) throw new ArgumentException("MCP HTTP URL must be absolute.", nameof(servers));
+                    if (!Uri.TryCreate(http.Url, UriKind.Absolute, out var httpUri)) throw new ArgumentException("MCP HTTP URL must be absolute.", nameof(servers));
+                    if (!IsHttpScheme(httpUri)) throw new ArgumentException("MCP HTTP URL must use the http or https scheme.", nameof(servers));
                     if (capabilities?.Http != true) throw new NotSupportedException("The ACP agent does not advertise HTTP MCP support.");
+                    ValidateMcpEndpoint(httpUri, nameof(servers));
                     break;
                 case McpServerSse sse:
                     ArgumentException.ThrowIfNullOrWhiteSpace(sse.Name);
-                    if (!Uri.TryCreate(sse.Url, UriKind.Absolute, out _)) throw new ArgumentException("MCP SSE URL must be absolute.", nameof(servers));
+                    if (!Uri.TryCreate(sse.Url, UriKind.Absolute, out var sseUri)) throw new ArgumentException("MCP SSE URL must be absolute.", nameof(servers));
+                    if (!IsHttpScheme(sseUri)) throw new ArgumentException("MCP SSE URL must use the http or https scheme.", nameof(servers));
                     if (capabilities?.Sse != true) throw new NotSupportedException("The ACP agent does not advertise SSE MCP support.");
+                    ValidateMcpEndpoint(sseUri, nameof(servers));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(servers), $"Unknown MCP server configuration '{server.GetType().Name}'.");
             }
+        }
+    }
+
+    /// <summary>Determines whether a URI uses the http or https scheme.</summary>
+    /// <param name="uri">The URI to classify.</param>
+    /// <returns><see langword="true"/> when the scheme is http or https.</returns>
+    private static bool IsHttpScheme(Uri uri) =>
+        uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;
+
+    /// <summary>
+    /// Requires that the security policy permits an MCP network endpoint.
+    /// </summary>
+    /// <remarks>
+    /// The client forwards the endpoint to the agent, which may then contact it. A URL that points
+    /// at a loopback, link-local, or private address turns the agent into a proxy for internal
+    /// services, including cloud instance metadata endpoints.
+    /// </remarks>
+    private void ValidateMcpEndpoint(Uri endpoint, string parameterName)
+    {
+        if (!_options.SecurityPolicy.McpEndpointAllowed(endpoint))
+        {
+            throw new ArgumentException($"The MCP endpoint '{endpoint}' is not permitted by the configured security policy.", parameterName);
         }
     }
 

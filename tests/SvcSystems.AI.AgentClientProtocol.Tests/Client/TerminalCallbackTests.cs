@@ -35,9 +35,18 @@ public sealed class TerminalCallbackTests
         var cwd = Path.GetTempPath();
         await using var transport = new TestTransport();
         var handler = new RecordingTerminalHandler();
-        var (client, _) = await ConnectAsync(transport, new ClientOptions { TerminalHandler = handler });
+        var (client, _) = await ConnectAsync(transport, new ClientOptions
+        {
+            TerminalHandler = handler,
+            SecurityPolicy = new AcpSecurityPolicy
+            {
+                TerminalCommandAllowed = static (_, _) => true
+            }
+        });
         await using (client)
         {
+            await CreateSessionAsync(transport, client, "session-1");
+
             transport.Receive(Request(
                 "create",
                 "terminal/create",
@@ -127,6 +136,17 @@ public sealed class TerminalCallbackTests
         transport.Respond(initialize, """{"protocolVersion":1,"agentCapabilities":{}}""");
         var client = await connecting.WaitAsync(TimeSpan.FromSeconds(5), Token);
         return (client, initialize.RootElement.GetProperty("params").GetProperty("clientCapabilities").Clone());
+    }
+
+    /// <summary>Creates a live session so that terminal requests naming it are accepted.</summary>
+    private static async Task CreateSessionAsync(TestTransport transport, AcpClient client, string sessionId)
+    {
+        var creating = client.CreateSessionAsync(
+            new SessionOptions { WorkingDirectory = Path.GetTempPath() },
+            Token);
+        using var request = await transport.ReadSentAsync();
+        transport.Respond(request, $$"""{"sessionId":"{{sessionId}}"}""");
+        _ = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
     }
 
     private static string Request(string id, string method, string parameters) =>

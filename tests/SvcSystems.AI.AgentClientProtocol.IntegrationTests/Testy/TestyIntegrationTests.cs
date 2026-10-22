@@ -139,7 +139,14 @@ public sealed class TestyIntegrationTests
             using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             await using var client = await AcpClient.StartAsync(
                 new ProcessOptions { FileName = testyPath, WorkingDirectory = workingDirectory },
-                cancellationToken: timeout.Token);
+                new ClientOptions
+                {
+                    SecurityPolicy = new AcpSecurityPolicy
+                    {
+                        McpCommandAllowed = command => command == mcpEchoPath
+                    }
+                },
+                timeout.Token);
             var session = await client.CreateSessionAsync(new SessionOptions
             {
                 WorkingDirectory = workingDirectory,
@@ -200,7 +207,11 @@ public sealed class TestyIntegrationTests
                     FileSystemHandler = fileSystem,
                     TerminalHandler = terminalHandler,
                     ElicitationHandler = elicitationHandler,
-                    ElicitationCompleted = elicitationHandler.OnCompleted
+                    ElicitationCompleted = elicitationHandler.OnCompleted,
+                    SecurityPolicy = new AcpSecurityPolicy
+                    {
+                        TerminalCommandAllowed = static (_, _) => true
+                    }
                 },
                 timeout.Token);
 

@@ -73,11 +73,41 @@ var clientOptions = new ClientOptions
 
 | Handler | Scope |
 |---|---|
-| Filesystem | Restricted to each session's working directory and configured additional directories. Paths resolving through symlinks or reparse points outside those roots are rejected. |
-| Terminal | Unrestricted: the client checks only that `cwd` is absolute. The handler owns command, argument, and directory policy. |
+| Filesystem | Restricted to each session's working directory and configured additional directories. Paths resolving through symlinks or reparse points outside those roots are rejected. The handler receives the resolved path. |
+| Terminal | The command must be permitted by the security policy and name a live session. The handler owns the remaining command, argument, and directory policy. |
 | Permission | A request must reference a session the client tracks; unknown sessions are rejected. |
 
 Filesystem and terminal handlers should still enforce their own authorization.
+
+## Security policy
+
+The agent is the untrusted peer. `ClientOptions.SecurityPolicy` decides what it may ask the host
+to run or reach. It denies everything by default, so a host opts in explicitly:
+
+```csharp
+var clientOptions = new ClientOptions
+{
+    SecurityPolicy = new AcpSecurityPolicy
+    {
+        McpCommandAllowed = command => command == "/opt/mcp/my-server",
+        McpEndpointAllowed = AcpSecurityPolicy.AllowPublicHttpsMcpEndpoints(),
+        TerminalCommandAllowed = (command, args) => command == "git"
+    }
+};
+```
+
+| Policy | Default | Covers |
+|---|---|---|
+| `McpCommandAllowed` | Deny | The executable an MCP stdio server is launched with. |
+| `McpEndpointAllowed` | Deny | The HTTP or SSE URL an MCP server is reached at. Only `http` and `https` are accepted. |
+| `TerminalCommandAllowed` | Deny | The command an agent asks the host to run. |
+
+`AllowPublicHttpsMcpEndpoints` permits HTTPS endpoints that are not loopback, link-local, or
+private addresses, which keeps cloud instance metadata and internal services out of reach.
+
+Other client-side guarantees: terminal output is truncated to the requested byte limit, a
+terminal request must name a live session, the number of live sessions is capped, and agent
+authentication environment variables are passed separately so the host can decline them.
 
 ## Failure handling
 
