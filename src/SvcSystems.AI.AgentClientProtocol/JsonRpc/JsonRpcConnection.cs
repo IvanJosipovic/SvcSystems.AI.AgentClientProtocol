@@ -297,7 +297,8 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
         catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
         {
-            await SendIncomingErrorAsync(id, -32800, "Request cancelled.").ConfigureAwait(false);
+            // The connection is shutting down, so there is nobody left to answer. The shutdown
+            // itself is reported through Completion; this request is simply abandoned.
             return;
         }
         catch (Exception exception)
@@ -318,8 +319,14 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
         catch (Exception exception)
         {
-            Interlocked.CompareExchange(ref _terminalException, exception, null);
-            FailPending(_terminalException!);
+            if (!_shutdown.IsCancellationRequested)
+            {
+                // A failure while the connection is live is terminal. A failure caused by the
+                // shutdown itself is not: aborting a request because the connection is closing
+                // must not be reported to the peer as a protocol failure.
+                Interlocked.CompareExchange(ref _terminalException, exception, null);
+                FailPending(_terminalException!);
+            }
             _shutdown.Cancel();
         }
         finally
@@ -522,6 +529,12 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+
+        // A deliberate disposal is a clean close, not a failure. The completion is resolved before
+        // the receive loop is torn down so that a caller awaiting it (for example an agent host
+        // running the connection) observes a clean result instead of racing the shutdown token
+        // and seeing a cancellation.
+        _completion.TrySetResult(_terminalException);
         _shutdown.Cancel();
         FailPending(new ObjectDisposedException(nameof(JsonRpcConnection)));
         await _transport.DisposeAsync().ConfigureAwait(false);

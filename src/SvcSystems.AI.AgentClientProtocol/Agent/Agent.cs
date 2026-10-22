@@ -65,6 +65,11 @@ public sealed class Agent : IAsyncDisposable
                 throw failure;
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The caller's token cancelled the run. A host that was stopped deliberately is not
+            // a failure, so the cancellation is swallowed and the run ends cleanly.
+        }
         finally
         {
             await DisposeAsync().ConfigureAwait(false);
@@ -204,8 +209,10 @@ public sealed class Agent : IAsyncDisposable
             {
                 response = await _handler.PromptAsync(request, context, promptCancellation.Token).ConfigureAwait(false);
             }
-            catch (OperationCanceledException) when (promptCancellation.IsCancellationRequested && !shutdownToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (promptCancellation.IsCancellationRequested)
             {
+                // A prompt cancelled by the host shutting down is not a protocol failure either.
+                // The turn ends as "cancelled" so the peer sees a well-formed response.
                 response = new PromptResponse { StopReason = "cancelled" };
             }
 
