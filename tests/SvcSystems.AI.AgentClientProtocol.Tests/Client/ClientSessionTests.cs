@@ -285,6 +285,52 @@ public sealed class ClientSessionTests
         "{\"jsonrpc\":\"2.0\",\"id\":" + id
         + ",\"method\":\"session/request_permission\",\"params\":{\"sessionId\":\"session\",\"toolCall\":{\"toolCallId\":\"call\",\"title\":\"Run tool\"},\"options\":[{\"optionId\":\"allow\",\"name\":\"Allow\",\"kind\":\"allow_once\"}]}}";
 
+    [Fact]
+    public async Task SessionCancelIsWrittenBeforeThePendingPermissionIsAnswered()
+    {
+        // The ACP spec requires the client to cancel the prompt turn with session/cancel and only
+        // then answer a pending session/request_permission with a cancelled outcome. Releasing the
+        // permission handler first lets the permission response reach the wire before the
+        // notification, so the agent is told about a decision for a turn it was never told to
+        // cancel. This test pins the order of the two outbound frames.
+        await using var transport = new TestTransport();
+        var handler = new WaitingPermissionHandler();
+        await using var client = await ConnectAsync(transport, new ClientOptions { PermissionHandler = handler });
+        var creating = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = Environment.CurrentDirectory }, Token);
+        using (var request = await transport.ReadSentAsync())
+        {
+            transport.Respond(request, """{"sessionId":"session"}""");
+        }
+        var session = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+        var prompting = CollectAsync(session.PromptAsync("hello", Token));
+        using (var prompt = await transport.ReadSentAsync())
+        {
+            transport.Receive(PermissionRequest(41));
+            await handler.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+            var cancelling = session.CancelAsync(Token);
+
+            // The notification must be the first frame written after the cancel is requested.
+            using (var cancel = await transport.ReadSentAsync())
+            {
+                Assert.Equal("session/cancel", cancel.RootElement.GetProperty("method").GetString());
+            }
+            await cancelling.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+            // The permission answer follows, and it is a cancelled outcome.
+            using (var cancelled = await transport.ReadSentAsync())
+            {
+                Assert.Equal(41, cancelled.RootElement.GetProperty("id").GetInt32());
+                Assert.Equal("cancelled", cancelled.RootElement.GetProperty("result").GetProperty("outcome").GetProperty("outcome").GetString());
+            }
+
+            transport.Respond(prompt, """{"stopReason":"cancelled"}""");
+        }
+
+        await prompting.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
     private sealed class WaitingPermissionHandler : IPermissionHandler
     {
         public TaskCompletionSource Entered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -296,6 +342,49 @@ public sealed class ClientSessionTests
             Entered.TrySetResult();
             await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
             return PermissionDecision.Select(request.Options[0].OptionId);
+        }
+    }
+
+    [Fact]
+    public async Task SessionCancelAlwaysPrecedesTheCancelledPermissionAnswerUnderRepetition()
+    {
+        // The two outbound frames race for the same write path. Repeating the exchange catches an
+        // ordering that only happens to hold on a quiet scheduler.
+        for (var attempt = 0; attempt < 50; attempt++)
+        {
+            await using var transport = new TestTransport();
+            var handler = new WaitingPermissionHandler();
+            await using var client = await ConnectAsync(transport, new ClientOptions { PermissionHandler = handler });
+            var creating = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = Environment.CurrentDirectory }, Token);
+            using (var request = await transport.ReadSentAsync())
+            {
+                transport.Respond(request, """{"sessionId":"session"}""");
+            }
+            var session = await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+            var prompting = CollectAsync(session.PromptAsync("hello", Token));
+            using (var prompt = await transport.ReadSentAsync())
+            {
+                transport.Receive(PermissionRequest(41));
+                await handler.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+                var cancelling = session.CancelAsync(Token);
+                using (var cancel = await transport.ReadSentAsync())
+                {
+                    Assert.Equal("session/cancel", cancel.RootElement.GetProperty("method").GetString());
+                }
+                await cancelling.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+                using (var cancelled = await transport.ReadSentAsync())
+                {
+                    Assert.Equal(41, cancelled.RootElement.GetProperty("id").GetInt32());
+                    Assert.Equal("cancelled", cancelled.RootElement.GetProperty("result").GetProperty("outcome").GetProperty("outcome").GetString());
+                }
+
+                transport.Respond(prompt, """{"stopReason":"cancelled"}""");
+            }
+
+            await prompting.WaitAsync(TimeSpan.FromSeconds(5), Token);
         }
     }
 

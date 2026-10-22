@@ -485,13 +485,26 @@ public sealed class Client : IClient
     internal async Task CancelSessionAsync(string sessionId, CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
-        if (_activePromptCancellation.TryGetValue(sessionId, out var permissionCancellation))
-        {
-            try { await permissionCancellation.CancelAsync().ConfigureAwait(false); }
-            catch (ObjectDisposedException) { }
-        }
+        // The ACP spec requires the client to cancel the prompt turn with session/cancel and only
+        // then answer a pending session/request_permission with a cancelled outcome. The
+        // notification therefore has to reach the wire before the permission handler is released,
+        // otherwise the permission response can be written first and the agent sees a decision for
+        // a turn it was never told to cancel.
         var notification = new CancelNotification { SessionId = sessionId };
-        await _connection.SendNotificationAsync(Methods.SessionCancel, JsonSerializer.SerializeToUtf8Bytes(notification, JsonContext.Default.CancelNotification), cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await _connection.SendNotificationAsync(Methods.SessionCancel, JsonSerializer.SerializeToUtf8Bytes(notification, JsonContext.Default.CancelNotification), cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            // The pending permission request is released even when the notification could not be
+            // written, so a permission handler is never left waiting on a turn nobody can cancel.
+            if (_activePromptCancellation.TryGetValue(sessionId, out var permissionCancellation))
+            {
+                try { await permissionCancellation.CancelAsync().ConfigureAwait(false); }
+                catch (ObjectDisposedException) { }
+            }
+        }
     }
 
     private async Task InitializeAsync(CancellationToken cancellationToken)
