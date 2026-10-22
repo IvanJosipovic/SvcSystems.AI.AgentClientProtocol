@@ -18,6 +18,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.OpenApi" Version="3.10.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.OpenApi" Version="3.11.0" PrivateAssets="all" />
   </ItemGroup>
 </Project>
