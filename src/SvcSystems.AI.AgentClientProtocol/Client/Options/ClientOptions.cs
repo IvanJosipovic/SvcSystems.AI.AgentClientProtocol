@@ -59,6 +59,25 @@ public sealed class ClientOptions
     /// <summary>Receives completion notifications for URL-based elicitation.</summary>
     public Action<CompleteElicitationNotification>? ElicitationCompleted { get; init; }
 
+    /// <summary>
+    /// Gets or sets the policy that decides which commands and endpoints an ACP agent may be given.
+    /// </summary>
+    /// <remarks>
+    /// The default policy rejects every MCP command, every MCP endpoint, and every terminal command.
+    /// A host that wants an agent to launch MCP servers, reach remote MCP endpoints, or run
+    /// terminal commands must opt in explicitly.
+    /// </remarks>
+    public AcpSecurityPolicy SecurityPolicy { get; init; } = AcpSecurityPolicy.DenyAll;
+
+    /// <summary>
+    /// Gets or sets the maximum number of sessions that may be live on one connection.
+    /// </summary>
+    /// <remarks>
+    /// Each live session holds a bounded update buffer, so an unbounded number of sessions is a
+    /// way to exhaust the host's memory. The default is 256.
+    /// </remarks>
+    public int MaximumSessions { get; init; } = 256;
+
     /// <summary>Advertises and accepts ACP context-compaction updates.</summary>
     public bool SupportsCompactionUpdates { get; init; } = true;
 

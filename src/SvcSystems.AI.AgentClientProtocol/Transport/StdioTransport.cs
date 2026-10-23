@@ -150,7 +150,11 @@ internal sealed class StdioTransport : ITransport
                 if (frame.WrittenCount > 0)
                 {
                     var length = GetFrameLength(frame.WrittenSpan);
-                    yield return frame.WrittenMemory[..length].ToArray();
+                    // A trailing blank line carries no frame.
+                    if (length > 0)
+                    {
+                        yield return frame.WrittenMemory[..length].ToArray();
+                    }
                 }
                 yield break;
             }
@@ -161,7 +165,12 @@ internal sealed class StdioTransport : ITransport
                 if (input[index] != (byte)'\n') continue;
                 AppendFrame(frame, input.AsSpan(segmentStart, index - segmentStart), maximumFrameBytes);
                 var length = GetFrameLength(frame.WrittenSpan);
-                yield return frame.WrittenMemory[..length].ToArray();
+                // A blank line carries no frame. Emitting it would fail JSON parsing and
+                // terminate the connection, so it is skipped.
+                if (length > 0)
+                {
+                    yield return frame.WrittenMemory[..length].ToArray();
+                }
                 frame = new ArrayBufferWriter<byte>();
                 segmentStart = index + 1;
             }

@@ -129,8 +129,11 @@ public sealed class ExtensionTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => cancelled);
         using var cancellationNotification = await transport.ReadSentAsync();
         Assert.Equal("$/cancel_request", cancellationNotification.RootElement.GetProperty("method").GetString());
+        // The ACP schema names the cancelled request "requestId".
+        var cancelParameters = cancellationNotification.RootElement.GetProperty("params");
         Assert.Equal(waitingRequest.RootElement.GetProperty("id").GetInt64(),
-            cancellationNotification.RootElement.GetProperty("params").GetProperty("id").GetInt64());
+            cancelParameters.GetProperty("requestId").GetInt64());
+        Assert.False(cancelParameters.TryGetProperty("id", out _));
         await BarrierAsync(client, transport);
     }
 
@@ -233,12 +236,14 @@ public sealed class ExtensionTests
     [InlineData("""{"authStatus":null}""")]
     [InlineData("""{"authStatus":{"kind":42,"label":"bad"}}""")]
     [InlineData("""{"authStatus":{"kind":"account","label":"bad","account":42}}""")]
-    public async Task InvalidAuthenticationStatusIsReportedAsProtocolFailure(string parameters)
+    public async Task InvalidAuthenticationStatusIsIgnoredWithoutBreakingTheConnection(string parameters)
     {
         await using var transport = new TestTransport();
         await using var client = await ConnectAsync(transport);
         transport.Receive($$"""{"jsonrpc":"2.0","method":"_auth/status_update","params":{{parameters}}}""");
-        Assert.IsType<ProtocolException>(await client.Completion.WaitAsync(TimeSpan.FromSeconds(5), Token));
+
+        // A malformed vendor extension must not terminate the connection.
+        await BarrierAsync(client, transport);
         Assert.Null(client.AuthenticationStatus);
     }
 

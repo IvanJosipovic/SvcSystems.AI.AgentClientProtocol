@@ -18,7 +18,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     private readonly bool _treatTransportEndAsClean;
     private readonly object _incomingRequestsLock = new();
     private readonly HashSet<Task> _incomingRequests = [];
-    private readonly ConcurrentDictionary<long, TaskCompletionSource<JsonElement>> _pendingRequests = new();
+    private readonly ConcurrentDictionary<long, PendingRequest> _pendingRequests = new();
     private readonly Dictionary<string, Func<JsonElement, CancellationToken, ValueTask<byte[]>>> _requestHandlers = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Func<JsonElement, ValueTask>> _notificationHandlers = new(StringComparer.Ordinal);
     private readonly Task _receiveTask;
@@ -75,17 +75,29 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         _notificationHandlers.Add(method, handler);
     }
 
+    /// <summary>Sends a request and awaits its response.</summary>
+    /// <param name="method">The JSON-RPC method name.</param>
+    /// <param name="parameters">The serialized request parameters.</param>
+    /// <param name="cancellationToken">A token that cancels the request.</param>
+    /// <param name="responseObserver">
+    /// An optional observer for the response. It runs on the receive loop before the awaiting
+    /// caller continues, so a caller can register state that a notification sent immediately
+    /// after the response depends on. An observer that throws is reported and ignored.
+    /// </param>
+    /// <returns>The response result.</returns>
     public async Task<JsonElement> SendRequestAsync(
         string method,
         ReadOnlyMemory<byte> parameters,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<JsonElement>? responseObserver = null)
     {
         ThrowIfUnavailable();
         cancellationToken.ThrowIfCancellationRequested();
 
         var requestId = Interlocked.Increment(ref _nextRequestId);
         var completion = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
-        if (!_pendingRequests.TryAdd(requestId, completion))
+        var pending = new PendingRequest(completion, responseObserver);
+        if (!_pendingRequests.TryAdd(requestId, pending))
         {
             throw new InvalidOperationException("Failed to register a JSON-RPC request id.");
         }
@@ -95,7 +107,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
             var pending = (PendingCancellation)state!;
             if (pending.Connection._pendingRequests.TryRemove(pending.RequestId, out var source))
             {
-                source.TrySetCanceled(pending.Token);
+                source.Completion.TrySetCanceled(pending.Token);
                 _ = pending.Connection.SendCancellationAsync(pending.RequestId);
             }
         }, new PendingCancellation(this, requestId, cancellationToken));
@@ -123,14 +135,12 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     {
         try
         {
-            var parameters = new ArrayBufferWriter<byte>();
-            using (var writer = new Utf8JsonWriter(parameters))
-            {
-                writer.WriteStartObject();
-                writer.WriteNumber("id", requestId);
-                writer.WriteEndObject();
-            }
-            await SendNotificationAsync(Methods.CancelRequest, parameters.WrittenMemory, CancellationToken.None).ConfigureAwait(false);
+            // The ACP schema names the cancelled request "requestId"; a peer that requires that
+            // property silently ignores a notification that sends "id" instead.
+            var parameters = JsonSerializer.SerializeToUtf8Bytes(
+                new CancelRequestNotification { RequestId = requestId },
+                JsonContext.Default.CancelRequestNotification);
+            await SendNotificationAsync(Methods.CancelRequest, parameters, CancellationToken.None).ConfigureAwait(false);
         }
         catch
         {
@@ -210,7 +220,7 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                     // Awaited inline on purpose: notifications must reach handlers in wire order, and the
                     // loop supplies the backpressure that keeps the transport buffers bounded. See
                     // RegisterNotificationHandler for the handler contract this implies.
-                    await DispatchNotificationAsync(handler, parameters).ConfigureAwait(false);
+                    await DispatchNotificationAsync(method, handler, parameters).ConfigureAwait(false);
                 }
                 else
                 {
@@ -237,20 +247,32 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
                 try
                 {
                     var rpcError = error.Deserialize(JsonContext.Default.Error)!;
-                    pending.TrySetException(new RpcException(rpcError.Code, rpcError.Message, data: rpcError.Data));
+                    pending.Completion.TrySetException(new RpcException(rpcError.Code, rpcError.Message, data: rpcError.Data));
                 }
                 catch (JsonException exception)
                 {
-                    pending.TrySetException(new ProtocolException("JSON-RPC error response is malformed.", exception));
+                    pending.Completion.TrySetException(new ProtocolException("JSON-RPC error response is malformed.", exception));
                 }
             }
             else if (message.TryGetProperty("result", out var result))
             {
-                pending.TrySetResult(result.Clone());
+                // The observer runs on the receive loop before the awaiting caller continues, so a
+                // caller can register state that an immediately following notification depends on.
+                var value = result.Clone();
+                try
+                {
+                    pending.ResponseObserver?.Invoke(value);
+                }
+                catch (Exception exception)
+                {
+                    _logger?.LogWarning(exception, "A JSON-RPC response observer failed.");
+                    Trace.TraceError("A JSON-RPC response observer failed: {0}", exception);
+                }
+                pending.Completion.TrySetResult(value);
             }
             else
             {
-                pending.TrySetException(new ProtocolException("JSON-RPC response must contain result or error."));
+                pending.Completion.TrySetException(new ProtocolException("JSON-RPC response must contain result or error."));
             }
         }
     }
@@ -275,7 +297,8 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
         catch (OperationCanceledException) when (_shutdown.IsCancellationRequested)
         {
-            await SendIncomingErrorAsync(id, -32800, "Request cancelled.").ConfigureAwait(false);
+            // The connection is shutting down, so there is nobody left to answer. The shutdown
+            // itself is reported through Completion; this request is simply abandoned.
             return;
         }
         catch (Exception exception)
@@ -296,8 +319,14 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
         }
         catch (Exception exception)
         {
-            Interlocked.CompareExchange(ref _terminalException, exception, null);
-            FailPending(_terminalException!);
+            if (!_shutdown.IsCancellationRequested)
+            {
+                // A failure while the connection is live is terminal. A failure caused by the
+                // shutdown itself is not: aborting a request because the connection is closing
+                // must not be reported to the peer as a protocol failure.
+                Interlocked.CompareExchange(ref _terminalException, exception, null);
+                FailPending(_terminalException!);
+            }
             _shutdown.Cancel();
         }
         finally
@@ -360,6 +389,28 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
 
     private static Task DispatchNotificationAsync(Func<JsonElement, ValueTask> handler, JsonElement parameters) =>
         handler(parameters).AsTask();
+
+    /// <summary>
+    /// Dispatches a notification, isolating malformed payloads from the receive loop.
+    /// </summary>
+    /// <remarks>
+    /// A notification whose payload cannot be interpreted is reported and skipped so that one bad
+    /// frame does not tear down an otherwise healthy connection. Any other exception comes from an
+    /// application callback and keeps its documented contract: it terminates the connection and is
+    /// surfaced through <see cref="Completion"/>.
+    /// </remarks>
+    private async Task DispatchNotificationAsync(string method, Func<JsonElement, ValueTask> handler, JsonElement parameters)
+    {
+        try
+        {
+            await handler(parameters).ConfigureAwait(false);
+        }
+        catch (ProtocolException exception)
+        {
+            _logger?.LogWarning(exception, "An ACP notification for {Method} was rejected and skipped.", method);
+            Trace.TraceError("An ACP notification for '{0}' was rejected and skipped: {1}", method, exception);
+        }
+    }
 
     private ValueTask SendIncomingResultAsync(RequestId? id, ReadOnlyMemory<byte> result) =>
         _transport.SendAsync(WriteResponse(id, result), _shutdown.Token);
@@ -471,13 +522,19 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     {
         foreach (var item in _pendingRequests)
         {
-            if (_pendingRequests.TryRemove(item.Key, out var completion)) completion.TrySetException(exception);
+            if (_pendingRequests.TryRemove(item.Key, out var completion)) completion.Completion.TrySetException(exception);
         }
     }
 
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+
+        // A deliberate disposal is a clean close, not a failure. The completion is resolved before
+        // the receive loop is torn down so that a caller awaiting it (for example an agent host
+        // running the connection) observes a clean result instead of racing the shutdown token
+        // and seeing a cancellation.
+        _completion.TrySetResult(_terminalException);
         _shutdown.Cancel();
         FailPending(new ObjectDisposedException(nameof(JsonRpcConnection)));
         await _transport.DisposeAsync().ConfigureAwait(false);
@@ -489,4 +546,14 @@ internal sealed class JsonRpcConnection : IAsyncDisposable
     }
 
     private sealed record PendingCancellation(JsonRpcConnection Connection, long RequestId, CancellationToken Token);
+
+    /// <summary>A request awaiting its response, plus an optional observer that runs on the receive loop.</summary>
+    private sealed class PendingRequest(
+        TaskCompletionSource<JsonElement> completion,
+        Action<JsonElement>? responseObserver)
+    {
+        public TaskCompletionSource<JsonElement> Completion { get; } = completion;
+
+        public Action<JsonElement>? ResponseObserver { get; } = responseObserver;
+    }
 }

@@ -14,16 +14,28 @@ internal sealed class RegistryBinaryInstaller
 
     private readonly HttpClient _httpClient;
     private readonly string? _configuredAgentsDirectory;
+    private readonly bool _requireChecksum;
+    private readonly long _maxArchiveBytes;
+    private readonly int _maxArchiveEntries;
+    private readonly double _maxCompressionRatio;
     private readonly Func<string, CancellationToken, Task<string?>> _findUsableCommand;
 
     public RegistryBinaryInstaller(
         HttpClient httpClient,
         string? agentsDirectory,
-        Func<string, CancellationToken, Task<string?>> findUsableCommand)
+        Func<string, CancellationToken, Task<string?>> findUsableCommand,
+        bool requireChecksum = false,
+        long maxArchiveBytes = 100_000_000,
+        int maxArchiveEntries = 10_000,
+        double maxCompressionRatio = 100.0)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _configuredAgentsDirectory = string.IsNullOrWhiteSpace(agentsDirectory) ? null : Path.GetFullPath(agentsDirectory);
         _findUsableCommand = findUsableCommand ?? throw new ArgumentNullException(nameof(findUsableCommand));
+        _requireChecksum = requireChecksum;
+        _maxArchiveBytes = maxArchiveBytes > 0 ? maxArchiveBytes : throw new ArgumentOutOfRangeException(nameof(maxArchiveBytes));
+        _maxArchiveEntries = maxArchiveEntries > 0 ? maxArchiveEntries : throw new ArgumentOutOfRangeException(nameof(maxArchiveEntries));
+        _maxCompressionRatio = maxCompressionRatio > 0 ? maxCompressionRatio : throw new ArgumentOutOfRangeException(nameof(maxCompressionRatio));
     }
     internal async Task<string> EnsureInstalledAsync(
         RegistryAgent agent,
@@ -41,6 +53,11 @@ internal sealed class RegistryBinaryInstaller
         var agentId = ValidatePathSegment(agent.Id, nameof(agent.Id));
         version = ValidatePathSegment(version, nameof(version));
         var platformPath = ValidatePathSegment(platform.RuntimeIdentifier, nameof(platform.RuntimeIdentifier));
+        if (_requireChecksum && string.IsNullOrWhiteSpace(target.Sha256))
+        {
+            throw new RegistryAgentLaunchException(
+                $"Agent '{agent.Id}' does not publish a SHA-256 checksum for its binary archive, and checksum verification is required.");
+        }
         var agentsDirectory = _configuredAgentsDirectory ?? Path.GetFullPath(Path.Combine(workingDirectory ?? Environment.CurrentDirectory, "agents"));
         var agentDirectory = Path.GetFullPath(Path.Combine(agentsDirectory, agentId));
         EnsureContainedPath(agentsDirectory, agentDirectory);
@@ -150,7 +167,7 @@ internal sealed class RegistryBinaryInstaller
         }
     }
 
-    private async Task ExtractArchiveAsync(
+    internal async Task ExtractArchiveAsync(
         Uri archiveUri,
         string archivePath,
         string stagingDirectory,
@@ -178,15 +195,40 @@ internal sealed class RegistryBinaryInstaller
 
         var commandPath = GetContainedCommandPath(stagingDirectory, command);
         Directory.CreateDirectory(Path.GetDirectoryName(commandPath)!);
+        var compressedSize = new FileInfo(archivePath).Length;
         File.Move(archivePath, commandPath);
+        var fileSize = new FileInfo(commandPath).Length;
+        if (fileSize > _maxArchiveBytes)
+        {
+            throw new RegistryAgentLaunchException($"Binary archive size {fileSize} bytes exceeds maximum of {_maxArchiveBytes} bytes.");
+        }
+        // Single file = 1 entry, compression ratio check
+        if (compressedSize > 0)
+        {
+            var ratio = (double)fileSize / compressedSize;
+            if (ratio > _maxCompressionRatio)
+            {
+                throw new RegistryAgentLaunchException($"Archive compression ratio {ratio:F2} exceeds maximum of {_maxCompressionRatio}.");
+            }
+        }
     }
 
-    private static async Task ExtractZipAsync(string archivePath, string destination, CancellationToken cancellationToken)
+    internal async Task ExtractZipAsync(string archivePath, string destination, CancellationToken cancellationToken)
     {
         using var archive = ZipFile.OpenRead(archivePath);
+        long totalBytesWritten = 0;
+        int entryCount = 0;
+        long compressedSize = new FileInfo(archivePath).Length;
+
         foreach (var entry in archive.Entries)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            entryCount++;
+            if (entryCount > _maxArchiveEntries)
+            {
+                throw new RegistryAgentLaunchException($"Archive entry count exceeds maximum of {_maxArchiveEntries}.");
+            }
+
             var outputPath = GetContainedCommandPath(destination, entry.FullName);
             if (entry.FullName.EndsWith('/') || entry.FullName.EndsWith('\\'))
             {
@@ -204,18 +246,42 @@ internal sealed class RegistryBinaryInstaller
             await using var input = entry.Open();
             await using var output = new FileStream(outputPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, useAsync: true);
             await input.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
+            var copied = output.Position; // Position after copy = bytes written (stream started at 0)
+            totalBytesWritten += copied;
+            if (totalBytesWritten > _maxArchiveBytes)
+            {
+                throw new RegistryAgentLaunchException($"Extracted archive size exceeds maximum of {_maxArchiveBytes} bytes.");
+            }
+        }
+
+        if (compressedSize > 0)
+        {
+            var ratio = (double)totalBytesWritten / compressedSize;
+            if (ratio > _maxCompressionRatio)
+            {
+                throw new RegistryAgentLaunchException($"Archive compression ratio {ratio:F2} exceeds maximum of {_maxCompressionRatio}.");
+            }
         }
     }
 
-    private static async Task ExtractGZipTarAsync(string archivePath, string destination, CancellationToken cancellationToken)
+    internal async Task ExtractGZipTarAsync(string archivePath, string destination, CancellationToken cancellationToken)
     {
         await using var input = File.OpenRead(archivePath);
+        long compressedSize = input.Length;
         await using var gzip = new GZipStream(input, CompressionMode.Decompress);
         using var reader = new TarReader(gzip);
         TarEntry? entry;
+        long totalBytesWritten = 0;
+        int entryCount = 0;
         while ((entry = await reader.GetNextEntryAsync(copyData: false, cancellationToken).ConfigureAwait(false)) is not null)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            entryCount++;
+            if (entryCount > _maxArchiveEntries)
+            {
+                throw new RegistryAgentLaunchException($"Archive entry count exceeds maximum of {_maxArchiveEntries}.");
+            }
+
             var outputPath = GetContainedCommandPath(destination, entry.Name);
             if (entry.EntryType == TarEntryType.Directory)
             {
@@ -238,11 +304,26 @@ internal sealed class RegistryBinaryInstaller
             if (entry.DataStream is { } data)
             {
                 await data.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
+                var copied = output.Position;
+                totalBytesWritten += copied;
+                if (totalBytesWritten > _maxArchiveBytes)
+                {
+                    throw new RegistryAgentLaunchException($"Extracted archive size exceeds maximum of {_maxArchiveBytes} bytes.");
+                }
+            }
+        }
+
+        if (compressedSize > 0)
+        {
+            var ratio = (double)totalBytesWritten / compressedSize;
+            if (ratio > _maxCompressionRatio)
+            {
+                throw new RegistryAgentLaunchException($"Archive compression ratio {ratio:F2} exceeds maximum of {_maxCompressionRatio}.");
             }
         }
     }
 
-    private async Task ExtractBZip2TarAsync(string archivePath, string destination, CancellationToken cancellationToken)
+    internal async Task ExtractBZip2TarAsync(string archivePath, string destination, CancellationToken cancellationToken)
     {
         var tar = await _findUsableCommand("tar", cancellationToken).ConfigureAwait(false);
         if (tar is null)
@@ -252,8 +333,14 @@ internal sealed class RegistryBinaryInstaller
         }
 
         var verboseListing = await RunToolAsync(tar, ["-tvjf", archivePath], ArchiveToolTimeout, cancellationToken).ConfigureAwait(false);
+        int entryCount = 0;
         foreach (var line in verboseListing.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
         {
+            entryCount++;
+            if (entryCount > _maxArchiveEntries)
+            {
+                throw new RegistryAgentLaunchException($"Archive entry count exceeds maximum of {_maxArchiveEntries}.");
+            }
             if (line[0] is 'l' or 'h')
             {
                 throw new RegistryAgentLaunchException("Binary bzip2 tar archives containing links are not supported.");
@@ -271,6 +358,27 @@ internal sealed class RegistryBinaryInstaller
             _ = GetContainedCommandPath(destination, member);
         }
         _ = await RunToolAsync(tar, ["-xjf", archivePath, "-C", destination], ArchiveToolTimeout, cancellationToken).ConfigureAwait(false);
+
+        // Post-extraction validation for bzip2 (since we can't easily track during extraction)
+        long totalBytesWritten = 0;
+        foreach (var file in Directory.EnumerateFiles(destination, "*", SearchOption.AllDirectories))
+        {
+            totalBytesWritten += new FileInfo(file).Length;
+            if (totalBytesWritten > _maxArchiveBytes)
+            {
+                throw new RegistryAgentLaunchException($"Extracted archive size exceeds maximum of {_maxArchiveBytes} bytes.");
+            }
+        }
+
+        var compressedSize = new FileInfo(archivePath).Length;
+        if (compressedSize > 0)
+        {
+            var ratio = (double)totalBytesWritten / compressedSize;
+            if (ratio > _maxCompressionRatio)
+            {
+                throw new RegistryAgentLaunchException($"Archive compression ratio {ratio:F2} exceeds maximum of {_maxCompressionRatio}.");
+            }
+        }
     }
 
     private static async Task<string> RunToolAsync(

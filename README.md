@@ -1,12 +1,13 @@
-# SvcSystems.AI.AgentClientProtocol
+﻿# SvcSystems.AI.AgentClientProtocol
 
 [![NuGet](https://img.shields.io/nuget/v/SvcSystems.AI.AgentClientProtocol)](https://www.nuget.org/packages/SvcSystems.AI.AgentClientProtocol)
 
-A .NET library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/). The core package provides both a session-oriented client and an agent host in the `SvcSystems.AI.AgentClientProtocol.Agent` namespace.
+A .NET library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/): a
+session-oriented client and an agent host.
 
-Targets `net11.0`. The library is trim-analyzed and NativeAOT compatible. Reflection-based `System.Text.Json` serialization is disabled in the project.
+Targets `net11.0`. Trim-analyzed and NativeAOT compatible.
 
-## Quick start
+## Client
 
 ```csharp
 using SvcSystems.AI.AgentClientProtocol;
@@ -19,10 +20,7 @@ await using var client = await AcpClient.StartAsync(
         Arguments = ["acp"],
         WorkingDirectory = @"C:\repos\MyProject"
     },
-    new ClientOptions
-    {
-        PermissionHandler = new ConsolePermissionHandler()
-    });
+    new ClientOptions { PermissionHandler = new ConsolePermissionHandler() });
 
 var session = await client.CreateSessionAsync(new SessionOptions
 {
@@ -35,17 +33,17 @@ await foreach (var update in session.PromptAsync("Explain this repository"))
 }
 ```
 
-`Client.StartAsync` starts the child process and completes ACP initialization before returning. The client owns and disposes the process. Standard output is reserved for ACP frames; standard error is delivered through `StandardErrorReceived`.
+`StartAsync` completes the ACP handshake before returning and owns the child process. Standard
+output carries ACP frames only; standard error arrives through `ProcessOptions.StandardErrorReceived`.
 
-## Hosting an agent
+`Session` covers prompt streaming, cancellation, mode changes, and session configuration.
+`IClient` covers create/load/list/resume/delete/close, authentication, and logout; optional
+operations require the agent to advertise the matching capability.
 
-Implement `IAgentHandler` for
-initialize, session creation, and prompt handling. `Agent` uses the current process's stdin/stdout
-by default, or accepts a custom `ITransport` for embedding and tests.
+## Agent host
 
-The handler also exposes optional callbacks for session load/resume/list/delete/close, mode and
-configuration changes, authentication, and logout. Unimplemented optional callbacks return
-"Method not found"; advertise only the capabilities your handler supports.
+Implement `IAgentHandler` for initialize, session creation, and prompt handling; the remaining
+callbacks are optional and answer "Method not found" when unimplemented.
 
 ```csharp
 using SvcSystems.AI.AgentClientProtocol.Agent;
@@ -54,33 +52,14 @@ await using var agent = new Agent(new MyAgentHandler());
 await agent.RunAsync(cancellationToken);
 ```
 
-Prompt callbacks receive an `IAgentContext` to stream `session/update` messages and make client
-requests. The runtime dispatches requests concurrently within a configured bound, so
-`session/cancel` can be handled while a prompt callback is active. Typed helpers cover the client
-methods an agent calls, so handlers do not hand-build JSON:
-
-```csharp
-var file = await context.ReadTextFileAsync(
-    new ReadTextFileRequest { SessionId = request.SessionId, Path = "notes.txt" }, cancellationToken);
-var permission = await context.RequestPermissionAsync(
-    new RequestPermissionRequest { SessionId = request.SessionId, ToolCall = toolCall, Options = options },
-    cancellationToken);
-```
-
-`ClientRequestExtensions` provides `ReadTextFileAsync`, `WriteTextFileAsync`, `CreateTerminalAsync`,
-`GetTerminalOutputAsync`, `WaitForTerminalExitAsync`, `KillTerminalAsync`, `ReleaseTerminalAsync`,
-`RequestPermissionAsync`, `CreateElicitationAsync`, and `CompleteElicitationAsync`; use
-`IAgentContext.SendClientRequestAsync` for anything else. `AcpJson` exposes the generated serializer contract (`AcpJson.Options`,
-`AcpJson.TypeInfo<T>()`, `SerializeToElement`, `SerializeToUtf8Bytes`, and `Deserialize<T>`) so
-extension payloads use the same wire settings.
-
-A dropped transport or protocol failure completes `Completion` with the failure and raises `TransportFaulted` once; a clean shutdown completes with `null` and raises nothing. `TransportFaulted` is a member of `IClient`, so external implementers of the interface must add it.
-
-Unrecognized JSON-RPC notifications, including agent-specific extensions such as `_auth/status_update`, are ignored without closing the connection. Unsupported requests still receive a JSON-RPC "Method not found" error.
+`Agent` uses the current process's stdin/stdout by default, or accepts a custom `ITransport`.
+Prompt callbacks receive an `IAgentContext` to stream `session/update` messages and call the
+client through typed helpers (`ReadTextFileAsync`, `RequestPermissionAsync`, and the rest of
+`ClientRequestExtensions`).
 
 ## Host capabilities
 
-ACP callbacks are enabled only when the host provides a handler. The client can host filesystem, terminal, permission, and elicitation operations. Filesystem callbacks are restricted to each active session's working directory and explicitly configured additional directories; paths that resolve through symlinks or reparse points outside those roots are rejected. Filesystem handlers should still enforce their own authorization and operation-specific policy. Do not configure terminal handlers unless the application has an appropriate workspace/command security policy.
+The client advertises only the capabilities its configured handlers support:
 
 ```csharp
 var clientOptions = new ClientOptions
@@ -92,22 +71,70 @@ var clientOptions = new ClientOptions
 };
 ```
 
-The client advertises only the capabilities supported by these configured handlers. `Session` exposes prompt streaming, cancellation, mode changes, and session configuration. `IClient` exposes create/load/list/resume/delete/close, authentication, and logout operations, with optional operations gated by the agent's negotiated capabilities.
+| Handler | Scope |
+|---|---|
+| Filesystem | Restricted to each session's working directory and configured additional directories. Paths resolving through symlinks or reparse points outside those roots are rejected. The handler receives the resolved path. |
+| Terminal | The command must be permitted by the security policy and name a live session. The handler owns the remaining command, argument, and directory policy. |
+| Permission | A request must reference a session the client tracks; unknown sessions are rejected. |
 
-Elicitation handlers work with the generated wire models: `IElicitationHandler.RequestElicitationAsync` receives the `CreateElicitationRequest` union, whose `Value` is an `ElicitationFormMode`, an `ElicitationUrlMode`, or a `CreateElicitationRequestCase2` for a mode the schema does not model, and answers with a `CreateElicitationResponse` case such as `ElicitationAcceptAction`. `ClientOptions.ElicitationCompleted` receives the generated `CompleteElicitationNotification` for URL elicitations.
+Filesystem and terminal handlers should still enforce their own authorization.
 
-ACP model types are generated from the checked-in schema and exposed directly: `Client.Agent` is an `InitializeResponse`, and MCP servers, prompt content, session updates, and config options use their generated wire models. Prompt streams yield `SessionUpdateEvent` values containing the generated `SessionUpdate` union and `Completed` values containing the generated `PromptResponse`; unknown update, content, and config-option variants remain available as `JsonElement`.
+## Security policy
 
-## Adapter extensions and metadata
-
-Use the generic extension APIs for adapter-specific methods. They preserve trim safety; capability
-checks and authorization remain the application's responsibility.
+The agent is the untrusted peer. `ClientOptions.SecurityPolicy` decides what it may ask the host
+to run or reach. It denies everything by default, so a host opts in explicitly:
 
 ```csharp
 var clientOptions = new ClientOptions
 {
-    ExtensionNotificationReceived = notification =>
-        Console.WriteLine($"Adapter notification: {notification.Method}"),
+    SecurityPolicy = new AcpSecurityPolicy
+    {
+        McpCommandAllowed = command => command == "/opt/mcp/my-server",
+        McpEndpointAllowed = endpoint => endpoint.Scheme == Uri.UriSchemeHttps && !AcpSecurityPolicy.IsRestrictedAddress(endpoint),
+        TerminalCommandAllowed = (command, args) => command == "git"
+    }
+};
+```
+
+| Policy | Default | Covers |
+|---|---|---|
+| `McpCommandAllowed` | Deny | The executable an MCP stdio server is launched with. |
+| `McpEndpointAllowed` | Deny | The HTTP or SSE URL an MCP server is reached at. Only `http` and `https` are accepted. |
+| `TerminalCommandAllowed` | Deny | The command an agent asks the host to run. |
+
+`AllowPublicHttpsMcpEndpoints` permits HTTPS endpoints that are not loopback, link-local, or
+private addresses, which keeps cloud instance metadata and internal services out of reach.
+
+> **DNS Rebinding Note:** Hostname-based endpoints (e.g., `https://mcp.internal/`) are not resolved
+> during validation. They pass the policy check but may resolve to a private IP (127.0.0.1, 10.x.x.x,
+> etc.) at connection time. For the strongest protection, use IP address literals in
+> `McpEndpointAllowed` or restrict to explicit hostnames via `AllowMcpHosts`. Applications using
+> hostnames should implement their own DNS resolution with IP validation.
+
+Other client-side guarantees: terminal output is truncated to the requested byte limit, a
+terminal request must name a live session, the number of live sessions is capped, and agent
+authentication environment variables are passed separately so the host can decline them.
+
+## Failure handling
+
+| Situation | Behavior |
+|---|---|
+| Transport or protocol failure | `Completion` completes with the failure and `TransportFaulted` raises once. |
+| Clean shutdown | `Completion` completes with `null`; no event. |
+| Unrecognized or malformed notification | Logged and skipped; the connection stays up. |
+| Unparseable frame | Terminates the connection with a protocol failure. |
+| Request the client does not implement | Answered with "Method not found". |
+| Request whose handler rejects it | Answered with the handler's error code. |
+
+## Extensions and metadata
+
+Extension methods use the generic APIs and stay trim-safe; capability checks and authorization
+remain the application's responsibility.
+
+```csharp
+var clientOptions = new ClientOptions
+{
+    ExtensionNotificationReceived = n => Console.WriteLine($"Adapter notification: {n.Method}"),
 };
 
 using var parameters = JsonDocument.Parse("""{"sessionId":"session-id","title":"New title"}""");
@@ -115,92 +142,47 @@ var response = await client.SendExtensionRequestAsync("_session/rename", paramet
 await client.SendExtensionNotificationAsync("_example/event", parameters.RootElement);
 ```
 
-Register incoming request handlers in `ClientOptions.ExtensionRequestHandlers` before connecting.
-Names must start with `_`; unhandled requests receive “Method not found.” Callbacks run on the
-receive loop and must not block on ACP operations or disposal. Callback exceptions fail the
-connection. Outgoing names may also target legacy methods; these low-level calls do not perform
-capability checks or session bookkeeping.
+Incoming request handlers go in `ClientOptions.ExtensionRequestHandlers` before connecting. Names
+must start with `_`. Callbacks run on the receive loop and must not block on ACP operations.
 
-`_auth/status_update` is available as `client.AuthenticationStatus`; prompt suggestions are
-available on session updates and `session.PromptSuggestions`. These are optional adapter
-extensions, not authentication proof or ACP guarantees.
+`_meta` attaches through `ClientOptions.Metadata`, `CapabilityMetadata`, `SessionOptions.Metadata`,
+and `PromptOptions.Metadata`. `Session.RawPayload` and `AuthenticationStatus.RawPayload` expose
+vendor-specific data on otherwise typed payloads.
 
-`ClientOptions.Metadata` and `CapabilityMetadata` attach `_meta` to `initialize` and
-`clientCapabilities`; `SessionOptions.Metadata` and `PromptOptions.Metadata` attach it to
-session and prompt requests. Other extension calls can include `_meta` directly in their JSON
-parameters. Incoming raw payloads retain metadata and unknown fields. `Session.RawPayload` and
-`AuthenticationStatus.RawPayload` are the intentional escape hatch for the vendor-specific
-`_meta` and extension data an agent may add to an otherwise typed payload; typed members cover
-everything ACP defines.
+`AcpJson` exposes the generated serializer contract (`Options`, `TypeInfo<T>()`, `SerializeToElement`,
+`SerializeToUtf8Bytes`, `Deserialize<T>`) so extension payloads use the same wire settings.
 
-## Schema-generated wire models
+## Registry
 
-The incremental Roslyn generator builds typed wire models and trim-safe JSON writers from the
-checked-in ACP v1 schema. Open payloads such as `_meta` remain `JsonElement`-based; the library
-does not use reflection-based `JsonSerializer` overloads.
-
-A tagged-union branch that declares neither a `const` discriminator value nor an inferable title
-is reported as `ACPGEN003` and fails the build, rather than silently dropping that case from the
-generated union. A schema whose naming collides, or whose generator options and metadata files are
-missing, invalid, or ambiguous, is likewise reported (`ACPGEN001`–`ACPGEN008`).
-
-## ACP Registry
-
-`RegistryClient` fetches the registry index using a caller-managed `HttpClient`; pass an
-alternate absolute URI to read from a mirror or test server. The registry wire models and JSON
-metadata are generated from `schema/registry/v1`.
+`RegistryClient` reads the registry index over a caller-managed `HttpClient`.
+`RegistryAgentLauncher` turns an entry into `ProcessOptions`, preferring `npx`, then `uvx`, then a
+platform binary. Archives are downloaded over HTTPS, verified against the published SHA-256 when
+one exists, and rejected if they contain links or escape the cache directory.
 
 ```csharp
-using SvcSystems.AI.AgentClientProtocol.Registry;
-
-var registry = new RegistryClient(httpClient);
-var index = await registry.GetIndexAsync(cancellationToken);
-```
-
-## Dependency injection and logging
-
-`AddAgentClientProtocol` registers an `IAcpClientFactory` and an `IRegistryClient`; existing
-registrations are preserved, so the call is safe to repeat.
-
-```csharp
-using SvcSystems.AI.AgentClientProtocol;
-
-services.AddAgentClientProtocol();
-// Or point the registry client at a mirror:
-services.AddAgentClientProtocol(
-    registryIndexUri: new Uri("https://mirror.example/registry.json"));
-```
-
-Both services are singletons, and a `defaultClientOptions` factory (when supplied) is invoked once
-from the container root, so it must not depend on scoped services. When `defaultClientOptions` is
-null, the factory builds options that report through the container's `ILoggerFactory`; pass your
-own factory to replace those defaults entirely.
-
-```csharp
-public sealed class AgentRunner(IAcpClientFactory clients)
+using var launcher = new RegistryAgentLauncher(httpClient, new RegistryAgentLauncherOptions
 {
-    public Task<IClient> StartAsync(CancellationToken cancellationToken) =>
-        clients.StartAsync(
-            new ProcessOptions { FileName = "opencode", Arguments = ["acp"] },
-            cancellationToken: cancellationToken);
-}
+    AgentsDirectory = Path.Combine(appData, "acp-agents"),
+    RequireChecksum = true
+});
+var processOptions = await launcher.BuildProcessOptionsAsync(agent, workingDirectory, cancellationToken);
 ```
 
-Set `ClientOptions.LoggerFactory` to receive structured diagnostics for connection and callback
-failures. When it is null, diagnostics are written through `System.Diagnostics.Trace`; the
-`RequestHandlerException` callback still takes precedence when it is set. The library targets the
-Microsoft.Extensions abstractions that ship with the runtime, so registration and logging add no
-package dependency.
+## Dependency injection
+
+```csharp
+services.AddAgentClientProtocol();
+services.AddAgentClientProtocol(registryIndexUri: new Uri("https://mirror.example/registry.json"));
+```
+
+Registers a singleton `IAcpClientFactory` and `IRegistryClient`. A `defaultClientOptions` factory
+is invoked once from the container root, so it must not depend on scoped services. Set
+`ClientOptions.LoggerFactory` for structured diagnostics; without it they go to `Trace`.
 
 ## Trimming and NativeAOT
 
-The library project enables AOT and trim analysis and sets:
-
-```xml
-<JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
-```
-
-The console sample is the NativeAOT/trimmed consumer smoke test:
+Reflection-based serialization is disabled; all wire models are generated from the checked-in
+schema. The console sample is the AOT smoke test:
 
 ```powershell
 dotnet publish samples/SvcSystems.AI.AgentClientProtocol.Console `
@@ -208,21 +190,10 @@ dotnet publish samples/SvcSystems.AI.AgentClientProtocol.Console `
   -p:PublishAot=true -p:PublishTrimmed=true
 ```
 
-CI also publishes the sample for `net11.0` on Linux.
-
-Run the published console executable with `--extension-smoke-test` to exercise metadata, incoming and outgoing extension requests/notifications, authentication status, and prompt suggestions without an external agent:
-
-```powershell
-& .\samples\SvcSystems.AI.AgentClientProtocol.Console\bin\Release\net11.0\win-x64\publish\SvcSystems.AI.AgentClientProtocol.Console.exe --extension-smoke-test
-```
-
 ## Testing
 
-- `SvcSystems.AI.AgentClientProtocol.Tests` tests JSON-RPC correlation, cancellation, error responses, host callback routing for filesystem, terminal, and elicitation requests, and reflection-disabled execution.
-- `SvcSystems.AI.AgentClientProtocol.Generator.Tests` tests the incremental generator against arbitrary JSON Schema inputs and checks that every applicable ACP method definition gets generated wire models.
-- `SvcSystems.AI.AgentClientProtocol.IntegrationTests` launches the official deterministic **Testy** agent from the ACP Rust SDK. The `full` scenario exercises stable v1 updates and reverse callbacks without a live model or credentials.
-
-The first Testy integration run downloads the pinned ACP Rust SDK source archive and builds `testy` and `mcp-echo-server` with Cargo. The source and binaries are cached in the user's local application-data directory. Rust/Cargo and network access are needed on the first run. To use prebuilt binaries, set `ACP_TESTY_BIN` and `ACP_MCP_ECHO_BIN` instead:
+`dotnet test` runs the unit, generator, and integration suites. The integration suite launches the
+official **Testy** agent, which needs Rust on first run (or set `ACP_TESTY_BIN`).
 
 ```powershell
 git clone https://github.com/agentclientprotocol/rust-sdk.git rust-sdk
@@ -233,33 +204,22 @@ $env:ACP_MCP_ECHO_BIN = (Resolve-Path rust-sdk/target/debug/mcp-echo-server.exe)
 dotnet test tests/SvcSystems.AI.AgentClientProtocol.IntegrationTests --framework net11.0
 ```
 
-If Cargo is unavailable, Testy tests are reported as skipped unless the binary paths are configured. Set `ACP_TESTY_AUTO_DOWNLOAD=false` to disable automatic provisioning. The OpenCode handshake check is opt-in with `ACP_OPENCODE_BIN`. The normal unit and generator tests do not require Rust or agent credentials.
-
 ### ACP TCK
 
-[ACP TCK](https://github.com/agentclientprotocol/acp-tck) tests agents, not clients. We run its
-complete v1 suite against official reference agents and against the library's own agent host
-through the sample agent in `samples/SvcSystems.AI.AgentClientProtocol.SampleAgent`, plus a
-separate .NET client interoperability suite against the same fixtures. These checks do not claim
-ACP TCK certification of this client.
+[ACP TCK](https://github.com/agentclientprotocol/acp-tck) tests agents, not clients. The runner
+drives its complete v1 suite against official reference agents and against this library's own
+agent host via the sample agent, plus a .NET client interoperability suite against the same
+fixtures. It does not claim TCK certification of this client.
 
 ```powershell
 pwsh -File .\tools\Test-AcpTck.ps1
 ```
 
-Requires Git, [uv](https://docs.astral.sh/uv/), and the .NET SDK in `global.json`. The first
-run checks out a pinned TCK revision and provisions Python 3.14; no model, credentials, or
-Cargo are needed. Reports and sources go under `artifacts/acp-tck`.
+Requires Git, [uv](https://docs.astral.sh/uv/), and the .NET SDK. The first run checks out a pinned
+TCK revision and provisions Python 3.14. All 56 registered v1 requirements must pass; reports land
+under `artifacts/acp-tck`.
 
-The upstream run covers all **56 registered v1 requirements** across minimal, authenticated,
-and full-capability fixtures and the sample agent, which advertises every optional capability so
-the suite exercises the whole `IAgentHandler` surface; the runner fails if any requirement
-lacks a passing result. Client tests cover v1 sessions, prompts, capabilities, metadata,
-extensions, transport, and error handling. GitHub Actions runs both suites on Windows and Linux.
-
-ACP v2 is not supported (the client test verifies that a v2-only agent is rejected). TCK does
-not cover positive MCP, filesystem, or terminal operations; those remain in the separate Testy
-integration tests.
+ACP v2 is not supported.
 
 ## License
 

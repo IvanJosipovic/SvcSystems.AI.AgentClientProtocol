@@ -34,6 +34,36 @@ public sealed class TransportBufferingTests
     }
 
     [Fact]
+    public async Task StdioFrameReaderSkipsBlankLines()
+    {
+        // Agents sometimes emit a blank line as a keepalive. It carries no frame and must not
+        // reach the JSON parser, which would fail the whole connection.
+        using var input = new MemoryStream(Encoding.UTF8.GetBytes("\n\r\n{\"a\":1}\n\n{\"b\":2}\n"));
+
+        var frames = new List<string>();
+        await foreach (var frame in StdioTransport.ReadFramesAsync(input, maximumFrameBytes: 1024, TestContext.Current.CancellationToken))
+        {
+            frames.Add(Encoding.UTF8.GetString(frame.Span));
+        }
+
+        Assert.Equal(["{\"a\":1}", "{\"b\":2}"], frames);
+    }
+
+    [Fact]
+    public async Task StdioFrameReaderSkipsATrailingBlankLineAtEndOfStream()
+    {
+        using var input = new MemoryStream(Encoding.UTF8.GetBytes("{\"a\":1}\n\n"));
+
+        var frames = new List<string>();
+        await foreach (var frame in StdioTransport.ReadFramesAsync(input, maximumFrameBytes: 1024, TestContext.Current.CancellationToken))
+        {
+            frames.Add(Encoding.UTF8.GetString(frame.Span));
+        }
+
+        Assert.Equal(["{\"a\":1}"], frames);
+    }
+
+    [Fact]
     public void SessionUpdateQueueFailsInsteadOfGrowingOrDroppingUpdates()
     {
         var session = new Session(null!, "session-1", maximumBufferedUpdates: 1);

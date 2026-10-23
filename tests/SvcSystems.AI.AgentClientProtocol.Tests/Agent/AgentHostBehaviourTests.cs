@@ -66,6 +66,43 @@ public sealed class AgentHostBehaviourTests
         await Assert.ThrowsAsync<ProtocolException>(() => run.WaitAsync(TimeSpan.FromSeconds(5), Token));
     }
 
+    [Fact]
+    public async Task AnUnsupportedProtocolVersionIsAnsweredWithTheSupportedVersion()
+    {
+        await using var transport = new ChannelTransport();
+        await using var agent = new AcpAgent(new MinimalHandler(), transport);
+        var run = agent.RunAsync(Token);
+
+        // The client asks for a protocol version this host does not speak. ACP requires a
+        // successful result carrying the agent's own version, not an error and not an echo of
+        // the unsupported version.
+        transport.Receive("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":65535}}""");
+
+        using var response = await transport.ReadSentAsync();
+        Assert.True(response.RootElement.TryGetProperty("result", out var result));
+        Assert.Equal(1, result.GetProperty("protocolVersion").GetInt32());
+
+        transport.CompleteInput();
+        await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
+    [Fact]
+    public async Task TheSupportedProtocolVersionIsAccepted()
+    {
+        await using var transport = new ChannelTransport();
+        await using var agent = new AcpAgent(new MinimalHandler(), transport);
+        var run = agent.RunAsync(Token);
+
+        transport.Receive("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":1}}""");
+
+        using var response = await transport.ReadSentAsync();
+        Assert.True(response.RootElement.TryGetProperty("result", out var result));
+        Assert.Equal(1, result.GetProperty("protocolVersion").GetInt32());
+
+        transport.CompleteInput();
+        await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+    }
+
     [Theory]
     [InlineData("session/delete", "null")]
     [InlineData("session/resume", "\"text\"")]
@@ -176,7 +213,34 @@ public sealed class AgentHostBehaviourTests
         await agent.StopAsync();
 
         await handler.Cancelled.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+        // Stopping the host deliberately is a clean shutdown, not a failure: the run must not
+        // surface a cancellation or a transport error to the caller.
         await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+        Assert.Null(await agent.Completion.WaitAsync(TimeSpan.FromSeconds(5), Token));
+    }
+
+    [Fact]
+    public async Task StoppingTheHostRepeatedlyStillEndsTheRunCleanly()
+    {
+        // A deliberate stop races the receive loop's own teardown. Repeating the stop exercises
+        // that race: the run must end cleanly every time, and never surface a cancellation.
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            await using var transport = new ChannelTransport();
+            var handler = new SuspendingPromptHandler(throwOnCancellation: true);
+            await using var agent = new AcpAgent(handler, transport);
+            var run = agent.RunAsync(Token);
+
+            await InitializeSessionAsync(transport);
+            transport.Receive("""{"jsonrpc":"2.0","id":3,"method":"session/prompt","params":{"sessionId":"session","prompt":[]}}""");
+            await handler.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+
+            await agent.StopAsync();
+
+            await handler.Cancelled.Task.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            await run.WaitAsync(TimeSpan.FromSeconds(5), Token);
+            Assert.Null(await agent.Completion.WaitAsync(TimeSpan.FromSeconds(5), Token));
+        }
     }
 
     [Fact]

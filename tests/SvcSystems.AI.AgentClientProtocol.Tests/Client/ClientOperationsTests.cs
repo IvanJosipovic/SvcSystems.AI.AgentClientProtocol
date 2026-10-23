@@ -94,7 +94,7 @@ public sealed class ClientOperationsTests
     }
 
     [Fact]
-    public async Task TerminalAuthenticationRunsConfiguredCommandWithAgentOverrides()
+    public async Task TerminalAuthenticationKeepsAgentOverridesOutOfTheHostEnvironment()
     {
         await using var transport = new TestTransport();
         var terminal = new RecordingTerminalAuthenticationHandler();
@@ -129,9 +129,17 @@ public sealed class ClientOperationsTests
         Assert.Equal("agent", terminal.Request.FileName);
         Assert.Equal(["--acp", "auth", "--interactive"], terminal.Request.Arguments);
         Assert.Equal(Path.GetTempPath(), terminal.Request.WorkingDirectory);
-        Assert.Equal("terminal", terminal.Request.Environment["SHARED"]);
+
+        // The agent is an untrusted peer. Its environment overrides are handed to the handler
+        // separately so the handler can decide whether to apply them, and the host environment is
+        // never silently rewritten by the agent.
+        Assert.Equal("base", terminal.Request.Environment["SHARED"]);
         Assert.Equal("yes", terminal.Request.Environment["BASE_ONLY"]);
-        Assert.Equal("yes", terminal.Request.Environment["TERMINAL_ONLY"]);
+        Assert.False(terminal.Request.Environment.ContainsKey("TERMINAL_ONLY"));
+
+        Assert.Equal("terminal", terminal.Request.AgentEnvironment["SHARED"]);
+        Assert.Equal("yes", terminal.Request.AgentEnvironment["TERMINAL_ONLY"]);
+        Assert.Equal(["auth", "--interactive"], terminal.Request.AgentArguments);
     }
 
     [Fact]
@@ -140,6 +148,7 @@ public sealed class ClientOperationsTests
         await using var transport = new TestTransport();
         var permissionHandler = new SelectingPermissionHandler("allow");
         await using var client = await ConnectAsync(transport, new ClientOptions { PermissionHandler = permissionHandler });
+        _ = await CreateSessionAsync(transport, client);
         transport.Receive("""
             {"jsonrpc":"2.0","id":41,"method":"session/request_permission","params":{
               "sessionId":"session","toolCall":{"toolCallId":"call","title":"Run tool"},
@@ -159,6 +168,7 @@ public sealed class ClientOperationsTests
     {
         await using var transport = new TestTransport();
         await using var client = await ConnectAsync(transport);
+        _ = await CreateSessionAsync(transport, client);
 
         transport.Receive("""
             {"jsonrpc":"2.0","id":42,"method":"session/request_permission","params":{
@@ -177,6 +187,36 @@ public sealed class ClientOperationsTests
             """);
         using var response = await transport.ReadSentAsync();
         Assert.Equal(-32601, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+    }
+
+    [Fact]
+    public async Task PermissionRequestsForUnknownSessionsAreRejected()
+    {
+        await using var transport = new TestTransport();
+        var permissionHandler = new SelectingPermissionHandler("allow");
+        await using var client = await ConnectAsync(transport, new ClientOptions { PermissionHandler = permissionHandler });
+
+        // The agent asks for a decision for a session this client never created.
+        transport.Receive("""
+            {"jsonrpc":"2.0","id":44,"method":"session/request_permission","params":{
+              "sessionId":"never-created","toolCall":{"toolCallId":"call","title":"Run tool"},
+              "options":[{"optionId":"allow","name":"Allow","kind":"allow_once"}]}}
+            """);
+
+        using var response = await transport.ReadSentAsync();
+
+        Assert.Equal(44, response.RootElement.GetProperty("id").GetInt32());
+        Assert.Equal(-32602, response.RootElement.GetProperty("error").GetProperty("code").GetInt32());
+        Assert.Null(permissionHandler.Request);
+    }
+
+    /// <summary>Creates a session named "session" so that session-scoped callbacks are accepted.</summary>
+    private static async Task<Session> CreateSessionAsync(TestTransport transport, AcpClient client)
+    {
+        var creating = client.CreateSessionAsync(new SessionOptions { WorkingDirectory = Environment.CurrentDirectory }, Token);
+        using var request = await transport.ReadSentAsync();
+        transport.Respond(request, """{"sessionId":"session"}""");
+        return await creating.WaitAsync(TimeSpan.FromSeconds(5), Token);
     }
 
     [Fact]

@@ -188,6 +188,83 @@ public sealed class RegistryAgentLauncherTests
     }
 
     [Fact]
+    public async Task RejectsChecksumlessBinaryArchiveWhenAChecksumIsRequired()
+    {
+        var platform = RegistryAgentLauncher.GetRegistryPlatform();
+        Assert.NotNull(platform);
+        var zipBytes = CreateZip("agent.exe", "test executable");
+        var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
+        {
+            Targets = new Dictionary<string, binaryTarget>
+            {
+                [platform.Value.RegistryName] = new binaryTarget
+                {
+                    Archive = "https://registry.test/agent.zip",
+                    Cmd = "agent.exe",
+                },
+            },
+        });
+        var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}");
+        using var httpClient = new HttpClient(new StaticResponseHandler(zipBytes));
+        using var launcher = new RegistryAgentLauncher(
+            httpClient,
+            new RegistryAgentLauncherOptions { AgentsDirectory = agentsDirectory, RequireChecksum = true },
+            (_, _) => Task.FromResult<string?>(null));
+
+        try
+        {
+            var exception = await Assert.ThrowsAsync<RegistryAgentLaunchException>(
+                () => launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken));
+            Assert.Contains("SHA-256", exception.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            if (Directory.Exists(agentsDirectory))
+            {
+                Directory.Delete(agentsDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task InstallsChecksumlessBinaryArchiveWhenAChecksumIsNotRequired()
+    {
+        var platform = RegistryAgentLauncher.GetRegistryPlatform();
+        Assert.NotNull(platform);
+        var zipBytes = CreateZip("agent.exe", "test executable");
+        var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
+        {
+            Targets = new Dictionary<string, binaryTarget>
+            {
+                [platform.Value.RegistryName] = new binaryTarget
+                {
+                    Archive = "https://registry.test/agent.zip",
+                    Cmd = "agent.exe",
+                },
+            },
+        });
+        var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}");
+        using var httpClient = new HttpClient(new StaticResponseHandler(zipBytes));
+        using var launcher = new RegistryAgentLauncher(
+            httpClient,
+            new RegistryAgentLauncherOptions { AgentsDirectory = agentsDirectory },
+            (_, _) => Task.FromResult<string?>(null));
+
+        try
+        {
+            var process = await launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken);
+            Assert.Equal("test executable", await File.ReadAllTextAsync(process.FileName, TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            if (Directory.Exists(agentsDirectory))
+            {
+                Directory.Delete(agentsDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public async Task RejectsBinaryArchiveWhenChecksumDoesNotMatch()
     {
         var platform = RegistryAgentLauncher.GetRegistryPlatform();
@@ -363,6 +440,7 @@ public sealed class RegistryAgentLauncherTests
         {
             AgentsDirectory = options?.AgentsDirectory ?? Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}"),
             ReleaseChannel = options?.ReleaseChannel ?? RegistryAgentReleaseChannel.Stable,
+            RequireChecksum = options?.RequireChecksum ?? false,
         }, findCommand);
 
     private static RegistryAgent CreateAgent(

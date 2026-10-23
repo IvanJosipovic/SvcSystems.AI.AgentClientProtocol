@@ -201,6 +201,100 @@ public sealed class JsonRpcConnectionTests
     }
 
     [Fact]
+    public async Task AResponseObserverRunsBeforeTheCallerContinues()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        var observed = new List<string>();
+        var request = connection.SendRequestAsync("host/register", Json("{}"), CancellationToken.None, result =>
+        {
+            observed.Add("observer");
+        });
+
+        using var sent = await ReadMessageAsync(transport.Sent);
+        transport.Receive(Json($"{{\"jsonrpc\":\"2.0\",\"id\":{sent.RootElement.GetProperty("id").GetInt64()},\"result\":{{}}}}"));
+
+        await request.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        Assert.Equal(["observer"], observed);
+    }
+
+    [Fact]
+    public async Task AResponseObserverRunsBeforeTheResultIsDelivered()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        var order = new List<string>();
+        var request = connection.SendRequestAsync("host/register", Json("{}"), CancellationToken.None, _ =>
+        {
+            order.Add("observer");
+        });
+
+        using var sent = await ReadMessageAsync(transport.Sent);
+        transport.Receive(Json($"{{\"jsonrpc\":\"2.0\",\"id\":{sent.RootElement.GetProperty("id").GetInt64()},\"result\":{{}}}}"));
+
+        _ = await request.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        order.Add("caller");
+        Assert.Equal(["observer", "caller"], order);
+    }
+
+    [Fact]
+    public async Task AResponseObserverFailureDoesNotFaultTheRequest()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        var request = connection.SendRequestAsync("host/register", Json("{}"), CancellationToken.None, _ =>
+        {
+            throw new InvalidOperationException("observer failed");
+        });
+
+        using var sent = await ReadMessageAsync(transport.Sent);
+        transport.Receive(Json($"{{\"jsonrpc\":\"2.0\",\"id\":{sent.RootElement.GetProperty("id").GetInt64()},\"result\":{{\"ok\":true}}}}"));
+
+        var result = await request.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        Assert.True(result.GetProperty("ok").GetBoolean());
+        Assert.False(connection.Completion.IsCompleted);
+    }
+
+    [Fact]
+    public async Task AMalformedNotificationPayloadDoesNotTerminateTheConnection()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        connection.RegisterNotificationHandler("host/event", parameters =>
+        {
+            // A payload the handler cannot interpret is a protocol error, not an application bug.
+            if (!parameters.TryGetProperty("required", out _))
+            {
+                throw new ProtocolException("The notification payload is malformed.");
+            }
+            return ValueTask.CompletedTask;
+        });
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","method":"host/event","params":{}}"""));
+
+        // The connection survives; a later request still completes.
+        var request = connection.SendRequestAsync("host/ping", Json("{}"), CancellationToken.None);
+        using var sent = await ReadMessageAsync(transport.Sent);
+        transport.Receive(Json($"{{\"jsonrpc\":\"2.0\",\"id\":{sent.RootElement.GetProperty("id").GetInt64()},\"result\":{{}}}}"));
+        await request.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+
+        Assert.False(connection.Completion.IsCompleted);
+    }
+
+    [Fact]
+    public async Task ANotificationHandlerFailureStillTerminatesTheConnection()
+    {
+        await using var transport = new FakeTransport();
+        await using var connection = new JsonRpcConnection(transport);
+        connection.RegisterNotificationHandler("host/event", _ => throw new InvalidOperationException("callback failed"));
+
+        transport.Receive(Json("""{"jsonrpc":"2.0","method":"host/event","params":{}}"""));
+
+        var failure = await connection.Completion.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
+        Assert.IsType<InvalidOperationException>(failure);
+    }
+
+    [Fact]
     public async Task UnknownRequestStillReturnsMethodNotFound()
     {
         await using var transport = new FakeTransport();

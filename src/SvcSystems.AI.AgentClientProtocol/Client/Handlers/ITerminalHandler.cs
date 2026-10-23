@@ -1,6 +1,12 @@
 ﻿namespace SvcSystems.AI.AgentClientProtocol;
 
 /// <summary>Host-provided terminal operations. Configure an implementation only when agent command execution is allowed.</summary>
+/// <remarks>
+/// The client validates only that a terminal's working directory is an absolute path. It does not
+/// restrict the command, its arguments, or the working directory to the session's workspace:
+/// terminal execution is delegated to this handler, which must enforce its own authorization,
+/// workspace, and command policy.
+/// </remarks>
 public interface ITerminalHandler
 {
     /// <summary>Creates a terminal and starts the requested command.</summary>
