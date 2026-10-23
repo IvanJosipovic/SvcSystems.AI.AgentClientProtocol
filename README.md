@@ -90,7 +90,7 @@ var clientOptions = new ClientOptions
     SecurityPolicy = new AcpSecurityPolicy
     {
         McpCommandAllowed = command => command == "/opt/mcp/my-server",
-        McpEndpointAllowed = AcpSecurityPolicy.AllowPublicHttpsMcpEndpoints(),
+        McpEndpointAllowed = endpoint => endpoint.Scheme == Uri.UriSchemeHttps && !AcpSecurityPolicy.IsRestrictedAddress(endpoint),
         TerminalCommandAllowed = (command, args) => command == "git"
     }
 };
@@ -104,6 +104,12 @@ var clientOptions = new ClientOptions
 
 `AllowPublicHttpsMcpEndpoints` permits HTTPS endpoints that are not loopback, link-local, or
 private addresses, which keeps cloud instance metadata and internal services out of reach.
+
+> **DNS Rebinding Note:** Hostname-based endpoints (e.g., `https://mcp.internal/`) are not resolved
+> during validation. They pass the policy check but may resolve to a private IP (127.0.0.1, 10.x.x.x,
+> etc.) at connection time. For the strongest protection, use IP address literals in
+> `McpEndpointAllowed` or restrict to explicit hostnames via `AllowMcpHosts`. Applications using
+> hostnames should implement their own DNS resolution with IP validation.
 
 Other client-side guarantees: terminal output is truncated to the requested byte limit, a
 terminal request must name a live session, the number of live sessions is capped, and agent

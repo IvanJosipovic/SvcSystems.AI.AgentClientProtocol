@@ -257,6 +257,22 @@ public sealed class Client : IClient
         {
             _sessions.TryRemove(session.Id, out _);
             _fileSystemRoots.TryRemove(session.Id, out _);
+            // Release the agent-side session so the agent doesn't retain a session the client cannot access.
+            // Best effort: the agent may not advertise close, in which case it answers with an error that is ignored.
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _connection.SendRequestAsync(
+                        Methods.SessionClose,
+                        JsonSerializer.SerializeToUtf8Bytes(new CloseSessionRequest { SessionId = session.Id }, JsonContext.Default.CloseSessionRequest),
+                        CancellationToken.None).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // Ignored - the cap violation is the failure reported to the caller.
+                }
+            });
             throw new ProtocolException($"The agent exceeded the maximum of {_options.MaximumSessions} live sessions.");
         }
         if (fileSystemRoots is not null) _fileSystemRoots[session.Id] = fileSystemRoots;
@@ -720,6 +736,7 @@ public sealed class Client : IClient
                 var request = parameters.Deserialize(JsonContext.Default.ReleaseTerminalRequest)!;
                 ValidateTerminalSession(request.SessionId, Methods.TerminalRelease);
                 await terminal.ReleaseAsync(request, cancellationToken).ConfigureAwait(false);
+                _terminalOutputLimits.TryRemove(request.TerminalId, out _);
                 return WireJson.WriteEmptyObject();
             };
         }
@@ -899,8 +916,9 @@ public sealed class Client : IClient
     /// </summary>
     /// <remarks>
     /// The ACP schema requires the client to truncate terminal output to the requested byte
-    /// limit, from the beginning of the output, at a character boundary. The limit is carried by
-    /// the terminal/create request, so the created terminal's limit is remembered here.
+    /// limit, from the beginning of the output (i.e. keeping the tail), at a character boundary.
+    /// The limit is carried by the terminal/create request, so the created terminal's limit is
+    /// remembered here.
     /// </remarks>
     private TerminalOutputResponse TruncateTerminalOutput(TerminalOutputResponse output, TerminalOutputRequest request)
     {
@@ -908,22 +926,42 @@ public sealed class Client : IClient
         if (limit is null or 0) return output;
 
         var text = output.Output;
-        var budget = (long)limit.Value;
+        // Clamp the budget to long.MaxValue to avoid overflow when the agent supplies a large ulong.
+        var budget = (long)Math.Min(limit.Value, (ulong)long.MaxValue);
         if (System.Text.Encoding.UTF8.GetByteCount(text) <= budget) return output;
 
-        // The ACP schema truncates from the beginning of the output to stay within the limit, and
-        // requires the truncation to land on a character boundary so the retained output stays a
-        // valid string. The boundary is found by walking back from the byte budget.
-        var end = (int)Math.Min((long)text.Length, budget);
-        while (end > 0 && System.Text.Encoding.UTF8.GetByteCount(text.AsSpan(0, end)) > budget)
+        // Truncate from the beginning (keep the tail). Walk backwards from the end of the string
+        // by Unicode code points, counting UTF-8 bytes, until we fit within the budget.
+        // This is O(n) in the number of code points and correctly handles surrogate pairs.
+        var encoding = System.Text.Encoding.UTF8;
+        var end = text.Length;
+        var bytesCounted = 0L;
+        while (end > 0)
         {
-            end--;
+            // Check if the character at end-1 is a low surrogate.
+            // If so, and end-2 is a high surrogate, they form a surrogate pair (1 code point).
+            int charCount;
+            if (end >= 2 && char.IsHighSurrogate(text[end - 2]) && char.IsLowSurrogate(text[end - 1]))
+            {
+                charCount = 2;
+            }
+            else
+            {
+                charCount = 1;
+            }
+
+            var charBytes = encoding.GetByteCount(text.AsSpan(end - charCount, charCount));
+            if (bytesCounted + charBytes > budget) break;
+            bytesCounted += charBytes;
+            end -= charCount;
         }
 
+        // If nothing fits, return an empty string (truncated).
+        var retained = text[end..];
         return new TerminalOutputResponse
         {
-            Output = text[..end],
-            Truncated = true,
+            Output = retained,
+            Truncated = end > 0,
             ExitStatus = output.ExitStatus
         };
     }
@@ -1049,6 +1087,7 @@ public sealed class Client : IClient
             catch (ObjectDisposedException) { }
         }
         _fileSystemRoots.Clear();
+        _terminalOutputLimits.Clear();
         await _connection.DisposeAsync().ConfigureAwait(false);
     }
 }

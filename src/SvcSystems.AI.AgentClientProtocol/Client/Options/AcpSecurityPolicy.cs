@@ -13,6 +13,14 @@ namespace SvcSystems.AI.AgentClientProtocol;
 /// reaches the agent. Every check fails closed: a value is allowed only when a predicate explicitly
 /// accepts it.
 /// </para>
+/// <para>
+/// <b>DNS Rebinding Limitation:</b> Hostname-based endpoints (e.g., <c>https://mcp.internal/</c>)
+/// are not resolved during validation. They pass the policy check but may resolve to a private IP
+/// (127.0.0.1, 10.x.x.x, etc.) at connection time. Applications using hostnames should implement
+/// their own DNS resolution with IP validation, or use IP literals in policies. For the strongest
+/// protection, use IP address literals in <see cref="McpEndpointAllowed"/> or restrict to explicit
+/// hostnames via <see cref="AllowMcpHosts"/>.
+/// </para>
 /// </remarks>
 public sealed class AcpSecurityPolicy
 {
@@ -85,8 +93,8 @@ public sealed class AcpSecurityPolicy
     public static bool IsRestrictedAddress(Uri endpoint)
     {
         ArgumentNullException.ThrowIfNull(endpoint);
-        if (endpoint.IsLoopback) return true;
         if (!endpoint.IsAbsoluteUri) return true;
+        if (endpoint.IsLoopback) return true;
 
         var host = endpoint.DnsSafeHost;
         if (string.IsNullOrEmpty(host)) return true;
@@ -115,10 +123,23 @@ public sealed class AcpSecurityPolicy
         if (address.AddressFamily is System.Net.Sockets.AddressFamily.InterNetworkV6)
         {
             if (address.IsIPv6LinkLocal || address.IsIPv6SiteLocal) return true;
-            // Unique local addresses (fc00::/7) and the IPv4-mapped loopback range.
+            // Unique local addresses (fc00::/7).
             var bytes = address.GetAddressBytes();
             if ((bytes[0] & 0xFE) == 0xFC) return true;
+            // IPv4-mapped addresses (::ffff:w.x.y.z) - delegate to IPv4 classification.
             if (address.IsIPv4MappedToIPv6) return IsRestrictedAddress(address.MapToIPv4());
+            // IPv4-compatible addresses (::w.x.y.z, i.e. ::/96) and the unspecified address ::.
+            // Treat the entire ::/96 range as restricted by mapping the last 4 bytes to IPv4.
+            bool isIpv4Compatible = true;
+            for (int i = 0; i < 12; i++)
+            {
+                if (bytes[i] != 0) { isIpv4Compatible = false; break; }
+            }
+            if (isIpv4Compatible)
+            {
+                var mapped = new System.Net.IPAddress(new byte[] { bytes[12], bytes[13], bytes[14], bytes[15] });
+                return IsRestrictedAddress(mapped);
+            }
             return false;
         }
 

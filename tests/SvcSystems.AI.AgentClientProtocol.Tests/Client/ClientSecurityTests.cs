@@ -190,6 +190,42 @@ public sealed class ClientSecurityTests
     }
 
     [Fact]
+    public async Task TerminalOutputTruncationKeepsTheTail()
+    {
+        // The ACP schema requires truncation from the beginning (keeping the tail/newest output).
+        // Use a handler that returns a known prefix + suffix so we can verify which end is kept.
+        var handler = new TailTruncationTerminalHandler();
+        await using var transport = new TestTransport();
+        await using var client = await ConnectAsync(transport, new ClientOptions
+        {
+            TerminalHandler = handler,
+            SecurityPolicy = new AcpSecurityPolicy { TerminalCommandAllowed = static (_, _) => true }
+        });
+        await CreateSessionAsync(transport, client, "session-1");
+
+        // Limit to 10 bytes. The handler returns "PREFIX-中文-SUFFIX" (21 bytes).
+        // Keeping the tail should give us "文-SUFFIX" (10 bytes) or similar.
+        transport.Receive(Request("create", "terminal/create", """{"sessionId":"session-1","command":"echo","outputByteLimit":10}"""));
+        using (var response = await transport.ReadSentAsync())
+        {
+            Assert.Equal("terminal-1", response.RootElement.GetProperty("result").GetProperty("terminalId").GetString());
+        }
+
+        transport.Receive(Request("output", "terminal/output", """{"sessionId":"session-1","terminalId":"terminal-1"}"""));
+        using (var response = await transport.ReadSentAsync())
+        {
+            var result = response.RootElement.GetProperty("result");
+            Assert.True(result.GetProperty("truncated").GetBoolean());
+            var output = result.GetProperty("output").GetString()!;
+            Assert.True(Encoding.UTF8.GetByteCount(output) <= 10, $"Retained {Encoding.UTF8.GetByteCount(output)} bytes, expected <= 10");
+            // The tail of "PREFIX-中文-SUFFIX" is "SUFFIX" (6 bytes) or "文-SUFFIX" (10 bytes depending on exact budget).
+            // At minimum, it should end with "SUFFIX" since that's the newest output.
+            Assert.EndsWith("SUFFIX", output);
+            Assert.DoesNotContain('�', output);
+        }
+    }
+
+    [Fact]
     public async Task TerminalOutputTruncationLandsOnACharacterBoundary()
     {
         await using var transport = new TestTransport();
@@ -336,6 +372,8 @@ public sealed class ClientSecurityTests
     [InlineData("http://[::1]/")]
     [InlineData("http://[fc00::1]/")]
     [InlineData("http://[fe80::1]/")]
+    [InlineData("http://[::]/")]                    // IPv6 unspecified address
+    [InlineData("http://[::ffff:127.0.0.1]/")]      // IPv4-mapped loopback
     public void RestrictedAddressesAreDetected(string url)
     {
         Assert.True(AcpSecurityPolicy.IsRestrictedAddress(new Uri(url)));
@@ -429,5 +467,26 @@ public sealed class ClientSecurityTests
         }
 
         public ValueTask WriteTextFileAsync(WriteTextFileRequest request, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+    }
+
+    private sealed class TailTruncationTerminalHandler : ITerminalHandler
+    {
+        public ValueTask<string> CreateAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult("terminal-1");
+
+        // "PREFIX-中文-SUFFIX" = "PREFIX-" (7) + "中文" (6) + "-SUFFIX" (7) = 20 chars, ~21 bytes UTF-8
+        public ValueTask<TerminalOutputResponse> GetOutputAsync(TerminalOutputRequest request, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(new TerminalOutputResponse
+            {
+                Output = "PREFIX-中文-SUFFIX",
+                Truncated = false
+            });
+
+        public ValueTask<TerminalExitStatus> WaitForExitAsync(WaitForTerminalExitRequest request, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(new TerminalExitStatus { ExitCode = 0 });
+
+        public ValueTask KillAsync(KillTerminalRequest request, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
+
+        public ValueTask ReleaseAsync(ReleaseTerminalRequest request, CancellationToken cancellationToken = default) => ValueTask.CompletedTask;
     }
 }
