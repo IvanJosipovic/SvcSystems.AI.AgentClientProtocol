@@ -11,8 +11,15 @@
       "matchFileNames": ["tests/**", "tools/**"]
     },
     {
-      "matchUpdateTypes": ["src/**", "minor", "patch", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
       "automerge": true,
+      "semanticCommitType": "fix",
+      "matchFileNames": [
+        "src/**"
+      ]
+    },
+    {
+      "matchUpdateTypes": ["major"],
       "semanticCommitType": "fix",
       "matchFileNames": [
         "src/**"
