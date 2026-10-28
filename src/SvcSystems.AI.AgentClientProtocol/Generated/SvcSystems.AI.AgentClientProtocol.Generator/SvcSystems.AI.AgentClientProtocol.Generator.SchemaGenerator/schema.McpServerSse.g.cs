@@ -32,14 +32,22 @@ public sealed class McpServerSse : McpServer
     /// HTTP headers to set when making requests to the MCP server.
     /// </summary>
     [JsonPropertyName("headers")]
-    public required List<HttpHeader> Headers { get; init; }
+    public required List<HttpHeader> Headers
+    {
+        get => _headers;
+        init
+        {
+            _headers = value ?? [];
+        }
+    }
 
+    private List<HttpHeader> _headers = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

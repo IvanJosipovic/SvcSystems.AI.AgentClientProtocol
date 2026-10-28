@@ -14,7 +14,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Agent.Models;
 /// 
 /// Only available if the Agent supports the `loadSession` capability.
 /// 
-/// See protocol docs: [Loading Sessions](https://agentclientprotocol.com/protocol/session-setup#loading-sessions)
+/// See protocol docs: [Loading Sessions](https://agentclientprotocol.com/protocol/v1/session-setup#loading-sessions)
 /// </summary>
 public sealed partial class LoadSessionRequest
 {
@@ -22,8 +22,16 @@ public sealed partial class LoadSessionRequest
     /// List of MCP servers to connect to for this session.
     /// </summary>
     [JsonPropertyName("mcpServers")]
-    public required List<McpServer> McpServers { get; init; }
+    public required List<McpServer> McpServers
+    {
+        get => _mcpServers;
+        init
+        {
+            _mcpServers = value ?? [];
+        }
+    }
 
+    private List<McpServer> _mcpServers = null!;
     /// <summary>
     /// The working directory for this session. Must be an absolute path.
     /// </summary>
@@ -39,8 +47,16 @@ public sealed partial class LoadSessionRequest
     /// the request `cwd` matches the session's `cwd`.
     /// </summary>
     [JsonPropertyName("additionalDirectories")]
-    public List<string>? AdditionalDirectories { get; init; }
+    public List<string>? AdditionalDirectories
+    {
+        get => _additionalDirectories;
+        init
+        {
+            _additionalDirectories = value ?? [];
+        }
+    }
 
+    private List<string>? _additionalDirectories = null!;
     /// <summary>
     /// The ID of the session to load.
     /// </summary>
@@ -52,7 +68,7 @@ public sealed partial class LoadSessionRequest
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

@@ -653,10 +653,17 @@ internal sealed class SchemaModelBuilder(
                 required,
                 nullable,
                 resolved?.Const,
-                description: property.Value.Schema.Description ?? resolved?.Description));
+                description: property.Value.Schema.Description ?? resolved?.Description,
+                defaultOnNull: HasDeserializeDefaultOnNull(property.Value.Schema)));
         }
         return results;
     }
+
+    private static bool HasDeserializeDefaultOnNull(IOpenApiSchema schema) =>
+        schema.Extensions is { } extensions &&
+        extensions.TryGetValue("x-deserialize-default-on-null", out var extension) &&
+        extension is JsonNodeExtension node &&
+        node.Node.GetValueKind() == System.Text.Json.JsonValueKind.True;
 
     private string GetTypeName(string owner, string property, IOpenApiSchema schema, bool nullable)
     {

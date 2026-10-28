@@ -39,4 +39,14 @@ public sealed class AcpJsonTests
         Assert.NotNull(outcome);
         Assert.Equal("allow", Assert.IsType<SelectedPermissionOutcome>(outcome.Outcome).OptionId);
     }
+
+    [Fact]
+    public void DefaultsAnnotatedRequiredCollectionsWhenJsonIsExplicitlyNull()
+    {
+        var request = AcpJson.Deserialize<NewSessionRequest>(
+            JsonDocument.Parse("""{"cwd":"C:/workspace","mcpServers":null}""").RootElement);
+
+        Assert.NotNull(request);
+        Assert.Empty(request.McpServers);
+    }
 }

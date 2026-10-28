@@ -32,20 +32,36 @@ public sealed class McpServerStdio : McpServer
     /// Command-line arguments to pass to the MCP server.
     /// </summary>
     [JsonPropertyName("args")]
-    public required List<string> Args { get; init; }
+    public required List<string> Args
+    {
+        get => _args;
+        init
+        {
+            _args = value ?? [];
+        }
+    }
 
+    private List<string> _args = null!;
     /// <summary>
     /// Environment variables to set when launching the MCP server.
     /// </summary>
     [JsonPropertyName("env")]
-    public required List<EnvVariable> Env { get; init; }
+    public required List<EnvVariable> Env
+    {
+        get => _env;
+        init
+        {
+            _env = value ?? [];
+        }
+    }
 
+    private List<EnvVariable> _env = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

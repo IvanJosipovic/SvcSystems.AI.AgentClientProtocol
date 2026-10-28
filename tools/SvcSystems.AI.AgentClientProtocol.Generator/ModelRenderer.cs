@@ -262,6 +262,10 @@ internal static class ModelRenderer
         foreach (var property in model.Properties)
         {
             declaration = declaration.AddMembers(RenderProperty(property));
+            if (HasCollectionNullDefault(property))
+            {
+                declaration = declaration.AddMembers(RenderNullDefaultField(property));
+            }
         }
 
         if (model.HasExtensionData)
@@ -277,8 +281,34 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
+    private static MemberDeclarationSyntax RenderNullDefaultField(PropertyModel model)
+    {
+        var fieldName = "_" + char.ToLowerInvariant(model.Identifier[0]) + model.Identifier.Substring(1);
+        return SyntaxFactory.FieldDeclaration(
+                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(model.TypeName))
+                    .AddVariables(SyntaxFactory.VariableDeclarator(fieldName)
+                        .WithInitializer(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null!")))))
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+    }
+
     private static PropertyDeclarationSyntax RenderProperty(PropertyModel model)
     {
+        if (HasCollectionNullDefault(model))
+        {
+            var fieldName = "_" + char.ToLowerInvariant(model.Identifier[0]) + model.Identifier.Substring(1);
+            var nullDefaultProperty = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                .WithAccessorList(SyntaxFactory.AccessorList(SyntaxFactory.SingletonList(
+                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                        .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.IdentifierName(fieldName)))
+                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))))
+                    .AddAccessors(SyntaxFactory.AccessorDeclaration(SyntaxKind.InitAccessorDeclaration)
+                        .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(fieldName + " = value ?? [];")))))
+                .WithAttributeLists(SyntaxFactory.SingletonList(AttributeList("JsonPropertyName", StringArgument(model.WireName))));
+            if (model.IsRequired) nullDefaultProperty = nullDefaultProperty.AddModifiers(SyntaxFactory.Token(SyntaxKind.RequiredKeyword));
+            return nullDefaultProperty.WithLeadingTrivia(SummaryTrivia(model.Description));
+        }
+
         var property = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
             .WithAccessorList(InitAccessors())
@@ -307,6 +337,14 @@ internal static class ModelRenderer
                 NameArgument("Condition", SyntaxFactory.ParseExpression("JsonIgnoreCondition.Never"))));
         }
         return property.WithLeadingTrivia(SummaryTrivia(model.Description));
+    }
+
+    private static bool HasCollectionNullDefault(PropertyModel model)
+    {
+        var typeName = model.TypeName.TrimEnd('?');
+        return model.DefaultOnNull &&
+            (typeName.StartsWith("List<", StringComparison.Ordinal) ||
+             typeName.StartsWith("Dictionary<", StringComparison.Ordinal));
     }
 
     private static MemberDeclarationSyntax RenderEnum(EnumModel model)

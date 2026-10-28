@@ -40,20 +40,36 @@ public sealed partial class ResumeSessionRequest
     /// the request `cwd` matches the session's `cwd`.
     /// </summary>
     [JsonPropertyName("additionalDirectories")]
-    public List<string>? AdditionalDirectories { get; init; }
+    public List<string>? AdditionalDirectories
+    {
+        get => _additionalDirectories;
+        init
+        {
+            _additionalDirectories = value ?? [];
+        }
+    }
 
+    private List<string>? _additionalDirectories = null!;
     /// <summary>
     /// List of MCP servers to connect to for this session.
     /// </summary>
     [JsonPropertyName("mcpServers")]
-    public List<McpServer>? McpServers { get; init; }
+    public List<McpServer>? McpServers
+    {
+        get => _mcpServers;
+        init
+        {
+            _mcpServers = value ?? [];
+        }
+    }
 
+    private List<McpServer>? _mcpServers = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

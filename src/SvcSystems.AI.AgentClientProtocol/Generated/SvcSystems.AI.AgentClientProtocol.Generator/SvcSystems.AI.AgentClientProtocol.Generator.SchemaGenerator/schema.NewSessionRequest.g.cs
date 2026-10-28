@@ -12,7 +12,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Agent.Models;
 /// <summary>
 /// Request parameters for creating a new session.
 /// 
-/// See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/session-setup#creating-a-session)
+/// See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/v1/session-setup#creating-a-session)
 /// </summary>
 public sealed partial class NewSessionRequest
 {
@@ -30,20 +30,36 @@ public sealed partial class NewSessionRequest
     /// additional roots are activated for the new session.
     /// </summary>
     [JsonPropertyName("additionalDirectories")]
-    public List<string>? AdditionalDirectories { get; init; }
+    public List<string>? AdditionalDirectories
+    {
+        get => _additionalDirectories;
+        init
+        {
+            _additionalDirectories = value ?? [];
+        }
+    }
 
+    private List<string>? _additionalDirectories = null!;
     /// <summary>
     /// List of MCP (Model Context Protocol) servers the agent should connect to.
     /// </summary>
     [JsonPropertyName("mcpServers")]
-    public required List<McpServer> McpServers { get; init; }
+    public required List<McpServer> McpServers
+    {
+        get => _mcpServers;
+        init
+        {
+            _mcpServers = value ?? [];
+        }
+    }
 
+    private List<McpServer> _mcpServers = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

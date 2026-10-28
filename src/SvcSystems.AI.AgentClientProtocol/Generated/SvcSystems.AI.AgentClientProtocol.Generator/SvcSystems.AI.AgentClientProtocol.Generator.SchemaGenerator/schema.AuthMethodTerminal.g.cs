@@ -42,21 +42,37 @@ public sealed partial class AuthMethodTerminal
     /// Additional arguments to append to the configured agent invocation for terminal auth.
     /// </summary>
     [JsonPropertyName("args")]
-    public List<string>? Args { get; init; }
+    public List<string>? Args
+    {
+        get => _args;
+        init
+        {
+            _args = value ?? [];
+        }
+    }
 
+    private List<string>? _args = null!;
     /// <summary>
     /// Additional environment variables to set on the configured agent invocation for terminal auth.
     /// These values override same-named variables in the base launch configuration.
     /// </summary>
     [JsonPropertyName("env")]
-    public Dictionary<string, string>? Env { get; init; }
+    public Dictionary<string, string>? Env
+    {
+        get => _env;
+        init
+        {
+            _env = value ?? [];
+        }
+    }
 
+    private Dictionary<string, string>? _env = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
