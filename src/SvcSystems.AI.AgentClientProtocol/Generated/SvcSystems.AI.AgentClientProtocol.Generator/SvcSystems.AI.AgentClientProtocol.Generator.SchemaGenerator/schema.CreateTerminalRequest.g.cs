@@ -30,30 +30,46 @@ public sealed partial class CreateTerminalRequest
     /// Array of command arguments.
     /// </summary>
     [JsonPropertyName("args")]
-    public List<string>? Args
+    [JsonConverter(typeof(ArgsDefaultOnNullConverter))]
+    public List<string>? Args { get; init; }
+
+    public sealed class ArgsDefaultOnNullConverter : JsonConverter<List<string>>
     {
-        get => _args;
-        init
+        public override bool HandleNull => true;
+
+        public override List<string> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _args = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<string>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<string>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<string>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<string>>)options.GetTypeInfo(typeof(List<string>)).Converter;
     }
 
-    private List<string>? _args = null!;
     /// <summary>
     /// Environment variables for the command.
     /// </summary>
     [JsonPropertyName("env")]
-    public List<EnvVariable>? Env
+    [JsonConverter(typeof(EnvDefaultOnNullConverter))]
+    public List<EnvVariable>? Env { get; init; }
+
+    public sealed class EnvDefaultOnNullConverter : JsonConverter<List<EnvVariable>>
     {
-        get => _env;
-        init
+        public override bool HandleNull => true;
+
+        public override List<EnvVariable> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _env = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<EnvVariable>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<EnvVariable>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, List<EnvVariable> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<EnvVariable>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<EnvVariable>>)options.GetTypeInfo(typeof(List<EnvVariable>)).Converter;
     }
 
-    private List<EnvVariable>? _env = null!;
     /// <summary>
     /// Working directory for the command. Must be an absolute path.
     /// </summary>

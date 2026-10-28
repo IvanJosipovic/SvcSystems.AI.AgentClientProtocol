@@ -42,31 +42,47 @@ public sealed partial class AuthMethodTerminal
     /// Additional arguments to append to the configured agent invocation for terminal auth.
     /// </summary>
     [JsonPropertyName("args")]
-    public List<string>? Args
+    [JsonConverter(typeof(ArgsDefaultOnNullConverter))]
+    public List<string>? Args { get; init; }
+
+    public sealed class ArgsDefaultOnNullConverter : JsonConverter<List<string>>
     {
-        get => _args;
-        init
+        public override bool HandleNull => true;
+
+        public override List<string> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _args = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<string>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<string>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<string>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<string>>)options.GetTypeInfo(typeof(List<string>)).Converter;
     }
 
-    private List<string>? _args = null!;
     /// <summary>
     /// Additional environment variables to set on the configured agent invocation for terminal auth.
     /// These values override same-named variables in the base launch configuration.
     /// </summary>
     [JsonPropertyName("env")]
-    public Dictionary<string, string>? Env
+    [JsonConverter(typeof(EnvDefaultOnNullConverter))]
+    public Dictionary<string, string>? Env { get; init; }
+
+    public sealed class EnvDefaultOnNullConverter : JsonConverter<Dictionary<string, string>>
     {
-        get => _env;
-        init
+        public override bool HandleNull => true;
+
+        public override Dictionary<string, string> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _env = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new Dictionary<string, string>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(Dictionary<string, string>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, Dictionary<string, string> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<Dictionary<string, string>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<Dictionary<string, string>>)options.GetTypeInfo(typeof(Dictionary<string, string>)).Converter;
     }
 
-    private Dictionary<string, string>? _env = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at

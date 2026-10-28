@@ -264,7 +264,7 @@ internal static class ModelRenderer
             declaration = declaration.AddMembers(RenderProperty(property));
             if (HasCollectionNullDefault(property))
             {
-                declaration = declaration.AddMembers(RenderNullDefaultField(property));
+                declaration = declaration.AddMembers(RenderNullDefaultConverter(property));
             }
         }
 
@@ -281,32 +281,43 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
-    private static MemberDeclarationSyntax RenderNullDefaultField(PropertyModel model)
+    private static MemberDeclarationSyntax RenderNullDefaultConverter(PropertyModel model)
     {
-        var fieldName = "_" + char.ToLowerInvariant(model.Identifier[0]) + model.Identifier.Substring(1);
-        return SyntaxFactory.FieldDeclaration(
-                SyntaxFactory.VariableDeclaration(SyntaxFactory.ParseTypeName(model.TypeName))
-                    .AddVariables(SyntaxFactory.VariableDeclarator(fieldName)
-                        .WithInitializer(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression("null!")))))
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+        var typeName = model.TypeName.TrimEnd('?');
+        var converterName = model.Identifier + "DefaultOnNullConverter";
+        var source = $$"""
+            public sealed class {{converterName}} : JsonConverter<{{typeName}}>
+            {
+                public override bool HandleNull => true;
+
+                public override {{typeName}} Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
+                {
+                    if (reader.TokenType == JsonTokenType.Null) return new {{typeName}}();
+                    return GetCollectionConverter(options).Read(ref reader, typeof({{typeName}}), options)!;
+                }
+
+                public override void Write(Utf8JsonWriter writer, {{typeName}} value, JsonSerializerOptions options) =>
+                    GetCollectionConverter(options).Write(writer, value, options);
+
+                private static JsonConverter<{{typeName}}> GetCollectionConverter(JsonSerializerOptions options) =>
+                    (JsonConverter<{{typeName}}>)options.GetTypeInfo(typeof({{typeName}})).Converter;
+            }
+            """;
+        return SyntaxFactory.ParseMemberDeclaration(source)!;
     }
 
     private static PropertyDeclarationSyntax RenderProperty(PropertyModel model)
     {
         if (HasCollectionNullDefault(model))
         {
-            var fieldName = "_" + char.ToLowerInvariant(model.Identifier[0]) + model.Identifier.Substring(1);
-            var nullDefaultProperty = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
+            var defaultOnNullProperty = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                .WithAccessorList(SyntaxFactory.AccessorList(SyntaxFactory.SingletonList(
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                        .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(SyntaxFactory.IdentifierName(fieldName)))
-                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))))
-                    .AddAccessors(SyntaxFactory.AccessorDeclaration(SyntaxKind.InitAccessorDeclaration)
-                        .WithBody(SyntaxFactory.Block(SyntaxFactory.ParseStatement(fieldName + " = value ?? [];")))))
-                .WithAttributeLists(SyntaxFactory.SingletonList(AttributeList("JsonPropertyName", StringArgument(model.WireName))));
-            if (model.IsRequired) nullDefaultProperty = nullDefaultProperty.AddModifiers(SyntaxFactory.Token(SyntaxKind.RequiredKeyword));
-            return nullDefaultProperty.WithLeadingTrivia(SummaryTrivia(model.Description));
+                .WithAccessorList(InitAccessors())
+                .AddAttributeLists(
+                    AttributeList("JsonPropertyName", StringArgument(model.WireName)),
+                    AttributeList("JsonConverter", TypeOfArgument(model.Identifier + "DefaultOnNullConverter")));
+            if (model.IsRequired) defaultOnNullProperty = defaultOnNullProperty.AddModifiers(SyntaxFactory.Token(SyntaxKind.RequiredKeyword));
+            return defaultOnNullProperty.WithLeadingTrivia(SummaryTrivia(model.Description));
         }
 
         var property = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)

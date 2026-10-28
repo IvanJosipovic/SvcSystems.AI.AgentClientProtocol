@@ -40,30 +40,46 @@ public sealed partial class ResumeSessionRequest
     /// the request `cwd` matches the session's `cwd`.
     /// </summary>
     [JsonPropertyName("additionalDirectories")]
-    public List<string>? AdditionalDirectories
+    [JsonConverter(typeof(AdditionalDirectoriesDefaultOnNullConverter))]
+    public List<string>? AdditionalDirectories { get; init; }
+
+    public sealed class AdditionalDirectoriesDefaultOnNullConverter : JsonConverter<List<string>>
     {
-        get => _additionalDirectories;
-        init
+        public override bool HandleNull => true;
+
+        public override List<string> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _additionalDirectories = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<string>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<string>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<string>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<string>>)options.GetTypeInfo(typeof(List<string>)).Converter;
     }
 
-    private List<string>? _additionalDirectories = null!;
     /// <summary>
     /// List of MCP servers to connect to for this session.
     /// </summary>
     [JsonPropertyName("mcpServers")]
-    public List<McpServer>? McpServers
+    [JsonConverter(typeof(McpServersDefaultOnNullConverter))]
+    public List<McpServer>? McpServers { get; init; }
+
+    public sealed class McpServersDefaultOnNullConverter : JsonConverter<List<McpServer>>
     {
-        get => _mcpServers;
-        init
+        public override bool HandleNull => true;
+
+        public override List<McpServer> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _mcpServers = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<McpServer>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<McpServer>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, List<McpServer> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<McpServer>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<McpServer>>)options.GetTypeInfo(typeof(List<McpServer>)).Converter;
     }
 
-    private List<McpServer>? _mcpServers = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at

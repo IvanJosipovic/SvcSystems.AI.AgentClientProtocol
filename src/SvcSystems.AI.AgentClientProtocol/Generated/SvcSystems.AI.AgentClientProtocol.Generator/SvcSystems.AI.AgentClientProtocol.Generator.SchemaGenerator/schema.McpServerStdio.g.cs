@@ -32,30 +32,46 @@ public sealed class McpServerStdio : McpServer
     /// Command-line arguments to pass to the MCP server.
     /// </summary>
     [JsonPropertyName("args")]
-    public required List<string> Args
+    [JsonConverter(typeof(ArgsDefaultOnNullConverter))]
+    public required List<string> Args { get; init; }
+
+    public sealed class ArgsDefaultOnNullConverter : JsonConverter<List<string>>
     {
-        get => _args;
-        init
+        public override bool HandleNull => true;
+
+        public override List<string> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _args = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<string>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<string>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<string>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<string>>)options.GetTypeInfo(typeof(List<string>)).Converter;
     }
 
-    private List<string> _args = null!;
     /// <summary>
     /// Environment variables to set when launching the MCP server.
     /// </summary>
     [JsonPropertyName("env")]
-    public required List<EnvVariable> Env
+    [JsonConverter(typeof(EnvDefaultOnNullConverter))]
+    public required List<EnvVariable> Env { get; init; }
+
+    public sealed class EnvDefaultOnNullConverter : JsonConverter<List<EnvVariable>>
     {
-        get => _env;
-        init
+        public override bool HandleNull => true;
+
+        public override List<EnvVariable> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
         {
-            _env = value ?? [];
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<EnvVariable>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<EnvVariable>), options)!;
         }
+
+        public override void Write(Utf8JsonWriter writer, List<EnvVariable> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<EnvVariable>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<EnvVariable>>)options.GetTypeInfo(typeof(List<EnvVariable>)).Converter;
     }
 
-    private List<EnvVariable> _env = null!;
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
