@@ -262,6 +262,10 @@ internal static class ModelRenderer
         foreach (var property in model.Properties)
         {
             declaration = declaration.AddMembers(RenderProperty(property));
+            if (HasCollectionNullDefault(property))
+            {
+                declaration = declaration.AddMembers(RenderNullDefaultConverter(property));
+            }
         }
 
         if (model.HasExtensionData)
@@ -277,8 +281,45 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
+    private static MemberDeclarationSyntax RenderNullDefaultConverter(PropertyModel model)
+    {
+        var typeName = model.TypeName.TrimEnd('?');
+        var converterName = model.Identifier + "DefaultOnNullConverter";
+        var source = $$"""
+            public sealed class {{converterName}} : JsonConverter<{{typeName}}>
+            {
+                public override bool HandleNull => true;
+
+                public override {{typeName}} Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
+                {
+                    if (reader.TokenType == JsonTokenType.Null) return new {{typeName}}();
+                    return GetCollectionConverter(options).Read(ref reader, typeof({{typeName}}), options)!;
+                }
+
+                public override void Write(Utf8JsonWriter writer, {{typeName}} value, JsonSerializerOptions options) =>
+                    GetCollectionConverter(options).Write(writer, value, options);
+
+                private static JsonConverter<{{typeName}}> GetCollectionConverter(JsonSerializerOptions options) =>
+                    (JsonConverter<{{typeName}}>)options.GetTypeInfo(typeof({{typeName}})).Converter;
+            }
+            """;
+        return SyntaxFactory.ParseMemberDeclaration(source)!;
+    }
+
     private static PropertyDeclarationSyntax RenderProperty(PropertyModel model)
     {
+        if (HasCollectionNullDefault(model))
+        {
+            var defaultOnNullProperty = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                .WithAccessorList(InitAccessors())
+                .AddAttributeLists(
+                    AttributeList("JsonPropertyName", StringArgument(model.WireName)),
+                    AttributeList("JsonConverter", TypeOfArgument(model.Identifier + "DefaultOnNullConverter")));
+            if (model.IsRequired) defaultOnNullProperty = defaultOnNullProperty.AddModifiers(SyntaxFactory.Token(SyntaxKind.RequiredKeyword));
+            return defaultOnNullProperty.WithLeadingTrivia(SummaryTrivia(model.Description));
+        }
+
         var property = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
             .WithAccessorList(InitAccessors())
@@ -307,6 +348,14 @@ internal static class ModelRenderer
                 NameArgument("Condition", SyntaxFactory.ParseExpression("JsonIgnoreCondition.Never"))));
         }
         return property.WithLeadingTrivia(SummaryTrivia(model.Description));
+    }
+
+    private static bool HasCollectionNullDefault(PropertyModel model)
+    {
+        var typeName = model.TypeName.TrimEnd('?');
+        return model.DefaultOnNull &&
+            (typeName.StartsWith("List<", StringComparison.Ordinal) ||
+             typeName.StartsWith("Dictionary<", StringComparison.Ordinal));
     }
 
     private static MemberDeclarationSyntax RenderEnum(EnumModel model)

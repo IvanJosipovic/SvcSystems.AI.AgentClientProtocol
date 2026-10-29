@@ -81,7 +81,8 @@ internal sealed class PropertyModel(
     bool isNullable,
     string? constValue = null,
     bool isIgnored = false,
-    string? description = null)
+    string? description = null,
+    bool defaultOnNull = false)
 {
     public string WireName { get; } = wireName;
     public string Identifier { get; } = identifier;
@@ -91,6 +92,7 @@ internal sealed class PropertyModel(
     public string? ConstValue { get; } = constValue;
     public bool IsIgnored { get; } = isIgnored;
     public string? Description { get; } = description;
+    public bool DefaultOnNull { get; } = defaultOnNull;
 }
 
 internal sealed class DiscriminatorCase(string typeName, string discriminatorValue)

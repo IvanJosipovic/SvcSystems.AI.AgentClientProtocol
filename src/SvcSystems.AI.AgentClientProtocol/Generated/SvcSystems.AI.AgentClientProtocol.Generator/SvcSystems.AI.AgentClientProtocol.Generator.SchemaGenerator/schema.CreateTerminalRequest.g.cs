@@ -30,13 +30,45 @@ public sealed partial class CreateTerminalRequest
     /// Array of command arguments.
     /// </summary>
     [JsonPropertyName("args")]
+    [JsonConverter(typeof(ArgsDefaultOnNullConverter))]
     public List<string>? Args { get; init; }
+
+    public sealed class ArgsDefaultOnNullConverter : JsonConverter<List<string>>
+    {
+        public override bool HandleNull => true;
+
+        public override List<string> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<string>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<string>), options)!;
+        }
+
+        public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<string>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<string>>)options.GetTypeInfo(typeof(List<string>)).Converter;
+    }
 
     /// <summary>
     /// Environment variables for the command.
     /// </summary>
     [JsonPropertyName("env")]
+    [JsonConverter(typeof(EnvDefaultOnNullConverter))]
     public List<EnvVariable>? Env { get; init; }
+
+    public sealed class EnvDefaultOnNullConverter : JsonConverter<List<EnvVariable>>
+    {
+        public override bool HandleNull => true;
+
+        public override List<EnvVariable> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+                return new List<EnvVariable>();
+            return GetCollectionConverter(options).Read(ref reader, typeof(List<EnvVariable>), options)!;
+        }
+
+        public override void Write(Utf8JsonWriter writer, List<EnvVariable> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
+        private static JsonConverter<List<EnvVariable>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<EnvVariable>>)options.GetTypeInfo(typeof(List<EnvVariable>)).Converter;
+    }
 
     /// <summary>
     /// Working directory for the command. Must be an absolute path.
@@ -62,7 +94,7 @@ public sealed partial class CreateTerminalRequest
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
