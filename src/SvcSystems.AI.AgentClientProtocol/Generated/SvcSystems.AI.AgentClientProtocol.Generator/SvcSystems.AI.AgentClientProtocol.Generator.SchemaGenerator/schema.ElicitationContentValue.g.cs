@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// Allowed wire representations for [`ElicitationContentValue`].
+/// Allowed wire representations for `ElicitationContentValue`.
 /// </summary>
 [JsonUnion(TypeClassifier = typeof(ElicitationContentValueJsonTypeClassifier))]
 public union ElicitationContentValue(string, long, double, bool, List<string>);

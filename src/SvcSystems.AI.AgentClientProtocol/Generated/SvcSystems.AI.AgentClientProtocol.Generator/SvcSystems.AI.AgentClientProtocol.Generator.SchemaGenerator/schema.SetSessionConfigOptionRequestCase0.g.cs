@@ -14,14 +14,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// </summary>
 public sealed partial class SetSessionConfigOptionRequestCase0
 {
+    [JsonPropertyName("type")]
+    public string Type { get; } = "boolean";
+
     /// <summary>
     /// The boolean value.
     /// </summary>
     [JsonPropertyName("value")]
     public required bool Value { get; init; }
-
-    [JsonPropertyName("type")]
-    public string Type { get; } = "boolean";
 
     /// <summary>
     /// The ID of the session to set the configuration option for.
@@ -40,7 +40,7 @@ public sealed partial class SetSessionConfigOptionRequestCase0
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

@@ -12,8 +12,8 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// Prompt capabilities supported by the agent in `session/prompt` requests.
 /// 
-/// Baseline agent functionality requires support for [`ContentBlock::Text`]
-/// and [`ContentBlock::ResourceLink`] in prompt requests.
+/// Baseline agent functionality requires support for `text`
+/// and `resource_link` content blocks in prompt requests.
 /// 
 /// Other variants must be explicitly opted in to.
 /// Capabilities for different types of content in prompt requests.
@@ -21,18 +21,18 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// Indicates which content types beyond the baseline (text and resource links)
 /// the agent can process.
 /// 
-/// See protocol docs: [Prompt Capabilities](https://agentclientprotocol.com/protocol/initialization#prompt-capabilities)
+/// See protocol docs: [Prompt Capabilities](https://agentclientprotocol.com/protocol/v1/initialization#prompt-capabilities)
 /// </summary>
 public sealed partial class PromptCapabilities
 {
     /// <summary>
-    /// Agent supports [`ContentBlock::Image`].
+    /// Agent supports `image` content blocks.
     /// </summary>
     [JsonPropertyName("image")]
     public bool? Image { get; init; }
 
     /// <summary>
-    /// Agent supports [`ContentBlock::Audio`].
+    /// Agent supports `audio` content blocks.
     /// </summary>
     [JsonPropertyName("audio")]
     public bool? Audio { get; init; }
@@ -40,7 +40,7 @@ public sealed partial class PromptCapabilities
     /// <summary>
     /// Agent supports embedded context in `session/prompt` requests.
     /// 
-    /// When enabled, the Client is allowed to include [`ContentBlock::Resource`]
+    /// When enabled, the Client is allowed to include `resource` content blocks
     /// in prompt requests for pieces of context that are referenced in the message.
     /// </summary>
     [JsonPropertyName("embeddedContext")]
@@ -51,7 +51,7 @@ public sealed partial class PromptCapabilities
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

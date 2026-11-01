@@ -11,7 +11,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
 /// The agent's execution plan for complex tasks.
-/// See protocol docs: [Agent Plan](https://agentclientprotocol.com/protocol/agent-plan)
+/// See protocol docs: [Agent Plan](https://agentclientprotocol.com/protocol/v1/agent-plan)
 /// </summary>
 public sealed partial class Plan
 {
@@ -29,7 +29,7 @@ public sealed partial class Plan
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

@@ -12,7 +12,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// A mode the agent can operate in.
 /// 
-/// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
+/// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/v1/session-modes)
 /// </summary>
 public sealed partial class SessionMode
 {
@@ -39,7 +39,7 @@ public sealed partial class SessionMode
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

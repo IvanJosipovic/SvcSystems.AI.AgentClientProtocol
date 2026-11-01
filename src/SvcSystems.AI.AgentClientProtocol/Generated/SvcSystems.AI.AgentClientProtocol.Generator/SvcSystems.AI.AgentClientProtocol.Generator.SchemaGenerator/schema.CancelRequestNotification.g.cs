@@ -12,7 +12,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// Notification to cancel an ongoing request.
 /// 
-/// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/cancellation)
+/// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/v1/cancellation)
 /// </summary>
 public sealed partial class CancelRequestNotification
 {
@@ -28,7 +28,7 @@ public sealed partial class CancelRequestNotification
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

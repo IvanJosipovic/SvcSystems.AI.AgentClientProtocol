@@ -14,7 +14,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Client.Models;
 /// 
 /// Sent when the agent needs authorization before performing a sensitive operation.
 /// 
-/// See protocol docs: [Requesting Permission](https://agentclientprotocol.com/protocol/tool-calls#requesting-permission)
+/// See protocol docs: [Requesting Permission](https://agentclientprotocol.com/protocol/v1/tool-calls#requesting-permission)
 /// </summary>
 public sealed partial class RequestPermissionRequest
 {
@@ -41,7 +41,7 @@ public sealed partial class RequestPermissionRequest
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

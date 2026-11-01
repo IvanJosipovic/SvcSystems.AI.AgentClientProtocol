@@ -15,7 +15,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// Enables clients to implement "follow-along" features that track
 /// which files the agent is working with in real-time.
 /// 
-/// See protocol docs: [Following the Agent](https://agentclientprotocol.com/protocol/tool-calls#following-the-agent)
+/// See protocol docs: [Following the Agent](https://agentclientprotocol.com/protocol/v1/tool-calls#following-the-agent)
 /// </summary>
 public sealed partial class ToolCallLocation
 {
@@ -26,7 +26,7 @@ public sealed partial class ToolCallLocation
     public required string Path { get; init; }
 
     /// <summary>
-    /// Optional line number within the file.
+    /// Optional 1-based line number within the file.
     /// </summary>
     [JsonPropertyName("line")]
     public uint? Line { get; init; }
@@ -36,7 +36,7 @@ public sealed partial class ToolCallLocation
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

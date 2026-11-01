@@ -24,7 +24,7 @@ public sealed partial class CreateElicitationResponseCase1
     /// 
     /// Optional. Omitted and `null` are equivalent and mean no metadata.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

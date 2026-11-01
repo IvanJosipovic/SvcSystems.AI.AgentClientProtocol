@@ -14,7 +14,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// Tool calls can produce different types of content including
 /// standard content blocks (text, images) or file diffs.
 /// 
-/// See protocol docs: [Content](https://agentclientprotocol.com/protocol/tool-calls#content)
+/// See protocol docs: [Content](https://agentclientprotocol.com/protocol/v1/tool-calls#content)
 /// </summary>
 [JsonUnion(TypeClassifier = typeof(ToolCallContentJsonTypeClassifier))]
 public union ToolCallContent(Content, Diff, Terminal, JsonElement);

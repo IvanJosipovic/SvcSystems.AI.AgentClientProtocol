@@ -15,7 +15,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// Advertised during initialization to inform the agent about
 /// available features and methods.
 /// 
-/// See protocol docs: [Client Capabilities](https://agentclientprotocol.com/protocol/initialization#client-capabilities)
+/// See protocol docs: [Client Capabilities](https://agentclientprotocol.com/protocol/v1/initialization#client-capabilities)
 /// </summary>
 public sealed partial class ClientCapabilities
 {
@@ -64,7 +64,7 @@ public sealed partial class ClientCapabilities
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

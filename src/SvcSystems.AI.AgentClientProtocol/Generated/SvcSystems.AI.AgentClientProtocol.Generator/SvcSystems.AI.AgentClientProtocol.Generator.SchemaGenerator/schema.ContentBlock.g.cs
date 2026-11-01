@@ -22,7 +22,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// This structure is compatible with the Model Context Protocol (MCP), enabling
 /// agents to seamlessly forward content from MCP tool outputs without transformation.
 /// 
-/// See protocol docs: [Content](https://agentclientprotocol.com/protocol/content)
+/// See protocol docs: [Content](https://agentclientprotocol.com/protocol/v1/content)
 /// </summary>
 [JsonUnion(TypeClassifier = typeof(ContentBlockJsonTypeClassifier))]
 public union ContentBlock(TextContent, ImageContent, AudioContent, ResourceLink, EmbeddedResource, JsonElement);
