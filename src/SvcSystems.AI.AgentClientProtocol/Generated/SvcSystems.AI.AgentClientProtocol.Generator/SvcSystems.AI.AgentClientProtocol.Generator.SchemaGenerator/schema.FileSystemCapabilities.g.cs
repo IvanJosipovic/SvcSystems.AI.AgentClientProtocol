@@ -12,7 +12,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// File system capabilities that a client may support.
 /// 
-/// See protocol docs: [FileSystem](https://agentclientprotocol.com/protocol/initialization#filesystem)
+/// See protocol docs: [FileSystem](https://agentclientprotocol.com/protocol/v1/initialization#filesystem)
 /// </summary>
 public sealed partial class FileSystemCapabilities
 {
@@ -33,7 +33,7 @@ public sealed partial class FileSystemCapabilities
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

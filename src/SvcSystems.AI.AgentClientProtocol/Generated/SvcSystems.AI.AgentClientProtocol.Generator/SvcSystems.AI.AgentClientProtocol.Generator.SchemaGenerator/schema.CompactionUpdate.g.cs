@@ -13,7 +13,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// A context compaction has been created or updated.
 /// 
 /// Agents MUST only send this update when the Client advertised
-/// [`ClientSessionCapabilities::compaction`].
+/// the `session.compaction` Client capability.
 /// </summary>
 public sealed partial class CompactionUpdate
 {

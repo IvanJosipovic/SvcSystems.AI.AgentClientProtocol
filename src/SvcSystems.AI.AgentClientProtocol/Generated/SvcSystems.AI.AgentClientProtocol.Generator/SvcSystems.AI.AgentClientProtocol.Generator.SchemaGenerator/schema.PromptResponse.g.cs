@@ -12,7 +12,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Agent.Models;
 /// <summary>
 /// Response from processing a user prompt.
 /// 
-/// See protocol docs: [Check for Completion](https://agentclientprotocol.com/protocol/prompt-turn#4-check-for-completion)
+/// See protocol docs: [Check for Completion](https://agentclientprotocol.com/protocol/v1/prompt-turn#4-check-for-completion)
 /// </summary>
 public sealed partial class PromptResponse
 {
@@ -27,7 +27,7 @@ public sealed partial class PromptResponse
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

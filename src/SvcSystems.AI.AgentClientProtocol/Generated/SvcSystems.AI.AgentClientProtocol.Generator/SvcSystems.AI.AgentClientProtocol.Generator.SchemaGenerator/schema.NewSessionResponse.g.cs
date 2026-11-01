@@ -12,7 +12,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Agent.Models;
 /// <summary>
 /// Response from creating a new session.
 /// 
-/// See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/session-setup#creating-a-session)
+/// See protocol docs: [Creating a Session](https://agentclientprotocol.com/protocol/v1/session-setup#creating-a-session)
 /// </summary>
 public sealed partial class NewSessionResponse
 {
@@ -27,7 +27,7 @@ public sealed partial class NewSessionResponse
     /// <summary>
     /// Initial mode state if supported by the Agent
     /// 
-    /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/session-modes)
+    /// See protocol docs: [Session Modes](https://agentclientprotocol.com/protocol/v1/session-modes)
     /// </summary>
     [JsonPropertyName("modes")]
     public SessionModeState? Modes { get; init; }
@@ -43,7 +43,7 @@ public sealed partial class NewSessionResponse
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

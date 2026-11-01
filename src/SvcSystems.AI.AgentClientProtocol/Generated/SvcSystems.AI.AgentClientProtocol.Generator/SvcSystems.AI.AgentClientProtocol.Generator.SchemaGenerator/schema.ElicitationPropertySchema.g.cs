@@ -11,8 +11,8 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// Property schema for elicitation form fields.
 /// 
 /// Each variant corresponds to a JSON Schema `"type"` value.
-/// Single-select enums use the `String` variant with `enum` or `oneOf` set.
-/// Multi-select enums use the `Array` variant.
+/// Single-select enums use `type: "string"` with `enum` or `oneOf` set.
+/// Multi-select enums use `type: "array"`.
 /// </summary>
 [JsonUnion(TypeClassifier = typeof(ElicitationPropertySchemaJsonTypeClassifier))]
 public union ElicitationPropertySchema(StringPropertySchema, NumberPropertySchema, IntegerPropertySchema, BooleanPropertySchema, MultiSelectPropertySchema, ElicitationPropertySchemaCase5);

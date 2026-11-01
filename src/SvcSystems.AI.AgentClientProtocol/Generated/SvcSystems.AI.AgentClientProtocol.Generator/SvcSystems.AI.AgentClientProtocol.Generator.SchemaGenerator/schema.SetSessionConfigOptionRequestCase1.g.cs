@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Models;
 
 /// <summary>
-/// A [`SessionConfigValueId`] string value.
+/// A `SessionConfigValueId` string value.
 /// 
 /// This is the default when `type` is absent on the wire. Unknown `type`
 /// values with string payloads also gracefully deserialize into this
@@ -41,7 +41,7 @@ public sealed partial class SetSessionConfigOptionRequestCase1
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

@@ -14,9 +14,9 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// 
 /// When a client sends a `session/cancel` notification to cancel an ongoing
 /// prompt turn, it MUST respond to all pending `session/request_permission`
-/// requests with this `Cancelled` outcome.
+/// requests with this `cancelled` outcome.
 /// 
-/// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/prompt-turn#cancellation)
+/// See protocol docs: [Cancellation](https://agentclientprotocol.com/protocol/v1/prompt-turn#cancellation)
 /// </summary>
 public sealed class RequestPermissionOutcomeVariant0Cancelled : RequestPermissionOutcome
 {

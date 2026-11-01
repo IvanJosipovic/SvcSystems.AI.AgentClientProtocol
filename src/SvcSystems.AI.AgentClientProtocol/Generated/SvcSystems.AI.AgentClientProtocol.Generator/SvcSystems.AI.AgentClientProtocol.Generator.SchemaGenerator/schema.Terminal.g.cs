@@ -14,7 +14,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// 
 /// The terminal must be added before calling `terminal/release`.
 /// 
-/// See protocol docs: [Terminal](https://agentclientprotocol.com/protocol/terminals)
+/// See protocol docs: [Terminal](https://agentclientprotocol.com/protocol/v1/terminals)
 /// </summary>
 public sealed partial class Terminal
 {
@@ -29,7 +29,7 @@ public sealed partial class Terminal
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

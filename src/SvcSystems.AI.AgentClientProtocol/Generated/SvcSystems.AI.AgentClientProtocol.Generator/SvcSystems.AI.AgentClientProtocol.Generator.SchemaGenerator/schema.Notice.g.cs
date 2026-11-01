@@ -13,7 +13,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// Information for the user that is not part of session history.
 /// 
 /// Agents MUST only send this update when the Client advertised
-/// [`ClientSessionCapabilities::notices`].
+/// the `session.notices` Client capability.
 /// </summary>
 public sealed partial class Notice
 {

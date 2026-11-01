@@ -15,13 +15,13 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 public sealed partial class McpCapabilities
 {
     /// <summary>
-    /// Agent supports [`McpServer::Http`].
+    /// Agent supports `http` MCP servers.
     /// </summary>
     [JsonPropertyName("http")]
     public bool? Http { get; init; }
 
     /// <summary>
-    /// Agent supports [`McpServer::Sse`].
+    /// Agent supports `sse` MCP servers.
     /// </summary>
     [JsonPropertyName("sse")]
     public bool? Sse { get; init; }
@@ -31,7 +31,7 @@ public sealed partial class McpCapabilities
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

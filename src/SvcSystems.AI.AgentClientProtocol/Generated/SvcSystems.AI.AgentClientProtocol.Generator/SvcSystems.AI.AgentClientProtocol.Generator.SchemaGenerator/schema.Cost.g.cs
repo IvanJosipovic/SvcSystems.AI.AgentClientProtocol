@@ -21,7 +21,8 @@ public sealed partial class Cost
     public required double Amount { get; init; }
 
     /// <summary>
-    /// ISO 4217 currency code (e.g., "USD", "EUR").
+    /// Unit of `amount`: an ISO 4217 currency code (e.g., "USD", "EUR") for money, or another
+    /// unit such as "credits".
     /// </summary>
     [JsonPropertyName("currency")]
     public required string Currency { get; init; }
@@ -31,7 +32,7 @@ public sealed partial class Cost
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
     /// 
-    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/extensibility)
+    /// See protocol docs: [Extensibility](https://agentclientprotocol.com/protocol/v1/extensibility)
     /// </summary>
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }

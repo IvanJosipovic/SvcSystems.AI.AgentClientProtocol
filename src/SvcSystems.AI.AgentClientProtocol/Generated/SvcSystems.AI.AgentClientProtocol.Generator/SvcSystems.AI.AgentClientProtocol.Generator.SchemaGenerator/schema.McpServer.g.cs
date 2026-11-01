@@ -15,7 +15,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// MCP servers provide tools and context that the agent can use when
 /// processing prompts.
 /// 
-/// See protocol docs: [MCP Servers](https://agentclientprotocol.com/protocol/session-setup#mcp-servers)
+/// See protocol docs: [MCP Servers](https://agentclientprotocol.com/protocol/v1/session-setup#mcp-servers)
 /// </summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(McpServerHttp), "http")]
