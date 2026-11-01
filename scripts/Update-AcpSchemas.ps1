@@ -83,6 +83,11 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Failed to download ACP Registry schema release assets.'
 }
 
+& dotnet build
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet build failed with exit code $LASTEXITCODE."
+}
+
 & git diff HEAD --quiet -- schema
 $diffExitCode = $LASTEXITCODE
 if ($diffExitCode -eq 0) {
@@ -131,8 +136,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Failed to configure the Git author email.' }
 
 & git checkout -B $branchName
 if ($LASTEXITCODE -ne 0) { throw "Failed to check out branch '$branchName'." }
-& git add schema
-if ($LASTEXITCODE -ne 0) { throw 'Failed to stage schema updates.' }
+& git add --all
+if ($LASTEXITCODE -ne 0) { throw 'Failed to stage workspace changes.' }
 & git commit -m 'chore: update ACP schemas'
 if ($LASTEXITCODE -ne 0) { throw 'Failed to commit schema updates.' }
 & git push --force-with-lease origin $branchName
