@@ -15,7 +15,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// The client runs the configured agent program as a separate interactive
 /// process for the user to authenticate via a TUI. Agents MUST advertise this
 /// method only when the client enabled its terminal authentication capability.
-/// A zero exit status signals success; any other termination signals failure.
+/// A zero exit status signals success. Any other termination signals failure.
 /// The client MUST NOT pass this method to `authenticate`.
 /// </summary>
 public sealed partial class AuthMethodTerminal
@@ -33,7 +33,7 @@ public sealed partial class AuthMethodTerminal
     public required string Name { get; init; }
 
     /// <summary>
-    /// Optional description providing more details about this authentication method.
+    /// Optional human-readable description of this authentication method.
     /// </summary>
     [JsonPropertyName("description")]
     public string? Description { get; init; }

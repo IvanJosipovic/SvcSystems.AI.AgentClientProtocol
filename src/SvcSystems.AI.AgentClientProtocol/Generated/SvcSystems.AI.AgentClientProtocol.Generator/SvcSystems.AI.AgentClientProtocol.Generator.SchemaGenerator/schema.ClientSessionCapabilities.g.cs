@@ -16,7 +16,7 @@ public sealed partial class ClientSessionCapabilities
 {
     /// <summary>
     /// Support for ID-addressed context compaction updates. Omitted or `null`
-    /// means unsupported; `{}` advertises the complete compaction contract.
+    /// means unsupported. `{}` advertises the complete compaction contract.
     /// </summary>
     [JsonPropertyName("compaction")]
     public CompactionCapabilities? Compaction { get; init; }
