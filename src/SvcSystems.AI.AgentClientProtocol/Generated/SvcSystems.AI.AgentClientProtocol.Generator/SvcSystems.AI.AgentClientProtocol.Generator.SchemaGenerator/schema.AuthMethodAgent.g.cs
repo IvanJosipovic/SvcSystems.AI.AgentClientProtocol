@@ -29,7 +29,7 @@ public sealed partial class AuthMethodAgent
     public required string Name { get; init; }
 
     /// <summary>
-    /// Optional description providing more details about this authentication method.
+    /// Optional human-readable description of this authentication method.
     /// </summary>
     [JsonPropertyName("description")]
     public string? Description { get; init; }
