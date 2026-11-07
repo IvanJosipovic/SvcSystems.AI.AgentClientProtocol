@@ -101,7 +101,7 @@ public sealed class WireJsonTests
         var sessionForm = new ElicitationFormMode
         {
             Message = "What is your name?",
-            RequestedSchema = new ElicitationSchema { Type = "object" },
+            RequestedSchema = new ElicitationSchema { Type = ElicitationSchemaType.Object },
             SessionId = "session-1",
             ToolCallId = "tool-1"
         };
@@ -115,7 +115,7 @@ public sealed class WireJsonTests
         var requestForm = new ElicitationFormMode
         {
             Message = "Name?",
-            RequestedSchema = new ElicitationSchema { Type = "object" },
+            RequestedSchema = new ElicitationSchema { Type = ElicitationSchemaType.Object },
             RequestId = numericRequestId
         };
         AssertUnionRoundTrip<ElicitationFormMode>(

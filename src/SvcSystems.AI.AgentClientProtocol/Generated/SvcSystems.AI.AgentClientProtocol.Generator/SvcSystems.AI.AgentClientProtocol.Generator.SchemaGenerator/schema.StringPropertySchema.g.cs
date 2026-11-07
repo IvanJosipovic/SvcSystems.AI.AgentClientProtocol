@@ -63,7 +63,7 @@ public sealed partial class StringPropertySchema
     /// Optional. Omitted and `null` are equivalent and mean there is no format constraint.
     /// </summary>
     [JsonPropertyName("format")]
-    public string? Format { get; init; }
+    public StringFormat? Format { get; init; }
 
     /// <summary>
     /// Default value.

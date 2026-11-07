@@ -21,7 +21,7 @@ public sealed partial class ElicitationSchema
     /// Type discriminator. Always `"object"`.
     /// </summary>
     [JsonPropertyName("type")]
-    public string? Type { get; init; }
+    public ElicitationSchemaType? Type { get; init; }
 
     /// <summary>
     /// Optional title for the schema.

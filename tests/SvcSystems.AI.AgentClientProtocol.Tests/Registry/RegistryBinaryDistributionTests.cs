@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using SvcSystems.AI.AgentClientProtocol.Registry.Models;
 using SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
 using Xunit;
 
@@ -39,6 +40,36 @@ public sealed class RegistryBinaryDistributionTests
 
         var roundTrip = JsonSerializer.Serialize(agent, RegistryJsonContext.Default.RegistryAgent);
         var restored = JsonSerializer.Deserialize(roundTrip, RegistryJsonContext.Default.RegistryAgent)!;
-        Assert.Equal("agent.exe", restored.Distribution.Binary!.Targets["windows-x86_64"].Cmd);
+        Assert.Equal("agent.exe", restored.Distribution.Binary!.Targets[BinaryDistributionPropertyName.WindowsX8664].Cmd);
+    }
+
+    [Fact]
+    public void RegistryBinaryTargetsRejectUnknownPlatformNames()
+    {
+        const string json = "{ \"unknown-platform\": { \"archive\": \"https://example.test/a.zip\", \"cmd\": \"agent\" } }";
+
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
+            json,
+            RegistryJsonContext.Default.binaryDistribution));
+    }
+
+    [Fact]
+    public void RegistryBinaryTargetsAcceptSchemaAddedMuslKeysAndResolveThemByWireName()
+    {
+        const string json = "{ \"linux-x86_64-musl\": { \"archive\": \"https://example.test/a.tar.gz\", \"cmd\": \"agent\" } }";
+
+        var distribution = JsonSerializer.Deserialize(json, RegistryJsonContext.Default.binaryDistribution)!;
+
+        Assert.True(distribution.TryGetTarget("linux-x86_64-musl", out var target));
+        Assert.Equal("agent", target!.Cmd);
+        Assert.False(distribution.TryGetTarget("linux-x86_64", out _));
+    }
+
+    [Fact]
+    public void RegistryBinaryTargetsRequireAtLeastOnePlatform()
+    {
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
+            "{}",
+            RegistryJsonContext.Default.binaryDistribution));
     }
 }

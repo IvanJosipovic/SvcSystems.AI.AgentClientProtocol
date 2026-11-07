@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
 
 [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, AllowOutOfOrderMetadataProperties = true)]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.BinaryDistributionPropertyName))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.RegistryAgent))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.RegistryAgentDistribution))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.RegistryIndex))]

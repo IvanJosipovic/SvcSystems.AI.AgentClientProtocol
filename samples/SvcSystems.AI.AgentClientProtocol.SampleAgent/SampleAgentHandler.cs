@@ -124,7 +124,7 @@ internal sealed class SampleAgentHandler : IAgentHandler
 
         if (!string.Equals(text, HangPromptText, StringComparison.Ordinal))
         {
-            return new PromptResponse { StopReason = "end_turn" };
+            return new PromptResponse { StopReason = StopReason.EndTurn };
         }
 
         // The host links `cancellationToken` to its own prompt-cancellation source, which covers
@@ -138,11 +138,11 @@ internal sealed class SampleAgentHandler : IAgentHandler
         {
             // Never completes on its own; only cancellation releases the turn.
             await Task.Delay(Timeout.InfiniteTimeSpan, linked.Token).ConfigureAwait(false);
-            return new PromptResponse { StopReason = "end_turn" };
+            return new PromptResponse { StopReason = StopReason.EndTurn };
         }
         catch (OperationCanceledException) when (promptCancellation.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
         {
-            return new PromptResponse { StopReason = "cancelled" };
+            return new PromptResponse { StopReason = StopReason.Cancelled };
         }
         finally
         {

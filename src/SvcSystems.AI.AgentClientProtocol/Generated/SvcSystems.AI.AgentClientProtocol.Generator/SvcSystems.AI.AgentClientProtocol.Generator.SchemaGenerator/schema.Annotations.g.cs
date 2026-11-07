@@ -18,7 +18,7 @@ public sealed partial class Annotations
     /// Intended recipients for this content, such as the user or assistant.
     /// </summary>
     [JsonPropertyName("audience")]
-    public List<string>? Audience { get; init; }
+    public List<Role>? Audience { get; init; }
 
     /// <summary>
     /// Timestamp indicating when the underlying resource was last modified.

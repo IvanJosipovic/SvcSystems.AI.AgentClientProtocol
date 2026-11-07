@@ -29,13 +29,13 @@ public sealed partial class PlanEntry
     /// Used to indicate which tasks are most critical to the overall goal.
     /// </summary>
     [JsonPropertyName("priority")]
-    public required string Priority { get; init; }
+    public required PlanEntryPriority Priority { get; init; }
 
     /// <summary>
     /// Current execution status of this task.
     /// </summary>
     [JsonPropertyName("status")]
-    public required string Status { get; init; }
+    public required PlanEntryStatus Status { get; init; }
 
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
