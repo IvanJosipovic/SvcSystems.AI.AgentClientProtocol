@@ -1,6 +1,8 @@
 ﻿# SvcSystems.AI.AgentClientProtocol
 
 [![NuGet](https://img.shields.io/nuget/v/SvcSystems.AI.AgentClientProtocol)](https://www.nuget.org/packages/SvcSystems.AI.AgentClientProtocol)
+[![Downloads](https://img.shields.io/nuget/dt/SvcSystems.AI.AgentClientProtocol.svg?style=flat-square)](https://www.nuget.org/packagesSvcSystems.AI.AgentClientProtocol)
+[![codecov](https://codecov.io/gh/IvanJosipovic/SvcSystems.AI.AgentClientProtocol/graph/badge.svg?token=Y8kBlwqTEl)](https://codecov.io/gh/IvanJosipovic/SvcSystems.AI.AgentClientProtocol)
 
 A .NET library for the [Agent Client Protocol (ACP)](https://agentclientprotocol.com/): a
 session-oriented client and an agent host.
