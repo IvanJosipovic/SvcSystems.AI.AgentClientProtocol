@@ -238,9 +238,9 @@ public sealed class AcpTckIntegrationTests
     }
 
     [Theory]
-    [InlineData(false, "end_turn")]
-    [InlineData(true, "cancelled")]
-    public async Task PermissionCallbacksCanSelectOrCancel(bool cancel, string stopReason)
+    [InlineData(false, StopReason.EndTurn)]
+    [InlineData(true, StopReason.Cancelled)]
+    public async Task PermissionCallbacksCanSelectOrCancel(bool cancel, StopReason stopReason)
     {
         using var timeout = Timeout();
         var handler = new PermissionHandler(cancel);
@@ -249,7 +249,7 @@ public sealed class AcpTckIntegrationTests
         var session = await client.CreateSessionAsync(Options(), timeout.Token);
         var updates = await PromptAsync(session, "permission", timeout.Token);
         Assert.Equal(1, handler.Calls);
-        Assert.Equal(Enum.Parse<StopReason>(stopReason), Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.Equal(stopReason, Assert.Single(updates.OfType<Completed>()).Response.StopReason);
     }
 
     [Fact]

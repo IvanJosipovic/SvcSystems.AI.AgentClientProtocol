@@ -51,6 +51,9 @@ public sealed class RegistryBinaryDistributionTests
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
             json,
             RegistryJsonContext.Default.binaryDistribution));
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
+            "{ \"999\": { \"archive\": \"https://example.test/a.zip\", \"cmd\": \"agent\" } }",
+            RegistryJsonContext.Default.binaryDistribution));
     }
 
     [Fact]
@@ -63,6 +66,8 @@ public sealed class RegistryBinaryDistributionTests
         Assert.True(distribution.TryGetTarget("linux-x86_64-musl", out var target));
         Assert.Equal("agent", target!.Cmd);
         Assert.False(distribution.TryGetTarget("linux-x86_64", out _));
+        Assert.False(distribution.TryGetTarget("not-a-platform", out _));
+        Assert.False(distribution.TryGetTarget("999", out _));
     }
 
     [Fact]
@@ -70,6 +75,25 @@ public sealed class RegistryBinaryDistributionTests
     {
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
             "{}",
+            RegistryJsonContext.Default.binaryDistribution));
+    }
+
+    [Fact]
+    public void RegistryBinaryTargetsMustBeObjectsWithNonNullTargets()
+    {
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
+            "[]",
+            RegistryJsonContext.Default.binaryDistribution));
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
+            "{ \"linux-x86_64\": null }",
+            RegistryJsonContext.Default.binaryDistribution));
+    }
+
+    [Fact]
+    public void RegistryBinaryTargetsCannotSerializeAnEmptyMap()
+    {
+        Assert.Throws<JsonException>(() => JsonSerializer.Serialize(
+            new binaryDistribution(),
             RegistryJsonContext.Default.binaryDistribution));
     }
 }

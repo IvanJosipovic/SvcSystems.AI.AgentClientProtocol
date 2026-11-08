@@ -411,6 +411,7 @@ public sealed class RegistryAgentLauncherTests
     [InlineData("linux-x64", "linux-x86_64")]
     [InlineData("linux-musl-arm64", "linux-aarch64-musl")]
     [InlineData("linux-musl-x64", "linux-x86_64-musl")]
+    [InlineData("linux-riscv64", "linux-riscv64")]
     [InlineData("win-arm64", "windows-aarch64")]
     [InlineData("win-x64", "windows-x86_64")]
     public void MapsDotnetRuntimeIdentifiersToRegistryBinaryPlatformNames(

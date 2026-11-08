@@ -871,6 +871,92 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void PropertyNamesOnDefinitionsGenerateNamedEnums()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "PlatformMap": {
+                  "type": "object",
+                  "propertyNames": { "enum": ["linux-x86_64", "windows-x86_64"] },
+                  "additionalProperties": { "type": "string" }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "definition-property-names-enum.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var enumSource = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("public enum PlatformMapPropertyName", StringComparison.Ordinal));
+        Assert.Contains("JsonStringEnumMemberName(\"linux-x86_64\")", enumSource, StringComparison.Ordinal);
+        Assert.Contains("JsonStringEnumMemberName(\"windows-x86_64\")", enumSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReportsPropertyNamesEnumNameCollisions()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "RequestPropertyName": { "type": "string" },
+                "RequestPlatformsPropertyName": { "type": "string" },
+                "Request": {
+                  "type": "object",
+                  "propertyNames": { "enum": ["first", "second"] },
+                  "properties": {
+                    "platforms": {
+                      "type": "object",
+                      "propertyNames": { "enum": ["linux-x86_64", "windows-x86_64"] },
+                      "additionalProperties": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "definition-property-names-collision.schema.json");
+
+        var diagnostics = result.Diagnostics.Where(item => item.Id == "ACPGEN003").ToArray();
+        Assert.Equal(2, diagnostics.Length);
+        Assert.Contains(diagnostics, diagnostic =>
+            diagnostic.GetMessage().Contains("generated property-name enum 'RequestPropertyName' collides", StringComparison.Ordinal));
+        Assert.Contains(diagnostics, diagnostic =>
+            diagnostic.GetMessage().Contains("generated property-name enum 'RequestPlatformsPropertyName' collides", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void RejectsUnsupportedPropertyNamesConstraints()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Request": {
+                  "type": "object",
+                  "properties": {
+                    "labels": {
+                      "type": "object",
+                      "propertyNames": { "type": "string", "minLength": 2 },
+                      "additionalProperties": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "unsupported-property-names.schema.json");
+
+        var diagnostic = Assert.Single(result.Diagnostics.Where(item => item.Id == "ACPGEN003"));
+        Assert.Contains("propertyNames constraints other than a closed string enum are not supported", diagnostic.GetMessage(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void NullPairingMakesEverySchemaTypeNullable()
     {
         const string schema = """
