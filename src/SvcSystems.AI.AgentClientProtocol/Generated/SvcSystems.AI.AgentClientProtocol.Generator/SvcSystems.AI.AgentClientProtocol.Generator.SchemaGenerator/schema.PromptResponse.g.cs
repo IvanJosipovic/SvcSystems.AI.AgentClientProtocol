@@ -20,7 +20,7 @@ public sealed partial class PromptResponse
     /// Indicates why the agent stopped processing the turn.
     /// </summary>
     [JsonPropertyName("stopReason")]
-    public required string StopReason { get; init; }
+    public required StopReason StopReason { get; init; }
 
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional

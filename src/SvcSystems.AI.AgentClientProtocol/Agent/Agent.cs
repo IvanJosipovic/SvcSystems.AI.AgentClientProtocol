@@ -213,7 +213,7 @@ public sealed class Agent : IAsyncDisposable
             {
                 // A prompt cancelled by the host shutting down is not a protocol failure either.
                 // The turn ends as "cancelled" so the peer sees a well-formed response.
-                response = new PromptResponse { StopReason = "cancelled" };
+                response = new PromptResponse { StopReason = StopReason.Cancelled };
             }
 
             return JsonSerializer.SerializeToUtf8Bytes(response, JsonContext.Default.PromptResponse);

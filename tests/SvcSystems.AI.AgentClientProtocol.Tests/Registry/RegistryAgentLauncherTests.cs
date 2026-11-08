@@ -92,8 +92,7 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task PreviewBinaryUsesPreviewVersionInItsCachePath()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "preview executable");
         var agent = CreateAgent(
             "preview-binary-agent",
@@ -104,7 +103,7 @@ public sealed class RegistryAgentLauncherTests
                 Version = "1.1.0-preview.3",
                 Distribution = new previewChannelDistribution
                 {
-                    Binary = CreateBinaryDistribution(platform.Value.RegistryName, "https://registry.test/preview.zip", "agent.exe"),
+                    Binary = CreateBinaryDistribution(platform.RegistryName, "https://registry.test/preview.zip", "agent.exe"),
                 },
             });
         var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-preview-agents-{Guid.NewGuid():N}");
@@ -117,7 +116,7 @@ public sealed class RegistryAgentLauncherTests
         try
         {
             var process = await launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken);
-            Assert.Contains(Path.Combine("preview-binary-agent", "1.1.0-preview.3", platform.Value.RuntimeIdentifier), process.FileName, StringComparison.Ordinal);
+            Assert.Contains(Path.Combine("preview-binary-agent", "1.1.0-preview.3", platform.RuntimeIdentifier), process.FileName, StringComparison.Ordinal);
             Assert.Equal("preview executable", await File.ReadAllTextAsync(process.FileName, TestContext.Current.CancellationToken));
         }
         finally
@@ -146,15 +145,14 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task FallsBackToBinaryWhenPackageManagersAreUnavailableAndVerifiesArchiveChecksum()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
         var sha256 = Convert.ToHexString(SHA256.HashData(zipBytes));
         var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
         {
-            Targets = new Dictionary<string, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
             {
-                [platform.Value.RegistryName] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Sha256 = sha256,
@@ -175,7 +173,7 @@ public sealed class RegistryAgentLauncherTests
             var process = await launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Equal(["acp"], process.Arguments);
-            Assert.EndsWith(Path.Combine("binary-agent", "1.2.3", platform.Value.RuntimeIdentifier, "agent.exe"), process.FileName);
+            Assert.EndsWith(Path.Combine("binary-agent", "1.2.3", platform.RuntimeIdentifier, "agent.exe"), process.FileName);
             Assert.Equal("test executable", await File.ReadAllTextAsync(process.FileName, TestContext.Current.CancellationToken));
         }
         finally
@@ -190,14 +188,13 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task RejectsChecksumlessBinaryArchiveWhenAChecksumIsRequired()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
         var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
         {
-            Targets = new Dictionary<string, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
             {
-                [platform.Value.RegistryName] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Cmd = "agent.exe",
@@ -229,14 +226,13 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task InstallsChecksumlessBinaryArchiveWhenAChecksumIsNotRequired()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
         var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
         {
-            Targets = new Dictionary<string, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
             {
-                [platform.Value.RegistryName] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Cmd = "agent.exe",
@@ -267,14 +263,13 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task RejectsBinaryArchiveWhenChecksumDoesNotMatch()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
         var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
         {
-            Targets = new Dictionary<string, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
             {
-                [platform.Value.RegistryName] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Sha256 = new string('0', 64),
@@ -307,11 +302,10 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task ExtractsGZipTarArchiveIntoWorkingDirectoryAgentCache()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var archiveBytes = CreateTarGZip("bundle/agent", "tar executable");
         var agent = CreateAgent("tar-agent", "2.0.0", binary: CreateBinaryDistribution(
-            platform.Value.RegistryName,
+            platform.RegistryName,
             "https://registry.test/agent.tar.gz",
             "bundle/agent"));
         var workingDirectory = Path.Combine(Path.GetTempPath(), $"acp-working-{Guid.NewGuid():N}");
@@ -338,10 +332,9 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task CopiesRawBinaryToTheConfiguredAgentCache()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var agent = CreateAgent("raw-agent", "1.0.0", binary: CreateBinaryDistribution(
-            platform.Value.RegistryName,
+            platform.RegistryName,
             "https://registry.test/agent.bin",
             "agent.bin"));
         var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}");
@@ -368,11 +361,10 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task ExtractsBZip2TarArchiveWhenSystemTarIsAvailable()
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform();
-        Assert.NotNull(platform);
+        var platform = GetCurrentPlatform();
         var archiveBytes = await CreateBZip2TarOrSkipAsync(TestContext.Current.CancellationToken);
         var agent = CreateAgent("bzip-agent", "1.0.0", binary: CreateBinaryDistribution(
-            platform.Value.RegistryName,
+            platform.RegistryName,
             "https://registry.test/agent.tar.bz2",
             "agent"));
         var agentsDirectory = Path.Combine(Path.GetTempPath(), $"acp-agents-{Guid.NewGuid():N}");
@@ -413,22 +405,31 @@ public sealed class RegistryAgentLauncherTests
     }
 
     [Theory]
-    [InlineData("darwin", Architecture.Arm64, "darwin-aarch64", "osx-arm64")]
-    [InlineData("darwin", Architecture.X64, "darwin-x86_64", "osx-x64")]
-    [InlineData("linux", Architecture.Arm64, "linux-aarch64", "linux-arm64")]
-    [InlineData("linux", Architecture.X64, "linux-x86_64", "linux-x64")]
-    [InlineData("windows", Architecture.Arm64, "windows-aarch64", "win-arm64")]
-    [InlineData("windows", Architecture.X64, "windows-x86_64", "win-x64")]
-    public void MapsRegistryBinaryPlatformNamesToDotnetRuntimeIdentifiers(
-        string operatingSystem,
-        Architecture architecture,
-        string registryName,
-        string runtimeIdentifier)
+    [InlineData("osx-arm64", "darwin-aarch64")]
+    [InlineData("osx-x64", "darwin-x86_64")]
+    [InlineData("linux-arm64", "linux-aarch64")]
+    [InlineData("linux-x64", "linux-x86_64")]
+    [InlineData("linux-musl-arm64", "linux-aarch64-musl")]
+    [InlineData("linux-musl-x64", "linux-x86_64-musl")]
+    [InlineData("linux-riscv64", "linux-riscv64")]
+    [InlineData("win-arm64", "windows-aarch64")]
+    [InlineData("win-x64", "windows-x86_64")]
+    public void MapsDotnetRuntimeIdentifiersToRegistryBinaryPlatformNames(
+        string runtimeIdentifier,
+        string registryName)
     {
-        var platform = RegistryAgentLauncher.GetRegistryPlatform(operatingSystem, architecture);
+        var platform = RegistryPlatform.FromRuntimeIdentifier(runtimeIdentifier);
         Assert.NotNull(platform);
-        Assert.Equal(registryName, platform.Value.RegistryName);
-        Assert.Equal(runtimeIdentifier, platform.Value.RuntimeIdentifier);
+        Assert.Equal(registryName, platform.RegistryName);
+        Assert.Equal(runtimeIdentifier, platform.RuntimeIdentifier);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("linux")]
+    public void RejectsIncompleteDotnetRuntimeIdentifiers(string runtimeIdentifier)
+    {
+        Assert.Null(RegistryPlatform.FromRuntimeIdentifier(runtimeIdentifier));
     }
 
     private static string NpxCommand => OperatingSystem.IsWindows() ? "npx.cmd" : "npx";
@@ -461,15 +462,28 @@ public sealed class RegistryAgentLauncherTests
 
     private static binaryDistribution CreateBinaryDistribution(string platform, string archive, string command) => new()
     {
-        Targets = new Dictionary<string, binaryTarget>
+        Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
         {
-            [platform] = new binaryTarget
+            [ParsePlatformName(platform)] = new binaryTarget
             {
                 Archive = archive,
                 Cmd = command,
             },
         },
     };
+
+    private static BinaryDistributionPropertyName ParsePlatformName(string value)
+    {
+        Assert.True(BinaryDistributionJsonConverter.TryParsePlatformName(value, out var platform));
+        return platform;
+    }
+
+    private static RegistryPlatform GetCurrentPlatform()
+    {
+        var platform = RegistryPlatform.FromRuntimeIdentifier(RuntimeInformation.RuntimeIdentifier);
+        Assert.NotNull(platform);
+        return platform;
+    }
 
     private static byte[] CreateZip(string fileName, string content)
     {

@@ -40,7 +40,7 @@ internal sealed class RegistryBinaryInstaller
     internal async Task<string> EnsureInstalledAsync(
         RegistryAgent agent,
         string version,
-        (string RegistryName, string RuntimeIdentifier) platform,
+        RegistryPlatform platform,
         binaryTarget target,
         string? workingDirectory,
         CancellationToken cancellationToken)

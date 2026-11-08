@@ -63,7 +63,7 @@ public sealed class AgentShutdownStressTests
         {
             promptEntered.TrySetResult();
             await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
-            return new PromptResponse { StopReason = "end_turn" };
+            return new PromptResponse { StopReason = StopReason.EndTurn };
         }
     }
 

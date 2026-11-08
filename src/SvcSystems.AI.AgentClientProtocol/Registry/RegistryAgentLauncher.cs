@@ -82,13 +82,14 @@ public sealed class RegistryAgentLauncher : IDisposable
             unavailable.Add("uvx distribution advertised, but the uvx command is missing or failed its --version check");
         }
 
-        var platform = GetRegistryPlatform();
-        if (platform is not null && binary is not null && binary.Targets.TryGetValue(platform.Value.RegistryName, out var target))
+        var platform = RegistryPlatform.FromRuntimeIdentifier(RuntimeInformation.RuntimeIdentifier);
+        if (platform is not null && binary is not null &&
+            binary.TryGetTarget(platform, out var target) && target is not null)
         {
             var executable = await _binaryInstaller.EnsureInstalledAsync(
                 agent,
                 version,
-                platform.Value,
+                platform,
                 target,
                 workingDirectory,
                 cancellationToken).ConfigureAwait(false);
@@ -105,7 +106,7 @@ public sealed class RegistryAgentLauncher : IDisposable
         {
             unavailable.Add(platform is null
                 ? "binary distribution advertised, but the current operating system or architecture is unsupported"
-                : $"binary distribution advertised, but no target exists for {platform.Value.RegistryName}");
+                : $"binary distribution advertised, but no target exists for {platform.RegistryName}");
         }
 
         var details = unavailable.Count > 0
@@ -165,45 +166,6 @@ public sealed class RegistryAgentLauncher : IDisposable
             WorkingDirectory = workingDirectory,
             Environment = ToProcessEnvironment(environment),
         };
-    }
-
-    internal static (string RegistryName, string RuntimeIdentifier)? GetRegistryPlatform(
-        string? operatingSystemOverride = null,
-        Architecture? architectureOverride = null)
-    {
-        var architecture = (architectureOverride ?? RuntimeInformation.ProcessArchitecture) switch
-        {
-            Architecture.X64 => "x86_64",
-            Architecture.Arm64 => "aarch64",
-            _ => null,
-        };
-        if (architecture is null)
-        {
-            return null;
-        }
-
-        var operatingSystem = operatingSystemOverride ?? (OperatingSystem.IsWindows() ? "windows"
-            : OperatingSystem.IsMacOS() ? "darwin"
-            : OperatingSystem.IsLinux() ? "linux"
-            : null);
-        if (operatingSystem is null)
-        {
-            return null;
-        }
-
-        var ridArchitecture = architecture switch
-        {
-            "x86_64" => "x64",
-            "aarch64" => "arm64",
-            _ => throw new InvalidOperationException(),
-        };
-        var rid = operatingSystem switch
-        {
-            "windows" => $"win-{ridArchitecture}",
-            "darwin" => $"osx-{ridArchitecture}",
-            _ => $"linux-{ridArchitecture}",
-        };
-        return ($"{operatingSystem}-{architecture}", rid);
     }
 
     private static IReadOnlyDictionary<string, string?> ToProcessEnvironment(IReadOnlyDictionary<string, string>? environment) =>

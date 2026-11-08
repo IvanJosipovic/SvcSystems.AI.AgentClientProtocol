@@ -24,13 +24,13 @@ public sealed partial class ToolCallUpdate
     /// Update the tool kind.
     /// </summary>
     [JsonPropertyName("kind")]
-    public string? Kind { get; init; }
+    public ToolKind? Kind { get; init; }
 
     /// <summary>
     /// Update the execution status.
     /// </summary>
     [JsonPropertyName("status")]
-    public string? Status { get; init; }
+    public ToolCallStatus? Status { get; init; }
 
     /// <summary>
     /// Update the human-readable title.

@@ -69,10 +69,11 @@ internal sealed class SchemaModelBuilder(
             if (IsInternalDefinition(definition.Value))
             {
                 foreach (var type in _model.Types.Where(type =>
-                             type.Name == name ||
-                             type.Name.StartsWith(name, StringComparison.Ordinal) &&
-                             type.Name.Length > name.Length &&
-                             char.IsUpper(type.Name[name.Length])))
+                              type.Name == name ||
+                              type.Name == PropertyNamesEnumName(name) ||
+                              type.Name.StartsWith(name, StringComparison.Ordinal) &&
+                              type.Name.Length > name.Length &&
+                              char.IsUpper(type.Name[name.Length])))
                 {
                     type.IsInternal = true;
                 }
@@ -138,6 +139,7 @@ internal sealed class SchemaModelBuilder(
             foreach (var part in schema.OneOf ?? []) Visit(part);
             Visit(schema.Items);
             Visit(schema.AdditionalProperties);
+            Visit(schema.PropertyNames);
         }
     }
 
@@ -163,13 +165,14 @@ internal sealed class SchemaModelBuilder(
         var originalTypeCount = _model.Types.Count;
 
         ValidateSupportedConstructs(name, schema);
-        if (OpenEnumPrimitiveType(schema) is not null)
-        {
-            // Extensible string/numeric enums use their primitive wire type.
-        }
-        else if (TryGetClosedStringEnum(schema, out var values))
+        AddPropertyNamesEnum(name, schema);
+        if (TryGetClosedStringEnum(schema, out var values))
         {
             _model.Types.Add(new EnumModel(name, values));
+        }
+        else if (OpenEnumPrimitiveType(schema) is not null)
+        {
+            // Extensible string/numeric enums use their primitive wire type.
         }
         else if (IsUnion(schema))
         {
@@ -688,6 +691,10 @@ internal sealed class SchemaModelBuilder(
             }
             ValidateSupportedConstructs(owner, resolvedDefinition);
             var referenceNullable = nullable || resolvedDefinition.Type?.HasFlag(JsonSchemaType.Null) == true || HasNullCase(resolvedDefinition);
+            if (TryGetClosedStringEnum(resolvedDefinition, out _))
+            {
+                return ApplyNullability(AddDefinition(name, definition), referenceNullable);
+            }
             if (resolvedDefinition.AllOf is { Count: 1 })
             {
                 return GetTypeName(owner, property, resolvedDefinition.AllOf[0], referenceNullable);
@@ -744,17 +751,17 @@ internal sealed class SchemaModelBuilder(
             return GetTypeName(owner, property, concrete.AnyOf[0], hasNull);
         }
 
-        var openEnum = OpenEnumPrimitiveType(concrete);
-        if (openEnum is not null)
-        {
-            return ApplyNullability(openEnum, hasNull);
-        }
-
         if (TryGetClosedStringEnum(concrete, out var enumValues))
         {
             var enumName = Identifier(owner + Pascal(property) + "Enum");
             AddModelOnce(enumName, () => new EnumModel(enumName, enumValues) { Description = concrete.Description });
             return ApplyNullability(enumName, hasNull);
+        }
+
+        var openEnum = OpenEnumPrimitiveType(concrete);
+        if (openEnum is not null)
+        {
+            return ApplyNullability(openEnum, hasNull);
         }
 
         if (IsUnion(concrete))
@@ -779,7 +786,8 @@ internal sealed class SchemaModelBuilder(
 
         if (concrete.AdditionalProperties is not null)
         {
-            return ApplyNullability("Dictionary<string, " + GetTypeName(owner, property + "Value", concrete.AdditionalProperties, nullable: false) + ">", hasNull);
+            var keyType = AddInlinePropertyNamesEnum(owner, property, concrete);
+            return ApplyNullability("Dictionary<" + keyType + ", " + GetTypeName(owner, property + "Value", concrete.AdditionalProperties, nullable: false) + ">", hasNull);
         }
 
         if (concrete.Type?.HasFlag(JsonSchemaType.Object) == true && concrete.Properties is null && concrete.AdditionalPropertiesAllowed)
@@ -1016,6 +1024,11 @@ internal sealed class SchemaModelBuilder(
         {
             ReportUnsupported(name, "tuple arrays using prefixItems are not supported");
         }
+        if (schema.PropertyNames is not null &&
+            (Resolve(schema.PropertyNames) is not { } propertyNames || !TryGetClosedStringEnum(propertyNames, out _)))
+        {
+            ReportUnsupported(name, "propertyNames constraints other than a closed string enum are not supported");
+        }
         if (schema.Type is { } type)
         {
             var nonNullTypes = (int)(type & ~JsonSchemaType.Null);
@@ -1062,7 +1075,7 @@ internal sealed class SchemaModelBuilder(
             return true;
         }
 
-        var alternatives = schema.OneOf;
+        var alternatives = schema.OneOf ?? schema.AnyOf;
         if (alternatives is not { Count: > 0 }) return false;
         var result = new List<string>();
         foreach (var alternative in alternatives)
@@ -1111,6 +1124,45 @@ internal sealed class SchemaModelBuilder(
     {
         if (_emitted.Add(name)) _model.Types.Add(create());
     }
+
+    private void AddPropertyNamesEnum(string ownerName, OpenApiSchema schema)
+    {
+        if (Resolve(schema.PropertyNames) is not { } propertyNames ||
+            !TryGetClosedStringEnum(propertyNames, out var values))
+        {
+            return;
+        }
+
+        var enumName = PropertyNamesEnumName(ownerName);
+        if (_definitions.ContainsKey(enumName))
+        {
+            ReportUnsupported(ownerName, $"generated property-name enum '{enumName}' collides with a schema definition");
+            return;
+        }
+
+        AddModelOnce(enumName, () => new EnumModel(enumName, values) { Description = propertyNames.Description });
+    }
+
+    private string AddInlinePropertyNamesEnum(string ownerName, string propertyName, OpenApiSchema schema)
+    {
+        if (Resolve(schema.PropertyNames) is not { } propertyNames ||
+            !TryGetClosedStringEnum(propertyNames, out var values))
+        {
+            return "string";
+        }
+
+        var enumName = Identifier(Pascal(ownerName) + Pascal(propertyName) + "PropertyName");
+        if (_definitions.ContainsKey(enumName))
+        {
+            ReportUnsupported(ownerName, $"generated property-name enum '{enumName}' collides with a schema definition");
+            return "string";
+        }
+
+        AddModelOnce(enumName, () => new EnumModel(enumName, values) { Description = propertyNames.Description });
+        return enumName;
+    }
+
+    private static string PropertyNamesEnumName(string ownerName) => Identifier(Pascal(ownerName) + "PropertyName");
 
     private void ReportUnsupported(string name, string detail)
     {

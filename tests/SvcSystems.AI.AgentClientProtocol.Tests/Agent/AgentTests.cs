@@ -306,7 +306,7 @@ public sealed class AgentTests
                 {
                     SessionId = request.SessionId,
                     ToolCall = new ToolCallUpdate { ToolCallId = "tool", Title = "Read" },
-                    Options = [new PermissionOption { OptionId = "allow", Name = "Allow", Kind = "allow_once" }]
+                    Options = [new PermissionOption { OptionId = "allow", Name = "Allow", Kind = PermissionOptionKind.AllowOnce }]
                 },
                 cancellationToken);
             PermissionOptionId = Assert.IsType<SelectedPermissionOutcome>(permission.Outcome).OptionId;
@@ -314,7 +314,7 @@ public sealed class AgentTests
                 new ElicitationFormMode
                 {
                     Message = "Sign in",
-                    RequestedSchema = new ElicitationSchema { Type = "object" },
+                    RequestedSchema = new ElicitationSchema { Type = ElicitationSchemaType.Object },
                     SessionId = request.SessionId
                 },
                 cancellationToken);
@@ -323,7 +323,7 @@ public sealed class AgentTests
             await context.CompleteElicitationAsync(
                 new CompleteElicitationNotification { ElicitationId = "elicitation-1" }, cancellationToken);
             ElicitationCompleted = true;
-            return new PromptResponse { StopReason = "end_turn" };
+            return new PromptResponse { StopReason = StopReason.EndTurn };
         }
     }
 
@@ -355,10 +355,10 @@ public sealed class AgentTests
                 {
                     SessionId = request.SessionId,
                     ToolCall = new ToolCallUpdate { ToolCallId = "tool", Title = "Read" },
-                    Options = [new PermissionOption { OptionId = "allow", Name = "Allow", Kind = "allow_once" }]
+                    Options = [new PermissionOption { OptionId = "allow", Name = "Allow", Kind = PermissionOptionKind.AllowOnce }]
                 },
                 cancellationToken);
-            return new PromptResponse { StopReason = "end_turn" };
+            return new PromptResponse { StopReason = StopReason.EndTurn };
         }
     }
 
@@ -387,7 +387,7 @@ public sealed class AgentTests
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 PromptCancellationObserved = true;
-                return new PromptResponse { StopReason = "cancelled" };
+                return new PromptResponse { StopReason = StopReason.Cancelled };
             }
 
             throw new InvalidOperationException("The test prompt should only finish through cancellation.");
@@ -405,7 +405,7 @@ public sealed class AgentTests
             ValueTask.FromResult(new NewSessionResponse { SessionId = "session" });
 
         public ValueTask<PromptResponse> PromptAsync(PromptRequest request, IAgentContext context, CancellationToken cancellationToken) =>
-            ValueTask.FromResult(new PromptResponse { StopReason = "end_turn" });
+            ValueTask.FromResult(new PromptResponse { StopReason = StopReason.EndTurn });
 
         public ValueTask<LoadSessionResponse> LoadSessionAsync(LoadSessionRequest request, CancellationToken cancellationToken)
         {

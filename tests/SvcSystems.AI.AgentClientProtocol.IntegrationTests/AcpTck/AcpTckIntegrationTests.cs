@@ -20,7 +20,7 @@ public sealed class AcpTckIntegrationTests
         var session = await client.CreateSessionAsync(Options(), timeout.Token);
         var updates = await PromptAsync(session, "Unicode: \u03bb \ud83d\ude80\nsecond line", timeout.Token);
         Assert.Equal("Unicode: \u03bb \ud83d\ude80\nsecond line", Text(Assert.Single(AgentMessageUpdates(updates))));
-        Assert.Equal("end_turn", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.Equal(StopReason.EndTurn, Assert.Single(updates.OfType<Completed>()).Response.StopReason);
         Assert.IsType<Completed>(updates[^1]);
     }
 
@@ -169,7 +169,7 @@ public sealed class AcpTckIntegrationTests
             updates.Add(update);
         }
         Assert.Equal("multimodal", Text(Assert.Single(AgentMessageUpdates(updates))));
-        Assert.Equal("end_turn", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.Equal(StopReason.EndTurn, Assert.Single(updates.OfType<Completed>()).Response.StopReason);
     }
 
     [Fact]
@@ -187,8 +187,8 @@ public sealed class AcpTckIntegrationTests
                 await session.CancelAsync(timeout.Token);
             }
         }
-        Assert.Equal("cancelled", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
-        Assert.Equal("end_turn", Assert.Single((await PromptAsync(session, "next", timeout.Token)).OfType<Completed>()).Response.StopReason);
+        Assert.Equal(StopReason.Cancelled, Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.Equal(StopReason.EndTurn, Assert.Single((await PromptAsync(session, "next", timeout.Token)).OfType<Completed>()).Response.StopReason);
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public sealed class AcpTckIntegrationTests
                 await client.CloseSessionAsync(session.Id, timeout.Token);
             }
         }
-        Assert.Equal("cancelled", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.Equal(StopReason.Cancelled, Assert.Single(updates.OfType<Completed>()).Response.StopReason);
     }
 
     [Fact]
@@ -221,7 +221,7 @@ public sealed class AcpTckIntegrationTests
         Assert.Equal(-32602, invalid.Code);
         await client.AuthenticateAsync("tck", timeout.Token);
         var session = await client.CreateSessionAsync(Options(), timeout.Token);
-        Assert.Equal("end_turn", Assert.Single((await PromptAsync(session, "authenticated", timeout.Token)).OfType<Completed>()).Response.StopReason);
+        Assert.Equal(StopReason.EndTurn, Assert.Single((await PromptAsync(session, "authenticated", timeout.Token)).OfType<Completed>()).Response.StopReason);
     }
 
     [Theory]
@@ -234,13 +234,13 @@ public sealed class AcpTckIntegrationTests
         await using var client = await AcpClient.StartAsync(AcpTckFixture.Process(fixture), cancellationToken: timeout.Token);
         var session = await client.CreateSessionAsync(Options(), timeout.Token);
         var updates = await PromptAsync(session, "probe", timeout.Token);
-        Assert.Equal("end_turn", Assert.Single(updates.OfType<Completed>()).Response.StopReason);
+        Assert.Equal(StopReason.EndTurn, Assert.Single(updates.OfType<Completed>()).Response.StopReason);
     }
 
     [Theory]
-    [InlineData(false, "end_turn")]
-    [InlineData(true, "cancelled")]
-    public async Task PermissionCallbacksCanSelectOrCancel(bool cancel, string stopReason)
+    [InlineData(false, StopReason.EndTurn)]
+    [InlineData(true, StopReason.Cancelled)]
+    public async Task PermissionCallbacksCanSelectOrCancel(bool cancel, StopReason stopReason)
     {
         using var timeout = Timeout();
         var handler = new PermissionHandler(cancel);

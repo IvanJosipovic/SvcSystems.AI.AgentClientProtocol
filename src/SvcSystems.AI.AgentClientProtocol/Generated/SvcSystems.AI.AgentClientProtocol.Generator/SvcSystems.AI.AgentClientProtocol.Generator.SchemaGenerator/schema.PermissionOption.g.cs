@@ -30,7 +30,7 @@ public sealed partial class PermissionOption
     /// Hint about the nature of this permission option.
     /// </summary>
     [JsonPropertyName("kind")]
-    public required string Kind { get; init; }
+    public required PermissionOptionKind Kind { get; init; }
 
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional

@@ -311,7 +311,7 @@ public sealed class AgentHostBehaviourTests
             PromptRequest request,
             IAgentContext context,
             CancellationToken cancellationToken) =>
-            ValueTask.FromResult(new PromptResponse { StopReason = "end_turn" });
+            ValueTask.FromResult(new PromptResponse { StopReason = StopReason.EndTurn });
     }
 
     private sealed class BlockingPromptHandler : IAgentHandler
@@ -333,7 +333,7 @@ public sealed class AgentHostBehaviourTests
         {
             Entered.TrySetResult();
             await Release.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
-            return new PromptResponse { StopReason = "end_turn" };
+            return new PromptResponse { StopReason = StopReason.EndTurn };
         }
     }
 
@@ -368,7 +368,7 @@ public sealed class AgentHostBehaviourTests
                 throw;
             }
 
-            return new PromptResponse { StopReason = "end_turn" };
+            return new PromptResponse { StopReason = StopReason.EndTurn };
         }
     }
 

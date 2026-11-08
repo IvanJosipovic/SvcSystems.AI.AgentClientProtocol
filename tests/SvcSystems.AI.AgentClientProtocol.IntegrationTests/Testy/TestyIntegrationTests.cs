@@ -43,7 +43,7 @@ public sealed class TestyIntegrationTests
             }
 
             Assert.Contains(AgentMessageTexts(updates), text => text.Contains("hello from acp client", StringComparison.OrdinalIgnoreCase));
-            Assert.Contains(updates, update => update is Completed { Response.StopReason: "end_turn" });
+            Assert.Contains(updates, update => update is Completed { Response.StopReason: StopReason.EndTurn });
         }
         finally
         {
@@ -76,11 +76,11 @@ public sealed class TestyIntegrationTests
             var promptTask = CollectPromptUpdatesAsync(session, "wait_for_cancel", timeout.Token);
             await session.CancelAsync(timeout.Token);
             var updates = await promptTask.WaitAsync(timeout.Token);
-            Assert.Contains(updates, update => update is Completed { Response.StopReason: "cancelled" });
+            Assert.Contains(updates, update => update is Completed { Response.StopReason: StopReason.Cancelled });
 
             var followUpUpdates = await CollectPromptUpdatesAsync(session, "echo after cancellation", timeout.Token);
             Assert.Contains(AgentMessageTexts(followUpUpdates), text => text.Contains("after cancellation", StringComparison.OrdinalIgnoreCase));
-            Assert.Contains(followUpUpdates, update => update is Completed { Response.StopReason: "end_turn" });
+            Assert.Contains(followUpUpdates, update => update is Completed { Response.StopReason: StopReason.EndTurn });
         }
         finally
         {
@@ -158,14 +158,14 @@ public sealed class TestyIntegrationTests
                 "{\"command\":\"list_tools\",\"server\":\"echo\"}",
                 timeout.Token);
             Assert.Contains(AgentMessageTexts(listUpdates), text => text.Contains("echo", StringComparison.Ordinal));
-            Assert.Contains(listUpdates, update => update is Completed { Response.StopReason: "end_turn" });
+            Assert.Contains(listUpdates, update => update is Completed { Response.StopReason: StopReason.EndTurn });
 
             var callUpdates = await CollectPromptUpdatesAsync(
                 session,
                 "{\"command\":\"call_tool\",\"server\":\"echo\",\"tool\":\"echo\",\"params\":{\"message\":\"hello from the MCP echo tool\"}}",
                 timeout.Token);
             Assert.Contains(AgentMessageTexts(callUpdates), text => text.Contains("Echo: hello from the MCP echo tool", StringComparison.Ordinal));
-            Assert.Contains(callUpdates, update => update is Completed { Response.StopReason: "end_turn" });
+            Assert.Contains(callUpdates, update => update is Completed { Response.StopReason: StopReason.EndTurn });
         }
         finally
         {
@@ -284,7 +284,7 @@ public sealed class TestyIntegrationTests
             Assert.Contains(wireUpdates, update => update.Value is AvailableCommandsUpdate);
             Assert.Contains(wireUpdates, update => update.Value is CurrentModeUpdate { CurrentModeId: "plan" });
             Assert.Contains(wireUpdates, update => update.Value is ConfigOptionUpdate);
-            Assert.Contains(updates, update => update is Completed { Response.StopReason: "end_turn" });
+            Assert.Contains(updates, update => update is Completed { Response.StopReason: StopReason.EndTurn });
             await client.CloseSessionAsync(session.Id, timeout.Token);
 
             var deleteSession = await client.CreateSessionAsync(new SessionOptions { WorkingDirectory = workingDirectory }, timeout.Token);
@@ -332,7 +332,7 @@ public sealed class TestyIntegrationTests
 
         public ValueTask<PermissionDecision> RequestPermissionAsync(RequestPermissionRequest request, CancellationToken cancellationToken = default)
         {
-            var reject = request.Options.First(option => option.Kind == "reject_once");
+            var reject = request.Options.First(option => option.Kind == PermissionOptionKind.RejectOnce);
             var selectedOptionId = reject.OptionId;
             SelectedOptionId = selectedOptionId;
             return ValueTask.FromResult(PermissionDecision.Select(selectedOptionId));

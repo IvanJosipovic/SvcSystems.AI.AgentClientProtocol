@@ -618,7 +618,8 @@ public sealed class Client : IClient
         }
         else
         {
-            var rejectOption = request.Options.FirstOrDefault(option => option.Kind.StartsWith("reject", StringComparison.Ordinal));
+            var rejectOption = request.Options.FirstOrDefault(option =>
+                option.Kind is PermissionOptionKind.RejectOnce or PermissionOptionKind.RejectAlways);
             if (rejectOption is null)
             {
                 throw new RpcException(-32601, "No permission handler is configured and the agent supplied no reject option.", Methods.SessionRequestPermission);

@@ -40,13 +40,13 @@ public sealed partial class ToolCall
     /// Helps clients choose appropriate icons and UI treatment.
     /// </summary>
     [JsonPropertyName("kind")]
-    public string? Kind { get; init; }
+    public ToolKind? Kind { get; init; }
 
     /// <summary>
     /// Current execution status of the tool call.
     /// </summary>
     [JsonPropertyName("status")]
-    public string? Status { get; init; }
+    public ToolCallStatus? Status { get; init; }
 
     /// <summary>
     /// Content produced by the tool call.

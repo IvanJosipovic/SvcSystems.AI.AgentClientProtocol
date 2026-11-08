@@ -789,8 +789,171 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains("InProgress", enumSource, StringComparison.Ordinal);
         Assert.Contains("JsonStringEnumMemberName(\"in-progress\")", enumSource, StringComparison.Ordinal);
         Assert.Contains("JsonStringEnumMemberName(\"awaiting_input\")", enumSource, StringComparison.Ordinal);
+        var task = Assert.Single(result.GeneratedSources.Where(source => ContainsClassDeclaration(source, "Task")));
+        Assert.Contains("public required TaskState State { get; init; }", task, StringComparison.Ordinal);
         var jsonContext = Assert.Single(result.GeneratedSources.Where(source => source.Contains("JsonSourceGenerationOptions", StringComparison.Ordinal)));
         Assert.Contains("JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Generated.TaskState))", jsonContext, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ClosedStringOneOfConstValuesGenerateClrEnumsInsteadOfPrimitiveStrings()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "ToolKind": {
+                  "oneOf": [
+                    { "type": "string", "const": "read" },
+                    { "type": "string", "const": "switch_mode" }
+                  ]
+                },
+                "PermissionChoice": {
+                  "anyOf": [
+                    { "type": "string", "const": "allow_once" },
+                    { "type": "string", "const": "reject_once" }
+                  ]
+                },
+                "Request": {
+                  "type": "object",
+                  "properties": {
+                    "kind": { "$ref": "#/$defs/ToolKind" },
+                    "permission": { "$ref": "#/$defs/PermissionChoice" }
+                  },
+                  "required": ["kind", "permission"]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "closed-oneof-enum.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var enumSource = Assert.Single(result.GeneratedSources, source => source.Contains("public enum ToolKind", StringComparison.Ordinal));
+        Assert.Contains("JsonStringEnumMemberName(\"switch_mode\")", enumSource, StringComparison.Ordinal);
+        Assert.Contains(result.GeneratedSources, source => source.Contains("public enum PermissionChoice", StringComparison.Ordinal));
+        var request = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "Request"));
+        Assert.Contains("public required ToolKind Kind { get; init; }", request, StringComparison.Ordinal);
+        Assert.Contains("public required PermissionChoice Permission { get; init; }", request, StringComparison.Ordinal);
+        Assert.DoesNotContain("public required string Kind", request, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PropertyNamesStringEnumsGenerateEnumDictionaryKeys()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Request": {
+                  "type": "object",
+                  "properties": {
+                    "platforms": {
+                      "type": "object",
+                      "propertyNames": { "enum": ["linux-x86_64", "windows-aarch64"] },
+                      "additionalProperties": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "property-names-enum.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var enumSource = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("public enum RequestPlatformsPropertyName", StringComparison.Ordinal));
+        Assert.Contains("JsonStringEnumMemberName(\"linux-x86_64\")", enumSource, StringComparison.Ordinal);
+        Assert.Contains("JsonStringEnumMemberName(\"windows-aarch64\")", enumSource, StringComparison.Ordinal);
+        var request = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "Request"));
+        Assert.Contains("Dictionary<RequestPlatformsPropertyName, string>? Platforms", request, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PropertyNamesOnDefinitionsGenerateNamedEnums()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "PlatformMap": {
+                  "type": "object",
+                  "propertyNames": { "enum": ["linux-x86_64", "windows-x86_64"] },
+                  "additionalProperties": { "type": "string" }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "definition-property-names-enum.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var enumSource = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("public enum PlatformMapPropertyName", StringComparison.Ordinal));
+        Assert.Contains("JsonStringEnumMemberName(\"linux-x86_64\")", enumSource, StringComparison.Ordinal);
+        Assert.Contains("JsonStringEnumMemberName(\"windows-x86_64\")", enumSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ReportsPropertyNamesEnumNameCollisions()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "RequestPropertyName": { "type": "string" },
+                "RequestPlatformsPropertyName": { "type": "string" },
+                "Request": {
+                  "type": "object",
+                  "propertyNames": { "enum": ["first", "second"] },
+                  "properties": {
+                    "platforms": {
+                      "type": "object",
+                      "propertyNames": { "enum": ["linux-x86_64", "windows-x86_64"] },
+                      "additionalProperties": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "definition-property-names-collision.schema.json");
+
+        var diagnostics = result.Diagnostics.Where(item => item.Id == "ACPGEN003").ToArray();
+        Assert.Equal(2, diagnostics.Length);
+        Assert.Contains(diagnostics, diagnostic =>
+            diagnostic.GetMessage().Contains("generated property-name enum 'RequestPropertyName' collides", StringComparison.Ordinal));
+        Assert.Contains(diagnostics, diagnostic =>
+            diagnostic.GetMessage().Contains("generated property-name enum 'RequestPlatformsPropertyName' collides", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void RejectsUnsupportedPropertyNamesConstraints()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "Request": {
+                  "type": "object",
+                  "properties": {
+                    "labels": {
+                      "type": "object",
+                      "propertyNames": { "type": "string", "minLength": 2 },
+                      "additionalProperties": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "unsupported-property-names.schema.json");
+
+        var diagnostic = Assert.Single(result.Diagnostics.Where(item => item.Id == "ACPGEN003"));
+        Assert.Contains("propertyNames constraints other than a closed string enum are not supported", diagnostic.GetMessage(), StringComparison.Ordinal);
     }
 
     [Fact]
