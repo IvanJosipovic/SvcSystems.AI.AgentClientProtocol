@@ -55,6 +55,15 @@ public sealed partial class SessionCapabilities
     public SessionAdditionalDirectoriesCapabilities? AdditionalDirectories { get; init; }
 
     /// <summary>
+    /// Whether the agent supports `systemPrompt` on session lifecycle requests.
+    /// 
+    /// Optional. Omitted or `null` both mean the agent does not advertise support.
+    /// Supplying `{}` means the agent supports `systemPrompt` in `append` mode.
+    /// </summary>
+    [JsonPropertyName("systemPrompt")]
+    public SessionSystemPromptCapabilities? SystemPrompt { get; init; }
+
+    /// <summary>
     /// Whether the agent supports `session/resume`.
     /// 
     /// Optional. Omitted or `null` both mean the agent does not advertise support.

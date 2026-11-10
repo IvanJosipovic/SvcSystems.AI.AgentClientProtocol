@@ -71,6 +71,16 @@ public sealed partial class NewSessionRequest
     }
 
     /// <summary>
+    /// System-level instructions for the new session.
+    /// 
+    /// Optional. Omitted and `null` are equivalent and mean the Agent uses its
+    /// own default instructions. Clients MUST only send this when the Agent
+    /// advertises `sessionCapabilities.systemPrompt`.
+    /// </summary>
+    [JsonPropertyName("systemPrompt")]
+    public SystemPrompt? SystemPrompt { get; init; }
+
+    /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.

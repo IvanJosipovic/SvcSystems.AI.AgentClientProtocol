@@ -80,6 +80,18 @@ public sealed partial class LoadSessionRequest
     public required string SessionId { get; init; }
 
     /// <summary>
+    /// System-level instructions for the loaded session.
+    /// 
+    /// Optional. Omitted and `null` are equivalent. The Agent may then keep a
+    /// system prompt it stored with the session or use its default instructions.
+    /// Clients MUST only send this when the Agent advertises
+    /// `sessionCapabilities.systemPrompt`, and SHOULD send the same value they used
+    /// when the session was created.
+    /// </summary>
+    [JsonPropertyName("systemPrompt")]
+    public SystemPrompt? SystemPrompt { get; init; }
+
+    /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional
     /// metadata to their interactions. Implementations MUST NOT make assumptions about values at
     /// these keys.
