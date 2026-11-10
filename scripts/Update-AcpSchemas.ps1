@@ -138,7 +138,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Failed to configure the Git author email.' }
 if ($LASTEXITCODE -ne 0) { throw "Failed to check out branch '$branchName'." }
 & git add --all
 if ($LASTEXITCODE -ne 0) { throw 'Failed to stage workspace changes.' }
-& git commit -m 'chore: update ACP schemas'
+& git commit -m 'feat: update ACP schemas'
 if ($LASTEXITCODE -ne 0) { throw 'Failed to commit schema updates.' }
 & git push --force-with-lease origin $branchName
 if ($LASTEXITCODE -ne 0) { throw "Failed to push branch '$branchName'." }
@@ -162,7 +162,7 @@ if (-not [string]::IsNullOrWhiteSpace(($existingPullRequest -join '').Trim())) {
     --repo $env:GITHUB_REPOSITORY `
     --head $branchName `
     --base $env:DEFAULT_BRANCH `
-    --title 'chore: update ACP schemas' `
+    --title 'feat: update ACP schemas' `
     --body 'Updates the vendored ACP and ACP Registry schemas from their latest GitHub releases.'
 if ($LASTEXITCODE -ne 0) {
     throw 'Failed to create the schema pull request.'
