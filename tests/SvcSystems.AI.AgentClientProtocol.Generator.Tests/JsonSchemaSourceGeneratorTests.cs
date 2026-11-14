@@ -68,6 +68,72 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void GeneratesValueAwareClassifiersForOverlappingNumericCases()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "Int32OrInt64": {
+                  "anyOf": [
+                    { "type": "integer", "format": "int64" },
+                    { "type": "integer", "format": "int32" }
+                  ]
+                },
+                "Int32OrDouble": {
+                  "anyOf": [
+                    { "type": "number", "format": "double" },
+                    { "type": "integer", "format": "int32" }
+                  ]
+                },
+                "UInt32OrUInt64": {
+                  "anyOf": [
+                    { "type": "integer", "format": "uint64" },
+                    { "type": "integer", "format": "uint32" }
+                  ]
+                },
+                "FloatOrDouble": {
+                  "anyOf": [
+                    { "type": "number", "format": "float" },
+                    { "type": "number", "format": "double" }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/numeric-unions.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var int32OrInt64 = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class Int32OrInt64JsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("TryGetInt32(out _)", int32OrInt64, StringComparison.Ordinal);
+        Assert.Contains("TryGetInt64(out _)", int32OrInt64, StringComparison.Ordinal);
+        Assert.True(int32OrInt64.IndexOf("TryGetInt32", StringComparison.Ordinal) <
+                    int32OrInt64.IndexOf("TryGetInt64", StringComparison.Ordinal));
+
+        var int32OrDouble = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class Int32OrDoubleJsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("TryGetInt32(out _)", int32OrDouble, StringComparison.Ordinal);
+        Assert.Contains("TryGetDouble(out _)", int32OrDouble, StringComparison.Ordinal);
+        Assert.True(int32OrDouble.IndexOf("TryGetInt32", StringComparison.Ordinal) <
+                    int32OrDouble.IndexOf("TryGetDouble", StringComparison.Ordinal));
+
+        var uint32OrUInt64 = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class UInt32OrUInt64JsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("TryGetUInt32(out _)", uint32OrUInt64, StringComparison.Ordinal);
+        Assert.Contains("TryGetUInt64(out _)", uint32OrUInt64, StringComparison.Ordinal);
+        Assert.True(uint32OrUInt64.IndexOf("TryGetUInt32", StringComparison.Ordinal) <
+                    uint32OrUInt64.IndexOf("TryGetUInt64", StringComparison.Ordinal));
+
+        var floatOrDouble = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class FloatOrDoubleJsonTypeClassifier", StringComparison.Ordinal));
+        Assert.Contains("TryGetSingle(out _)", floatOrDouble, StringComparison.Ordinal);
+        Assert.Contains("TryGetDouble(out _)", floatOrDouble, StringComparison.Ordinal);
+        Assert.True(floatOrDouble.IndexOf("TryGetDouble", StringComparison.Ordinal) <
+                    floatOrDouble.IndexOf("TryGetSingle", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void GeneratesInitAccessorsForCollectionsDefaultedWhenNull()
     {
         const string schema = """

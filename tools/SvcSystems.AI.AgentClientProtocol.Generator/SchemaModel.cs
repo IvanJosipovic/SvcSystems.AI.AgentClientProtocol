@@ -62,7 +62,7 @@ internal sealed class UnionModel(
         (CaseModels.Any(item => item.ConstProperties.Count > 0) ||
          CaseModels.Any(item => item.UniqueProperties.Count > 0) ||
          DefaultCaseName is not null ||
-         Cases.Contains("long", StringComparer.Ordinal) && Cases.Contains("double", StringComparer.Ordinal));
+         Cases.Count(item => item is "int" or "uint" or "long" or "ulong" or "double" or "float") > 1);
 }
 
 internal sealed class UnionCaseModel(

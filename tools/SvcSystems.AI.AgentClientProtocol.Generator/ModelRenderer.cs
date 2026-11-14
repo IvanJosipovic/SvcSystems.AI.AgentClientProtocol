@@ -427,10 +427,27 @@ internal static class ModelRenderer
         {
             code.AppendLine("            if (reader.TokenType == JsonTokenType.Number)");
             code.AppendLine("            {");
-            if (numericCases.Contains("long", StringComparer.Ordinal) && numericCases.Contains("double", StringComparer.Ordinal))
-                code.AppendLine("                return reader.TryGetInt64(out _) ? typeof(long) : typeof(double);");
-            else
+            if (numericCases.Length == 1)
+            {
                 code.Append("                return typeof(").Append(numericCases[0]).AppendLine(");");
+            }
+            else
+            {
+                // Prefer the narrowest matching integer to preserve exact values, then the widest floating-point case.
+                foreach (var numericCase in numericCases.Where(IsIntegerType).OrderBy(GetNumericWidth))
+                {
+                    code.Append("                if (reader.").Append(GetNumericTryMethod(numericCase))
+                        .Append("(out _)) return typeof(").Append(numericCase).AppendLine(");");
+                }
+                foreach (var numericCase in numericCases.Where(IsFloatingPointType).OrderByDescending(GetNumericWidth))
+                {
+                    code.Append("                if (reader.").Append(GetNumericTryMethod(numericCase))
+                        .Append("(out _)) return typeof(").Append(numericCase).AppendLine(");");
+                }
+                code.Append("                return ")
+                    .Append(rawFallback is not null && !model.AllowUnknownDiscriminator ? "typeof(JsonElement);" : "null;")
+                    .AppendLine();
+            }
             code.AppendLine("            }");
         }
         var listCases = model.Cases.Where(item => item.StartsWith("List<", StringComparison.Ordinal)).ToArray();
@@ -588,6 +605,26 @@ internal static class ModelRenderer
 
     private static bool IsNumericType(string typeName) =>
         typeName is "int" or "uint" or "long" or "ulong" or "double" or "float";
+
+    private static bool IsIntegerType(string typeName) =>
+        typeName is "int" or "uint" or "long" or "ulong";
+
+    private static bool IsFloatingPointType(string typeName) =>
+        typeName is "float" or "double";
+
+    private static int GetNumericWidth(string typeName) =>
+        typeName is "int" or "uint" or "float" ? 32 : 64;
+
+    private static string GetNumericTryMethod(string typeName) => typeName switch
+    {
+        "int" => "TryGetInt32",
+        "uint" => "TryGetUInt32",
+        "long" => "TryGetInt64",
+        "ulong" => "TryGetUInt64",
+        "float" => "TryGetSingle",
+        "double" => "TryGetDouble",
+        _ => throw new ArgumentOutOfRangeException(nameof(typeName), typeName, null)
+    };
 
     private static AccessorListSyntax InitAccessors() => SyntaxFactory.AccessorList(
         SyntaxFactory.List([
