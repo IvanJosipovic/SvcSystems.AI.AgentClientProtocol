@@ -359,7 +359,11 @@ internal static class ModelRenderer
             .Append("namespace ").Append(modelNamespace).AppendLine(";")
             .AppendLine();
         AppendSummary(code, model.Description);
-        if (model.HasGeneratedClassifier)
+        if (model.UsesStructuralClassifier)
+        {
+            code.AppendLine("[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]");
+        }
+        else if (model.HasGeneratedClassifier)
         {
             code.Append("[JsonUnion(TypeClassifier = typeof(").Append(model.Name).AppendLine("JsonTypeClassifier))]");
         }

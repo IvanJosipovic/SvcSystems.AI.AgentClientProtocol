@@ -276,12 +276,16 @@ internal sealed class SchemaModelBuilder(
                     .Where((_, otherIndex) => otherIndex != index)
                     .All(other => !other.ContainsKey(propertyName)))
                 .ToArray();
+            var caseType = _model.Types.OfType<ClassModel>().FirstOrDefault(type => type.Name == caseName);
+            var isPlainObject = caseType is not null && caseType.BaseType is null &&
+                caseType.DiscriminatorName is null && caseType.DiscriminatorCases.Count == 0;
             return new UnionCaseModel(
                 caseName,
                 constants,
                 properties.Keys.ToArray(),
                 properties.Where(property => property.Value.Required).Select(property => property.Key).ToArray(),
-                uniqueProperties);
+                uniqueProperties,
+                isPlainObject);
         }).ToArray();
         _model.Types.Add(new UnionModel(name, caseNames, defaultCaseName, caseModels)
         {

@@ -21,7 +21,9 @@ internal sealed class ElicitationContentValueJsonTypeClassifier : JsonTypeClassi
             if (reader.TokenType is JsonTokenType.True or JsonTokenType.False) return typeof(bool);
             if (reader.TokenType == JsonTokenType.Number)
             {
-                return reader.TryGetInt64(out _) ? typeof(long) : typeof(double);
+                if (reader.TryGetInt64(out _)) return typeof(long);
+                if (reader.TryGetDouble(out _)) return typeof(double);
+                return null;
             }
             if (reader.TokenType == JsonTokenType.StartArray) return typeof(List<string>);
             if (reader.TokenType != JsonTokenType.StartObject) return null;

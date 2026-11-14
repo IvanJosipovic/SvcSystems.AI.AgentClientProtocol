@@ -26,6 +26,26 @@ public sealed class WireJsonTests
     }
 
     [Fact]
+    public void JsonRpcResponseUnionsClassifySuccessAndErrorByObjectShape()
+    {
+        using var agentSuccessJson = JsonDocument.Parse("""{"id":1,"result":null}""");
+        var agentSuccess = DeserializeJson<AgentResponse>(agentSuccessJson.RootElement);
+        Assert.IsType<AgentResponseCase0>(agentSuccess.Value);
+
+        using var agentErrorJson = JsonDocument.Parse("""{"id":1,"error":{"code":-32600,"message":"Invalid Request"}}""");
+        var agentError = DeserializeJson<AgentResponse>(agentErrorJson.RootElement);
+        Assert.IsType<AgentResponseCase1>(agentError.Value);
+
+        using var clientSuccessJson = JsonDocument.Parse("""{"id":1,"result":null}""");
+        var clientSuccess = DeserializeJson<ClientResponse>(clientSuccessJson.RootElement);
+        Assert.IsType<ClientResponseCase0>(clientSuccess.Value);
+
+        using var clientErrorJson = JsonDocument.Parse("""{"id":1,"error":{"code":-32600,"message":"Invalid Request"}}""");
+        var clientError = DeserializeJson<ClientResponse>(clientErrorJson.RootElement);
+        Assert.IsType<ClientResponseCase1>(clientError.Value);
+    }
+
+    [Fact]
     public void AuthMethodClassifierUsesSchemaTagAndDefault()
     {
         using var terminalJson = JsonDocument.Parse("""{"id":"terminal","name":"Terminal","type":"terminal"}""");

@@ -134,6 +134,131 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void UsesStructuralClassifierForObjectCasesWithDifferentRequiredProperties()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "RequiredShapeUnion": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "first": { "type": "string" },
+                        "second": { "type": "string" }
+                      },
+                      "required": ["first"]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "first": { "type": "string" },
+                        "second": { "type": "string" }
+                      },
+                      "required": ["second"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/required-shape-union.schema.json", useSystemTextJsonContext: true);
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var union = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("union RequiredShapeUnion(", StringComparison.Ordinal));
+        Assert.Contains(
+            "[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]",
+            union,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(result.GeneratedSources, source =>
+            source.Contains("class RequiredShapeUnionJsonTypeClassifier", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void UsesStructuralClassifierForObjectCasesWithDistinctRequiredProperties()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "ResourceUnion": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "uri": { "type": "string" },
+                        "text": { "type": "string" }
+                      },
+                      "required": ["uri", "text"]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "uri": { "type": "string" },
+                        "blob": { "type": "string" }
+                      },
+                      "required": ["uri", "blob"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/resource-union.schema.json", useSystemTextJsonContext: true);
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var union = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("union ResourceUnion(", StringComparison.Ordinal));
+        Assert.Contains(
+            "[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]",
+            union,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(result.GeneratedSources, source =>
+            source.Contains("class ResourceUnionJsonTypeClassifier", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void KeepsCustomClassifierWhenAnObjectCaseIsShadowedByAnother()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "ShadowedUnion": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": { "id": { "type": "string" } },
+                      "required": ["id"]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "extra": { "type": "string" }
+                      },
+                      "required": ["id"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/shadowed-union.schema.json", useSystemTextJsonContext: true);
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var union = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("union ShadowedUnion(", StringComparison.Ordinal));
+        Assert.Contains(
+            "[JsonUnion(TypeClassifier = typeof(ShadowedUnionJsonTypeClassifier))]",
+            union,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(union, "JsonUnionTypeStructuralClassifier", StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GeneratesInitAccessorsForCollectionsDefaultedWhenNull()
     {
         const string schema = """
