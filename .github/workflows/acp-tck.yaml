@@ -25,10 +25,12 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v7
+        with:
+          path: a
 
       - uses: actions/setup-dotnet@v6
         with:
-          global-json-file: global.json
+          global-json-file: a/global.json
 
       - uses: astral-sh/setup-uv@v10.3.3
         with:
@@ -36,12 +38,12 @@ jobs:
 
       - name: Run official agent baselines, repository sample agent, and .NET client matrix
         shell: pwsh
-        run: ./tools/Test-AcpTck.ps1
+        run: ./a/tools/Test-AcpTck.ps1
 
       - name: Upload upstream conformance reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: acp-tck-v1-${{ matrix.os }}
-          path: artifacts/acp-tck/reports
+          path: a/artifacts/acp-tck/reports
           if-no-files-found: warn
