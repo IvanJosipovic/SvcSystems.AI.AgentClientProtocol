@@ -30,45 +30,13 @@ public sealed partial class NewSessionRequest
     /// additional roots are activated for the new session.
     /// </summary>
     [JsonPropertyName("additionalDirectories")]
-    [JsonConverter(typeof(AdditionalDirectoriesDefaultOnNullConverter))]
-    public List<string>? AdditionalDirectories { get; init; }
-
-    public sealed class AdditionalDirectoriesDefaultOnNullConverter : JsonConverter<List<string>>
-    {
-        public override bool HandleNull => true;
-
-        public override List<string> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType == JsonTokenType.Null)
-                return new List<string>();
-            return GetCollectionConverter(options).Read(ref reader, typeof(List<string>), options)!;
-        }
-
-        public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
-        private static JsonConverter<List<string>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<string>>)options.GetTypeInfo(typeof(List<string>)).Converter;
-    }
+    public List<string>? AdditionalDirectories { get; init => field = value is null ? new List<string>() : value; }
 
     /// <summary>
     /// List of MCP (Model Context Protocol) servers the agent should connect to.
     /// </summary>
     [JsonPropertyName("mcpServers")]
-    [JsonConverter(typeof(McpServersDefaultOnNullConverter))]
-    public required List<McpServer> McpServers { get; init; }
-
-    public sealed class McpServersDefaultOnNullConverter : JsonConverter<List<McpServer>>
-    {
-        public override bool HandleNull => true;
-
-        public override List<McpServer> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType == JsonTokenType.Null)
-                return new List<McpServer>();
-            return GetCollectionConverter(options).Read(ref reader, typeof(List<McpServer>), options)!;
-        }
-
-        public override void Write(Utf8JsonWriter writer, List<McpServer> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
-        private static JsonConverter<List<McpServer>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<McpServer>>)options.GetTypeInfo(typeof(List<McpServer>)).Converter;
-    }
+    public required List<McpServer> McpServers { get; init => field = value is null ? new List<McpServer>() : value; }
 
     /// <summary>
     /// System-level instructions for the new session.

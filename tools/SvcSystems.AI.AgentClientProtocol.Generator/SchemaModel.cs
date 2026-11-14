@@ -41,6 +41,12 @@ internal sealed class EnumModel(string name, IReadOnlyList<string> values) : Typ
     public IReadOnlyList<string> Values { get; } = values;
 }
 
+internal sealed class DictionaryModel(string name, string keyType, string valueType) : TypeModel(name)
+{
+    public string KeyType { get; } = keyType;
+    public string ValueType { get; } = valueType;
+}
+
 internal sealed class UnionModel(
     string name,
     IReadOnlyList<string> cases,

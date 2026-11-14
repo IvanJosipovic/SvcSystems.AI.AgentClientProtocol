@@ -90,26 +90,51 @@ internal static class WireJson
         }, JsonContext.Default.InitializeRequest);
     }
 
-    public static byte[] WriteNewSessionRequest(NewSessionRequest request) =>
-        JsonSerializer.SerializeToUtf8Bytes(new NewSessionRequest
-        {
-            Cwd = request.Cwd,
-            McpServers = request.McpServers,
-            AdditionalDirectories = request.AdditionalDirectories is { Count: > 0 } ? [.. request.AdditionalDirectories] : null,
-            Meta = request.Meta,
-            ExtensionData = request.ExtensionData
-        }, JsonContext.Default.NewSessionRequest);
+    public static byte[] WriteNewSessionRequest(NewSessionRequest request)
+    {
+        List<string>? additionalDirectories = request.AdditionalDirectories is { Count: > 0 } ? [.. request.AdditionalDirectories] : null;
+        var wireRequest = additionalDirectories is null
+            ? new NewSessionRequest
+            {
+                Cwd = request.Cwd,
+                McpServers = request.McpServers,
+                Meta = request.Meta,
+                ExtensionData = request.ExtensionData
+            }
+            : new NewSessionRequest
+            {
+                Cwd = request.Cwd,
+                McpServers = request.McpServers,
+                AdditionalDirectories = additionalDirectories,
+                Meta = request.Meta,
+                ExtensionData = request.ExtensionData
+            };
+        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.NewSessionRequest);
+    }
 
-    public static byte[] WriteLoadSessionRequest(LoadSessionRequest request) =>
-        JsonSerializer.SerializeToUtf8Bytes(new LoadSessionRequest
-        {
-            SessionId = request.SessionId,
-            Cwd = request.Cwd,
-            McpServers = request.McpServers,
-            AdditionalDirectories = request.AdditionalDirectories is { Count: > 0 } ? [.. request.AdditionalDirectories] : null,
-            Meta = request.Meta,
-            ExtensionData = request.ExtensionData
-        }, JsonContext.Default.LoadSessionRequest);
+    public static byte[] WriteLoadSessionRequest(LoadSessionRequest request)
+    {
+        List<string>? additionalDirectories = request.AdditionalDirectories is { Count: > 0 } ? [.. request.AdditionalDirectories] : null;
+        var wireRequest = additionalDirectories is null
+            ? new LoadSessionRequest
+            {
+                SessionId = request.SessionId,
+                Cwd = request.Cwd,
+                McpServers = request.McpServers,
+                Meta = request.Meta,
+                ExtensionData = request.ExtensionData
+            }
+            : new LoadSessionRequest
+            {
+                SessionId = request.SessionId,
+                Cwd = request.Cwd,
+                McpServers = request.McpServers,
+                AdditionalDirectories = additionalDirectories,
+                Meta = request.Meta,
+                ExtensionData = request.ExtensionData
+            };
+        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.LoadSessionRequest);
+    }
 
     public static byte[] WritePromptRequest(string sessionId, IReadOnlyList<ContentBlock> content, PromptOptions? options = null) =>
         JsonSerializer.SerializeToUtf8Bytes(new PromptRequest
@@ -119,15 +144,44 @@ internal static class WireJson
             Meta = CopyMetadata(options?.Metadata)
         }, JsonContext.Default.PromptRequest);
 
-    public static byte[] WriteResumeSessionRequest(string sessionId, SessionOptions options) =>
-        JsonSerializer.SerializeToUtf8Bytes(new ResumeSessionRequest
+    public static byte[] WriteResumeSessionRequest(string sessionId, SessionOptions options)
+    {
+        List<McpServer>? mcpServers = options.McpServers.Count > 0 ? [.. options.McpServers] : null;
+        List<string>? additionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null;
+        var metadata = CopyMetadata(options.Metadata);
+        var wireRequest = (mcpServers is not null, additionalDirectories is not null) switch
         {
-            SessionId = sessionId,
-            Cwd = options.WorkingDirectory,
-            McpServers = options.McpServers.Count > 0 ? [.. options.McpServers] : null,
-            AdditionalDirectories = options.AdditionalDirectories.Count > 0 ? [.. options.AdditionalDirectories] : null,
-            Meta = CopyMetadata(options.Metadata)
-        }, JsonContext.Default.ResumeSessionRequest);
+            (true, true) => new ResumeSessionRequest
+            {
+                SessionId = sessionId,
+                Cwd = options.WorkingDirectory,
+                McpServers = mcpServers,
+                AdditionalDirectories = additionalDirectories,
+                Meta = metadata
+            },
+            (true, false) => new ResumeSessionRequest
+            {
+                SessionId = sessionId,
+                Cwd = options.WorkingDirectory,
+                McpServers = mcpServers,
+                Meta = metadata
+            },
+            (false, true) => new ResumeSessionRequest
+            {
+                SessionId = sessionId,
+                Cwd = options.WorkingDirectory,
+                AdditionalDirectories = additionalDirectories,
+                Meta = metadata
+            },
+            _ => new ResumeSessionRequest
+            {
+                SessionId = sessionId,
+                Cwd = options.WorkingDirectory,
+                Meta = metadata
+            }
+        };
+        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.ResumeSessionRequest);
+    }
 
     public static byte[] WriteSetConfigOptionRequest(SetSessionConfigOptionRequest value) =>
         value.Value switch

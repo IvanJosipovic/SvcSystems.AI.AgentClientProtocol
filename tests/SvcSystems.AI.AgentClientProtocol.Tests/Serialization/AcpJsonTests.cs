@@ -49,4 +49,24 @@ public sealed class AcpJsonTests
         Assert.NotNull(request);
         Assert.Empty(request.McpServers);
     }
+
+    [Fact]
+    public void DefaultsAnnotatedOptionalCollectionsOnlyWhenNullIsProvided()
+    {
+        var omitted = AcpJson.Deserialize<CreateTerminalRequest>(
+            JsonDocument.Parse("""{"sessionId":"session-1","command":"sh"}""").RootElement);
+        var explicitNull = AcpJson.Deserialize<CreateTerminalRequest>(
+            JsonDocument.Parse("""{"sessionId":"session-1","command":"sh","args":null}""").RootElement);
+        var providedValue = AcpJson.Deserialize<CreateTerminalRequest>(
+            JsonDocument.Parse("""{"sessionId":"session-1","command":"sh","args":["-c"]}""").RootElement);
+        var assignedNull = new CreateTerminalRequest { SessionId = "session-1", Command = "sh", Args = null };
+
+        Assert.NotNull(omitted);
+        Assert.Null(omitted.Args);
+        Assert.NotNull(explicitNull);
+        Assert.Empty(explicitNull.Args!);
+        Assert.NotNull(providedValue);
+        Assert.Collection(providedValue.Args!, argument => Assert.Equal("-c", argument));
+        Assert.Empty(assignedNull.Args!);
+    }
 }

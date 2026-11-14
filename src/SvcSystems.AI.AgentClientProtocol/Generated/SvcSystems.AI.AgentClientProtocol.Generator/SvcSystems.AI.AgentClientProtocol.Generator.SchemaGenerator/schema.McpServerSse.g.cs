@@ -32,23 +32,7 @@ public sealed class McpServerSse : McpServer
     /// HTTP headers to set when making requests to the MCP server.
     /// </summary>
     [JsonPropertyName("headers")]
-    [JsonConverter(typeof(HeadersDefaultOnNullConverter))]
-    public required List<HttpHeader> Headers { get; init; }
-
-    public sealed class HeadersDefaultOnNullConverter : JsonConverter<List<HttpHeader>>
-    {
-        public override bool HandleNull => true;
-
-        public override List<HttpHeader> Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (reader.TokenType == JsonTokenType.Null)
-                return new List<HttpHeader>();
-            return GetCollectionConverter(options).Read(ref reader, typeof(List<HttpHeader>), options)!;
-        }
-
-        public override void Write(Utf8JsonWriter writer, List<HttpHeader> value, JsonSerializerOptions options) => GetCollectionConverter(options).Write(writer, value, options);
-        private static JsonConverter<List<HttpHeader>> GetCollectionConverter(JsonSerializerOptions options) => (JsonConverter<List<HttpHeader>>)options.GetTypeInfo(typeof(List<HttpHeader>)).Converter;
-    }
+    public required List<HttpHeader> Headers { get; init => field = value is null ? new List<HttpHeader>() : value; }
 
     /// <summary>
     /// The _meta property is reserved by ACP to allow clients and agents to attach additional

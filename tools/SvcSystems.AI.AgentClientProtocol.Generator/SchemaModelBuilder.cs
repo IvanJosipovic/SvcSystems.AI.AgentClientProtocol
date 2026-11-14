@@ -178,6 +178,14 @@ internal sealed class SchemaModelBuilder(
         {
             AddUnion(name, schema);
         }
+        else if (IsDictionaryDefinition(schema))
+        {
+            var hasEnumKeys = Resolve(schema.PropertyNames) is { } propertyNames &&
+                TryGetClosedStringEnum(propertyNames, out _);
+            var keyType = hasEnumKeys ? PropertyNamesEnumName(name) : "string";
+            var valueType = GetTypeName(name, "Value", schema.AdditionalProperties!, nullable: false);
+            _model.Types.Add(new DictionaryModel(name, keyType, valueType));
+        }
         else if (IsObject(schema))
         {
             _model.Types.Add(BuildClass(name, schema));
@@ -1000,6 +1008,13 @@ internal sealed class SchemaModelBuilder(
 
     private static bool IsObject(OpenApiSchema schema) =>
         schema.Properties is { Count: > 0 } || schema.Type?.HasFlag(JsonSchemaType.Object) == true || schema.AllOf is { Count: > 0 };
+
+    private static bool IsDictionaryDefinition(OpenApiSchema schema) =>
+        schema.AdditionalProperties is not null &&
+        schema.Properties is not { Count: > 0 } &&
+        schema.AllOf is not { Count: > 0 } &&
+        schema.AnyOf is not { Count: > 0 } &&
+        schema.OneOf is not { Count: > 0 };
 
     private static bool IsUnconstrainedSchema(OpenApiSchema schema) =>
         schema.Type is null &&
