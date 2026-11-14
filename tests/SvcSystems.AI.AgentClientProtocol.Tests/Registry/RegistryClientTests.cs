@@ -43,6 +43,40 @@ public sealed class RegistryClientTests
         Assert.Equal("2.1.0-preview.1", agent.Preview!.Version);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetIndexAsyncAcceptsEmptyBinaryDistributions(bool isPreview)
+    {
+        var channel = isPreview
+            ? "\"distribution\": { \"npx\": { \"package\": \"sample-agent\" } }, " +
+              "\"preview\": { \"version\": \"2.1.0-preview.1\", \"distribution\": { \"binary\": {} } }"
+            : "\"distribution\": { \"binary\": {} }";
+        var json = $$"""
+            {
+              "version": "1.2.3",
+              "agents": [
+                {
+                  "id": "sample-agent",
+                  "name": "Sample Agent",
+                  "version": "2.0.1",
+                  "description": "A test agent",
+                  {{channel}}
+                }
+              ]
+            }
+            """;
+        using var httpClient = new HttpClient(new FakeHttpMessageHandler((_, _) => Task.FromResult(JsonResponse(json))));
+        using var registry = new RegistryClient(httpClient);
+
+        var index = await registry.GetIndexAsync(TestContext.Current.CancellationToken);
+
+        var agent = Assert.Single(index.Agents);
+        var binary = isPreview ? agent.Preview!.Distribution.Binary : agent.Distribution.Binary;
+        Assert.NotNull(binary);
+        Assert.Empty(binary);
+    }
+
     [Fact]
     public async Task GetIndexAsyncThrowsForUnsuccessfulResponse()
     {

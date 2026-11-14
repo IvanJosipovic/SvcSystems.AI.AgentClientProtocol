@@ -474,7 +474,7 @@ public sealed class RegistryAgentLauncherTests
 
     private static BinaryDistributionPropertyName ParsePlatformName(string value)
     {
-        Assert.True(BinaryDistributionJsonConverter.TryParsePlatformName(value, out var platform));
+        Assert.True(binaryDistribution.TryParsePlatformName(value, out var platform));
         return platform;
     }
 

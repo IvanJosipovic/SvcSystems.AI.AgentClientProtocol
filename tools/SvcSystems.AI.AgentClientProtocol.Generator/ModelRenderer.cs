@@ -201,6 +201,7 @@ internal static class ModelRenderer
         var member = type switch
         {
             ClassModel classModel => RenderClass(classModel),
+            DictionaryModel dictionaryModel => RenderDictionary(dictionaryModel),
             EnumModel enumModel => RenderEnum(enumModel),
             _ => throw new InvalidOperationException("Unknown protocol model: " + type.GetType().Name)
         };
@@ -228,6 +229,16 @@ internal static class ModelRenderer
             namespaceDeclaration.WithSemicolonToken(
                 semicolon.WithTrailingTrivia(semicolon.TrailingTrivia.Add(SyntaxFactory.EndOfLine("\n")))));
         return GeneratedHeaderText() + normalized.ToFullString();
+    }
+
+    private static MemberDeclarationSyntax RenderDictionary(DictionaryModel model)
+    {
+        var declaration = SyntaxFactory.ClassDeclaration(model.Name)
+            .AddModifiers(SyntaxFactory.Token(model.IsInternal ? SyntaxKind.InternalKeyword : SyntaxKind.PublicKeyword))
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.SealedKeyword), SyntaxFactory.Token(SyntaxKind.PartialKeyword))
+            .AddBaseListTypes(SyntaxFactory.SimpleBaseType(
+                SyntaxFactory.ParseTypeName($"Dictionary<{model.KeyType}, {model.ValueType}>")));
+        return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
     private static MemberDeclarationSyntax RenderClass(ClassModel model)
@@ -262,10 +273,6 @@ internal static class ModelRenderer
         foreach (var property in model.Properties)
         {
             declaration = declaration.AddMembers(RenderProperty(property));
-            if (HasCollectionNullDefault(property))
-            {
-                declaration = declaration.AddMembers(RenderNullDefaultConverter(property));
-            }
         }
 
         if (model.HasExtensionData)
@@ -281,48 +288,14 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
-    private static MemberDeclarationSyntax RenderNullDefaultConverter(PropertyModel model)
-    {
-        var typeName = model.TypeName.TrimEnd('?');
-        var converterName = model.Identifier + "DefaultOnNullConverter";
-        var source = $$"""
-            public sealed class {{converterName}} : JsonConverter<{{typeName}}>
-            {
-                public override bool HandleNull => true;
-
-                public override {{typeName}} Read(ref Utf8JsonReader reader, global::System.Type typeToConvert, JsonSerializerOptions options)
-                {
-                    if (reader.TokenType == JsonTokenType.Null) return new {{typeName}}();
-                    return GetCollectionConverter(options).Read(ref reader, typeof({{typeName}}), options)!;
-                }
-
-                public override void Write(Utf8JsonWriter writer, {{typeName}} value, JsonSerializerOptions options) =>
-                    GetCollectionConverter(options).Write(writer, value, options);
-
-                private static JsonConverter<{{typeName}}> GetCollectionConverter(JsonSerializerOptions options) =>
-                    (JsonConverter<{{typeName}}>)options.GetTypeInfo(typeof({{typeName}})).Converter;
-            }
-            """;
-        return SyntaxFactory.ParseMemberDeclaration(source)!;
-    }
-
     private static PropertyDeclarationSyntax RenderProperty(PropertyModel model)
     {
-        if (HasCollectionNullDefault(model))
-        {
-            var defaultOnNullProperty = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                .WithAccessorList(InitAccessors())
-                .AddAttributeLists(
-                    AttributeList("JsonPropertyName", StringArgument(model.WireName)),
-                    AttributeList("JsonConverter", TypeOfArgument(model.Identifier + "DefaultOnNullConverter")));
-            if (model.IsRequired) defaultOnNullProperty = defaultOnNullProperty.AddModifiers(SyntaxFactory.Token(SyntaxKind.RequiredKeyword));
-            return defaultOnNullProperty.WithLeadingTrivia(SummaryTrivia(model.Description));
-        }
-
+        var accessorList = HasCollectionNullDefault(model)
+            ? DefaultOnNullAccessors(model.TypeName)
+            : InitAccessors();
         var property = SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(model.TypeName), model.Identifier)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-            .WithAccessorList(InitAccessors())
+            .WithAccessorList(accessorList)
             .WithAttributeLists(SyntaxFactory.SingletonList(AttributeList("JsonPropertyName", StringArgument(model.WireName))));
         if (model.IsIgnored)
         {
@@ -620,6 +593,31 @@ internal static class ModelRenderer
         SyntaxFactory.List([
             SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
             SyntaxFactory.AccessorDeclaration(SyntaxKind.InitAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))]));
+
+    private static AccessorListSyntax DefaultOnNullAccessors(string typeName)
+    {
+        var collectionType = typeName.TrimEnd('?');
+        var defaultValue = SyntaxFactory.ObjectCreationExpression(SyntaxFactory.ParseTypeName(collectionType))
+            .WithArgumentList(SyntaxFactory.ArgumentList());
+        var valueOrDefault = SyntaxFactory.ConditionalExpression(
+            SyntaxFactory.IsPatternExpression(
+                SyntaxFactory.IdentifierName("value"),
+                SyntaxFactory.ConstantPattern(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression))),
+            defaultValue,
+            SyntaxFactory.IdentifierName("value"));
+        var initAccessor = SyntaxFactory.AccessorDeclaration(SyntaxKind.InitAccessorDeclaration)
+            .WithExpressionBody(SyntaxFactory.ArrowExpressionClause(
+                SyntaxFactory.AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    SyntaxFactory.IdentifierName("field"),
+                    valueOrDefault)))
+            .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+
+        return SyntaxFactory.AccessorList(SyntaxFactory.List([
+            SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+            initAccessor]));
+    }
 
     private static AttributeListSyntax AttributeList(string name, params AttributeArgumentSyntax[] arguments) =>
         SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(

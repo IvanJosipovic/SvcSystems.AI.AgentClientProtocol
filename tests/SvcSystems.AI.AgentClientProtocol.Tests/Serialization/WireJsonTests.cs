@@ -345,6 +345,14 @@ public sealed class WireJsonTests
         Assert.Equal("C:/workspace", list.RootElement.GetProperty("cwd").GetString());
         Assert.Equal("cursor-1", list.RootElement.GetProperty("cursor").GetString());
 
+        using var load = JsonDocument.Parse(WireJson.WriteLoadSessionRequest(new LoadSessionRequest
+        {
+            SessionId = "session-1",
+            Cwd = "C:/workspace",
+            McpServers = []
+        }));
+        Assert.False(load.RootElement.TryGetProperty("additionalDirectories", out _));
+
         using var resume = JsonDocument.Parse(WireJson.WriteResumeSessionRequest("session-2", new SessionOptions
         {
             WorkingDirectory = "C:/workspace",

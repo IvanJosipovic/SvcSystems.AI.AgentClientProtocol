@@ -68,6 +68,35 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void GeneratesInitAccessorsForCollectionsDefaultedWhenNull()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "CommandRequest": {
+                  "type": "object",
+                  "properties": {
+                    "args": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "x-deserialize-default-on-null": true
+                    }
+                  }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/null-default-collection.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var commandRequest = Assert.Single(result.GeneratedSources, source =>
+            source.Contains("class CommandRequest", StringComparison.Ordinal));
+        Assert.Contains("init => field = value is null ? new List<string>() : value", commandRequest, StringComparison.Ordinal);
+        Assert.DoesNotContain("DefaultOnNullConverter", commandRequest, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ReusesUniqueAllOfVariantsAndPreservesBranchProperties()
     {
         const string schema = """
@@ -893,6 +922,9 @@ public sealed class JsonSchemaSourceGeneratorTests
             source.Contains("public enum PlatformMapPropertyName", StringComparison.Ordinal));
         Assert.Contains("JsonStringEnumMemberName(\"linux-x86_64\")", enumSource, StringComparison.Ordinal);
         Assert.Contains("JsonStringEnumMemberName(\"windows-x86_64\")", enumSource, StringComparison.Ordinal);
+        var mapSource = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "PlatformMap"));
+        Assert.Contains("Dictionary<PlatformMapPropertyName, string>", mapSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("JsonConverter", mapSource, StringComparison.Ordinal);
     }
 
     [Fact]
