@@ -9,16 +9,25 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 /// </summary>
 public static class AcpJson
 {
+    private static readonly JsonSerializerOptions s_options = CreateOptions();
+
     /// <summary>The serializer options generated for the ACP models.</summary>
-    public static JsonSerializerOptions Options => JsonContext.Default.Options;
+    public static JsonSerializerOptions Options => s_options;
 
     /// <summary>Returns the generated type metadata for an ACP model.</summary>
     /// <typeparam name="T">An ACP model registered in the generated serializer context.</typeparam>
     /// <returns>The type metadata used to (de)serialize <typeparamref name="T"/>.</returns>
     /// <exception cref="InvalidOperationException"><typeparamref name="T"/> is not part of the ACP model set.</exception>
     public static JsonTypeInfo<T> TypeInfo<T>() =>
-        JsonContext.Default.GetTypeInfo(typeof(T)) as JsonTypeInfo<T>
+        Options.GetTypeInfo(typeof(T)) as JsonTypeInfo<T>
         ?? throw new InvalidOperationException($"'{typeof(T)}' is not part of the generated ACP serializer context.");
+
+    private static JsonSerializerOptions CreateOptions()
+    {
+        var options = new JsonSerializerOptions(JsonContext.Default.Options);
+        options.MakeReadOnly();
+        return options;
+    }
 
     /// <summary>Serializes an ACP model to a <see cref="JsonElement"/>.</summary>
     /// <typeparam name="T">An ACP model registered in the generated serializer context.</typeparam>

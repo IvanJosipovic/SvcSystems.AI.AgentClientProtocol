@@ -105,7 +105,7 @@ internal static class WireJson
                 AdditionalDirectories = additionalDirectories,
                 Meta = request.Meta
             };
-        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.NewSessionRequest);
+        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, AcpJson.TypeInfo<NewSessionRequest>());
     }
 
     public static byte[] WriteLoadSessionRequest(LoadSessionRequest request)
@@ -127,7 +127,7 @@ internal static class WireJson
                 AdditionalDirectories = additionalDirectories,
                 Meta = request.Meta
             };
-        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.LoadSessionRequest);
+        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, AcpJson.TypeInfo<LoadSessionRequest>());
     }
 
     public static byte[] WritePromptRequest(string sessionId, IReadOnlyList<ContentBlock> content, PromptOptions? options = null) =>
@@ -174,7 +174,7 @@ internal static class WireJson
                 Meta = metadata
             }
         };
-        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.ResumeSessionRequest);
+        return JsonSerializer.SerializeToUtf8Bytes(wireRequest, AcpJson.TypeInfo<ResumeSessionRequest>());
     }
 
     public static byte[] WriteSetConfigOptionRequest(SetSessionConfigOptionRequest value) =>
@@ -193,7 +193,7 @@ internal static class WireJson
             Outcome = decision.Cancelled
                 ? new RequestPermissionOutcomeVariant0Cancelled()
                 : new SelectedPermissionOutcome { OptionId = decision.SelectedOptionId! }
-        }, JsonContext.Default.RequestPermissionResponse);
+        }, AcpJson.TypeInfo<RequestPermissionResponse>());
 
     public static string ReadNotificationSessionId(JsonElement parameters) =>
         ReadString(parameters, "sessionId") ?? throw new ProtocolException("ACP session notification did not include sessionId.");

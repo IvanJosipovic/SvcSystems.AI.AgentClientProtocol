@@ -15,6 +15,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "outcome")]
 [JsonDerivedType(typeof(RequestPermissionOutcomeVariant0Cancelled), "cancelled")]
 [JsonDerivedType(typeof(SelectedPermissionOutcome), "selected")]
-public abstract class RequestPermissionOutcome
+public closed class RequestPermissionOutcome
 {
 }

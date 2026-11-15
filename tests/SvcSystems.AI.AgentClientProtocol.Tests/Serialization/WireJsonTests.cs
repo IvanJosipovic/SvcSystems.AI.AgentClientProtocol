@@ -306,6 +306,14 @@ public sealed class WireJsonTests
     }
 
     [Fact]
+    public void TaggedMcpServerHierarchyRejectsUnknownDiscriminators()
+    {
+        using var document = JsonDocument.Parse("""{"type":"future_transport","name":"remote"}""");
+
+        Assert.Throws<JsonException>(() => DeserializeJson<McpServer>(document.RootElement));
+    }
+
+    [Fact]
     public void ClosedTaggedObjectVariantsIgnoreUnknownMembers()
     {
         const string cancelledJson = """{"outcome":"cancelled","vendor":{"preserve":true}}""";
@@ -628,7 +636,7 @@ public sealed class WireJsonTests
         AssertJsonEqual(json, SerializeJson(server));
     }
 
-    private static JsonTypeInfo<T> TypeInfo<T>() => (JsonTypeInfo<T>)JsonContext.Default.GetTypeInfo(typeof(T))!;
+    private static JsonTypeInfo<T> TypeInfo<T>() => AcpJson.TypeInfo<T>();
 
     private static byte[] SerializeJson<T>(T value) => JsonSerializer.SerializeToUtf8Bytes(value, TypeInfo<T>());
 

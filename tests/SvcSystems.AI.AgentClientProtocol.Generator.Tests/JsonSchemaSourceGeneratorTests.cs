@@ -62,13 +62,18 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains(result.GeneratedSources, source => source.Contains("class PromptRequest", StringComparison.Ordinal));
         Assert.Contains(result.GeneratedSources, source => source.Contains("string SessionId", StringComparison.Ordinal));
         Assert.Contains(result.GeneratedSources, source => source.Contains("string Message", StringComparison.Ordinal));
-        Assert.Contains(result.GeneratedSources, source => source.Contains("JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")", StringComparison.Ordinal));
-        Assert.Contains(result.GeneratedSources, source => source.Contains("JsonDerivedType(typeof(UpdateVariant0Text)", StringComparison.Ordinal));
+        var update = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "Update"));
+        Assert.Contains("[JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")]", update, StringComparison.Ordinal);
+        Assert.Contains("public abstract class Update", update, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(UpdateVariant0Text), \"text\")]", update, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(UpdateVariant1Finished), \"finished\")]", update, StringComparison.Ordinal);
+        Assert.DoesNotContain("InferClosedTypePolymorphism", update, StringComparison.Ordinal);
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("JsonSourceGenerationOptions", StringComparison.Ordinal));
         Assert.Contains(result.GeneratedSources, source => source.Contains("union Payload(string, int)", StringComparison.Ordinal));
     }
 
     [Fact]
-    public void InfersPolymorphicHierarchyForRequiredStringConstObjectUnion()
+    public void RegistersPolymorphicHierarchyWithSchemaDiscriminatorAttributes()
     {
         const string schema = """
             {
@@ -104,8 +109,12 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains("[JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")]", message, StringComparison.Ordinal);
         Assert.Contains("[JsonDerivedType(typeof(MessageVariant0Created), \"created\")]", message, StringComparison.Ordinal);
         Assert.Contains("[JsonDerivedType(typeof(MessageVariant1Deleted), \"deleted\")]", message, StringComparison.Ordinal);
-        Assert.Contains("public abstract class Message", message, StringComparison.Ordinal);
+        Assert.DoesNotContain("InferClosedTypePolymorphism", message, StringComparison.Ordinal);
+        Assert.Contains("public closed class Message", message, StringComparison.Ordinal);
         Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("union Message(", StringComparison.Ordinal));
+        var jsonContext = Assert.Single(result.GeneratedSources, source => source.Contains("JsonSourceGenerationOptions", StringComparison.Ordinal));
+        Assert.DoesNotContain("InferClosedTypePolymorphism", jsonContext, StringComparison.Ordinal);
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("JsonContextPolymorphismMetadata", StringComparison.Ordinal));
 
         var created = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "MessageVariant0Created"));
         Assert.Contains("public sealed class MessageVariant0Created : Message", created, StringComparison.Ordinal);
@@ -443,7 +452,7 @@ public sealed class JsonSchemaSourceGeneratorTests
             }
             """;
 
-        var result = RunGenerator(schema, "fixtures/allof-reuse.schema.json");
+        var result = RunGenerator(schema, "fixtures/allof-reuse.schema.json", useSystemTextJsonContext: true);
 
         Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
         var textContent = Assert.Single(result.GeneratedSources, source =>
@@ -451,9 +460,11 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains("public sealed class TextContent : ContentBlock", textContent, StringComparison.Ordinal);
         Assert.Contains("public required bool Bold { get; init; }", textContent, StringComparison.Ordinal);
         var contentBlock = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")", StringComparison.Ordinal));
-        Assert.Contains("JsonDerivedType(typeof(TextContent), \"text\")", contentBlock, StringComparison.Ordinal);
-        Assert.Contains("JsonDerivedType(typeof(ImageContent), \"image\")", contentBlock, StringComparison.Ordinal);
+            source.Contains("JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")", StringComparison.Ordinal) &&
+            source.Contains("class ContentBlock", StringComparison.Ordinal));
+        Assert.Contains("public closed class ContentBlock", contentBlock, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(TextContent), \"text\")]", contentBlock, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(ImageContent), \"image\")]", contentBlock, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -505,7 +516,7 @@ public sealed class JsonSchemaSourceGeneratorTests
             }
             """;
 
-        var result = RunGenerator(schema, "fixtures/shared-allof-variant.schema.json");
+        var result = RunGenerator(schema, "fixtures/shared-allof-variant.schema.json", useSystemTextJsonContext: true);
 
         Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
         var shared = Assert.Single(result.GeneratedSources, source =>
@@ -518,8 +529,12 @@ public sealed class JsonSchemaSourceGeneratorTests
         var second = Assert.Single(result.GeneratedSources, source =>
             source.Contains("JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")", StringComparison.Ordinal) &&
             source.Contains("class Second", StringComparison.Ordinal));
-        Assert.DoesNotContain("JsonDerivedType(typeof(Shared), \"shared\")", first, StringComparison.Ordinal);
-        Assert.DoesNotContain("JsonDerivedType(typeof(Shared), \"shared\")", second, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(", first, StringComparison.Ordinal);
+        Assert.Contains("\"shared\"", first, StringComparison.Ordinal);
+        Assert.DoesNotContain("JsonDerivedType(typeof(Shared)", first, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(", second, StringComparison.Ordinal);
+        Assert.Contains("\"shared\"", second, StringComparison.Ordinal);
+        Assert.DoesNotContain("JsonDerivedType(typeof(Shared)", second, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1426,15 +1441,21 @@ public sealed class JsonSchemaSourceGeneratorTests
             StringComparison.Ordinal));
         var multiSelectClassifier = GetUnionClassifierDefinition(result.GeneratedSources, "MultiSelectItems");
         Assert.Contains("\"anyOf\"", multiSelectClassifier, StringComparison.Ordinal);
-        Assert.Contains(result.GeneratedSources, source =>
-            source.Contains("class McpServer", StringComparison.Ordinal) &&
-            source.Contains("JsonDerivedType(typeof(McpServerStdio), \"stdio\")", StringComparison.Ordinal));
+        var mcpServer = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "McpServer"));
+        Assert.Contains("[JsonPolymorphic(TypeDiscriminatorPropertyName = \"type\")]", mcpServer, StringComparison.Ordinal);
+        Assert.Contains("public closed class McpServer", mcpServer, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(McpServerHttp), \"http\")]", mcpServer, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(McpServerSse), \"sse\")]", mcpServer, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(McpServerStdio), \"stdio\")]", mcpServer, StringComparison.Ordinal);
 
         var permissionOutcome = Assert.Single(result.GeneratedSources, source =>
             ContainsClassDeclaration(source, "RequestPermissionOutcome"));
         Assert.Contains("[JsonPolymorphic(TypeDiscriminatorPropertyName = \"outcome\")]", permissionOutcome, StringComparison.Ordinal);
+        Assert.Contains("public closed class RequestPermissionOutcome", permissionOutcome, StringComparison.Ordinal);
         Assert.Contains("[JsonDerivedType(typeof(RequestPermissionOutcomeVariant0Cancelled), \"cancelled\")]", permissionOutcome, StringComparison.Ordinal);
         Assert.Contains("[JsonDerivedType(typeof(SelectedPermissionOutcome), \"selected\")]", permissionOutcome, StringComparison.Ordinal);
+        Assert.DoesNotContain("InferClosedTypePolymorphism", jsonContext, StringComparison.Ordinal);
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("JsonContextPolymorphismMetadata", StringComparison.Ordinal));
 
         foreach (var modelName in new[]
         {

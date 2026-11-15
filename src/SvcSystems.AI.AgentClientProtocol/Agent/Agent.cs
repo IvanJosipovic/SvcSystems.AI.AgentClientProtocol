@@ -139,15 +139,15 @@ public sealed class Agent : IAsyncDisposable
 
         _connection.RegisterRequestHandler(Methods.SessionNew, async (parameters, cancellationToken) =>
         {
-            var request = parameters.Deserialize(JsonContext.Default.NewSessionRequest)
+            var request = parameters.Deserialize(AcpJson.TypeInfo<NewSessionRequest>())
                 ?? throw new RpcException(-32602, "session/new params are required.", Methods.SessionNew);
             var response = await _handler.NewSessionAsync(request, cancellationToken).ConfigureAwait(false);
             return JsonSerializer.SerializeToUtf8Bytes(response, JsonContext.Default.NewSessionResponse);
         });
 
         _connection.RegisterRequestHandler(Methods.SessionPrompt, HandlePromptAsync);
-        RegisterRequestHandler(Methods.SessionLoad, JsonContext.Default.LoadSessionRequest, JsonContext.Default.LoadSessionResponse, _handler.LoadSessionAsync);
-        RegisterRequestHandler(Methods.SessionResume, JsonContext.Default.ResumeSessionRequest, JsonContext.Default.ResumeSessionResponse, _handler.ResumeSessionAsync);
+        RegisterRequestHandler(Methods.SessionLoad, AcpJson.TypeInfo<LoadSessionRequest>(), JsonContext.Default.LoadSessionResponse, _handler.LoadSessionAsync);
+        RegisterRequestHandler(Methods.SessionResume, AcpJson.TypeInfo<ResumeSessionRequest>(), JsonContext.Default.ResumeSessionResponse, _handler.ResumeSessionAsync);
         RegisterRequestHandler(Methods.SessionList, JsonContext.Default.ListSessionsRequest, JsonContext.Default.ListSessionsResponse, _handler.ListSessionsAsync);
         RegisterRequestHandler(Methods.SessionDelete, JsonContext.Default.DeleteSessionRequest, JsonContext.Default.DeleteSessionResponse, _handler.DeleteSessionAsync);
         RegisterRequestHandler(Methods.SessionClose, JsonContext.Default.CloseSessionRequest, JsonContext.Default.CloseSessionResponse, _handler.CloseSessionAsync);

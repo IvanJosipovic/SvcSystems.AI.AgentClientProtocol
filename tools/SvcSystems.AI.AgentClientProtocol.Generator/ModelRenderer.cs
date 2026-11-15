@@ -207,7 +207,7 @@ internal static class ModelRenderer
 
         var member = type switch
         {
-            ClassModel classModel => RenderClass(classModel),
+            ClassModel classModel => RenderClass(classModel, options),
             DictionaryModel dictionaryModel => RenderDictionary(dictionaryModel),
             EnumModel enumModel => RenderEnum(enumModel),
             _ => throw new InvalidOperationException("Unknown protocol model: " + type.GetType().Name)
@@ -248,14 +248,16 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
-    private static MemberDeclarationSyntax RenderClass(ClassModel model)
+    private static MemberDeclarationSyntax RenderClass(ClassModel model, SchemaGeneratorOptions options)
     {
         var declaration = SyntaxFactory.ClassDeclaration(model.Name)
             .AddModifiers(SyntaxFactory.Token(model.IsInternal ? SyntaxKind.InternalKeyword : SyntaxKind.PublicKeyword));
 
         if (model.DiscriminatorName is not null)
         {
-            declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.AbstractKeyword));
+            var isClosedHierarchy = options.GenerateJsonContext && model.DiscriminatorCases.Count > 0;
+            declaration = declaration.AddModifiers(SyntaxFactory.Token(
+                isClosedHierarchy ? SyntaxKind.ClosedKeyword : SyntaxKind.AbstractKeyword));
             declaration = declaration.AddAttributeLists(AttributeList(
                 "JsonPolymorphic",
                 NameArgument("TypeDiscriminatorPropertyName", StringExpression(model.DiscriminatorName))));
