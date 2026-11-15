@@ -257,13 +257,17 @@ internal sealed class SchemaModelBuilder(
                     property.IsRequired),
                 StringComparer.Ordinal);
         }).ToArray();
-        var configuredDefault = _options.GetDefaultUnionCase(name);
-        var defaultCaseIndex = configuredDefault is null
-            ? -1
-            : Array.FindIndex(branches, branch => string.Equals(Resolve(branch)?.Title, configuredDefault, StringComparison.Ordinal));
-        if (defaultCaseIndex < 0)
-            defaultCaseIndex = FindDefaultCaseWithMissingDiscriminator(classifierProperties);
+        var defaultCaseIndex = FindDefaultCaseWithMissingDiscriminator(classifierProperties);
         var defaultCaseName = defaultCaseIndex >= 0 && defaultCaseIndex < caseNames.Length ? caseNames[defaultCaseIndex] : null;
+        var discriminatorProperty = GetClassifierDiscriminatorProperty(classifierProperties);
+        var unknownDiscriminatorFallbackCaseName = _options.UsesDefaultCaseForUnknownDiscriminator(name)
+            ? defaultCaseName
+            : null;
+        if (_options.UsesDefaultCaseForUnknownDiscriminator(name) &&
+            (discriminatorProperty is null || unknownDiscriminatorFallbackCaseName is null))
+        {
+            ReportUnsupported(name, "unknownDiscriminatorFallbacks requires a string discriminator and an inferred default case");
+        }
         var caseModels = caseNames.Select((caseName, index) =>
         {
             var properties = classifierProperties[index];
@@ -287,7 +291,13 @@ internal sealed class SchemaModelBuilder(
                 uniqueProperties,
                 isPlainObject);
         }).ToArray();
-        _model.Types.Add(new UnionModel(name, caseNames, defaultCaseName, caseModels)
+        _model.Types.Add(new UnionModel(
+            name,
+            caseNames,
+            defaultCaseName,
+            caseModels,
+            discriminatorProperty: discriminatorProperty,
+            unknownDiscriminatorFallbackCaseName: unknownDiscriminatorFallbackCaseName)
         {
             Description = schema.Description
         });
@@ -461,6 +471,60 @@ internal sealed class SchemaModelBuilder(
         };
     }
 
+    private string? GetClassifierDiscriminatorProperty(IReadOnlyList<Dictionary<string, PropertyEntry>> caseProperties)
+    {
+        var candidateProperties = caseProperties
+            .SelectMany(properties => properties
+                .Where(property => Resolve(property.Value.Schema)?.Const is string)
+                .Select(property => property.Key))
+            .Distinct(StringComparer.Ordinal);
+        var validCandidates = new List<(string PropertyName, int TagCount)>();
+
+        foreach (var candidate in candidateProperties)
+        {
+            var values = new HashSet<string>(StringComparer.Ordinal);
+            var missingCases = 0;
+            var fallbackCases = 0;
+            var isValid = true;
+            foreach (var properties in caseProperties)
+            {
+                if (!properties.TryGetValue(candidate, out var property))
+                {
+                    missingCases++;
+                    continue;
+                }
+
+                var schema = Resolve(property.Schema);
+                if (!property.Required || schema?.Type?.HasFlag(JsonSchemaType.String) != true)
+                {
+                    isValid = false;
+                    break;
+                }
+
+                if (schema.Const is string value)
+                {
+                    if (value.Length == 0 || !values.Add(value))
+                    {
+                        isValid = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    fallbackCases++;
+                }
+            }
+
+            if (isValid && values.Count > 0 && missingCases + fallbackCases <= 1)
+                validCandidates.Add((candidate, values.Count));
+        }
+
+        if (validCandidates.Count == 0) return null;
+        var highestTagCount = validCandidates.Max(candidate => candidate.TagCount);
+        var bestCandidates = validCandidates.Where(candidate => candidate.TagCount == highestTagCount).ToArray();
+        return bestCandidates.Length == 1 ? bestCandidates[0].PropertyName : null;
+    }
+
     private int FindDefaultCaseWithMissingDiscriminator(IReadOnlyList<Dictionary<string, PropertyEntry>> caseProperties)
     {
         // Infer a fallback only when one case omits a property that every other case requires as a const.
@@ -539,6 +603,7 @@ internal sealed class SchemaModelBuilder(
         var branchVariants = new List<ClassModel>();
         var commonProperties = BuildProperties(name, schema, excludedProperties: [discriminatorName]);
         var allowsUnknown = _options.AllowsUnknownDiscriminators(name);
+        var branchSchemasAreObjects = true;
         var index = 0;
 
         foreach (var branch in schema.OneOf ?? schema.AnyOf ?? [])
@@ -546,11 +611,13 @@ internal sealed class SchemaModelBuilder(
             var branchSchema = Resolve(branch);
             if (branchSchema is null)
             {
+                branchSchemasAreObjects = false;
                 ReportUnsupported(name, "unresolved union branch reference");
                 index++;
                 continue;
             }
 
+            branchSchemasAreObjects &= IsObject(branchSchema);
             var properties = GetProperties(name, branchSchema, new HashSet<string>(StringComparer.Ordinal));
             var discriminatorValue = properties.TryGetValue(discriminatorName, out var discriminatorProperty)
                 ? Resolve(discriminatorProperty.Schema)?.Const
@@ -559,6 +626,7 @@ internal sealed class SchemaModelBuilder(
             var caseDefinition = GetReferenceDefinitionName(branch) ?? branchSchema.Title ?? "Variant" + index;
             if (string.IsNullOrEmpty(discriminatorValue))
             {
+                branchSchemasAreObjects = false;
                 // Skipping the branch would silently drop a case from the generated union, so report it instead.
                 ReportUnsupported(name, "union branch '" + caseDefinition + "' has no '" + discriminatorName + "' discriminator value");
                 index++;
@@ -600,7 +668,47 @@ internal sealed class SchemaModelBuilder(
 
         if (allowsUnknown)
         {
-            var caseModels = branchVariants.Select(variant => new UnionCaseModel(
+            if (branchSchemasAreObjects && branchVariants.Count == cases.Count)
+            {
+                var unknownCaseName = GetUniqueGeneratedTypeName(name + "Unknown");
+                var tagProperty = new PropertyModel(
+                    discriminatorName,
+                    Identifier(Pascal(discriminatorName)),
+                    "string",
+                    isRequired: true,
+                    isNullable: false);
+                var unknownCase = new ClassModel(
+                    unknownCaseName,
+                    [tagProperty],
+                    hasExtensionData: true)
+                {
+                    Description = "Preserves an unrecognized " + discriminatorName + " variant."
+                };
+                var caseModels = branchVariants.Select(variant => new UnionCaseModel(
+                    variant.Name,
+                    variant.Properties
+                        .Where(property => property.ConstValue is not null)
+                        .ToDictionary(property => property.WireName, property => property.ConstValue!, StringComparer.Ordinal),
+                    variant.Properties.Select(property => property.WireName).ToArray(),
+                    variant.Properties.Where(property => property.IsRequired).Select(property => property.WireName).ToArray(),
+                    [])).Append(new UnionCaseModel(
+                        unknownCaseName,
+                        new Dictionary<string, string>(StringComparer.Ordinal),
+                        [discriminatorName],
+                        [discriminatorName],
+                        [])).ToArray();
+                _model.Types.AddRange(variants);
+                _model.Types.Add(unknownCase);
+                _model.Types.Add(new UnionModel(
+                    name,
+                    [.. cases.Select(item => item.TypeName), unknownCaseName],
+                    caseModels: caseModels,
+                    allowUnknownDiscriminator: true,
+                    discriminatorProperty: discriminatorName));
+                return;
+            }
+
+            var fallbackModels = branchVariants.Select(variant => new UnionCaseModel(
                 variant.Name,
                 variant.Properties
                     .Where(property => property.ConstValue is not null)
@@ -612,8 +720,9 @@ internal sealed class SchemaModelBuilder(
             _model.Types.Add(new UnionModel(
                 name,
                 [.. cases.Select(item => item.TypeName), "JsonElement"],
-                caseModels: caseModels,
-                allowUnknownDiscriminator: true));
+                caseModels: fallbackModels,
+                allowUnknownDiscriminator: true,
+                discriminatorProperty: discriminatorName));
             return;
         }
 
@@ -629,6 +738,17 @@ internal sealed class SchemaModelBuilder(
                 discriminatorEnumName,
                 ["unknown", .. cases.Select(item => item.DiscriminatorValue)]));
         }
+    }
+
+    private string GetUniqueGeneratedTypeName(string baseName)
+    {
+        var candidate = Identifier(baseName);
+        var suffix = 2;
+        while (_definitions.ContainsKey(candidate) || _model.Types.Any(type => type.Name == candidate))
+        {
+            candidate = Identifier(baseName + suffix++);
+        }
+        return candidate;
     }
 
     private ClassModel BuildClass(string name, OpenApiSchema schema)
@@ -882,7 +1002,15 @@ internal sealed class SchemaModelBuilder(
     private string? GetDiscriminatorName(string unionName, OpenApiSchema schema)
     {
         var explicitDiscriminator = schema.Discriminator?.PropertyName;
-        if (!string.IsNullOrWhiteSpace(explicitDiscriminator)) return explicitDiscriminator;
+        if (!string.IsNullOrWhiteSpace(explicitDiscriminator))
+        {
+            var explicitBranches = (schema.OneOf ?? schema.AnyOf ?? [])
+                .Select(branch => Resolve(branch))
+                .ToArray();
+            return explicitBranches.All(branch => branch is null || IsObject(branch))
+                ? explicitDiscriminator
+                : null;
+        }
 
         var branches = (schema.OneOf ?? schema.AnyOf ?? [])
             .Select(branch => Resolve(branch))
@@ -892,11 +1020,12 @@ internal sealed class SchemaModelBuilder(
             ReportUnsupported(unionName, "unresolved union branch reference");
             return null;
         }
+        if (branches.Any(branch => !IsObject(branch!))) return null;
 
         var branchConstants = branches
             .Select(branch => GetProperties(unionName, branch!, new HashSet<string>(StringComparer.Ordinal))
                 .Where(property => Resolve(property.Value.Schema)?.Const is not null)
-                .Select(property => (property.Key, Value: Resolve(property.Value.Schema)!.Const!))
+                .Select(property => (property.Key, property.Value, Schema: Resolve(property.Value.Schema)!))
                 .ToArray())
             .ToArray();
         if (branchConstants.Any(constants => constants.Length > 1)) return null;
@@ -910,16 +1039,29 @@ internal sealed class SchemaModelBuilder(
 
         if (commonProperty is null) return null;
 
+        var discriminatorValues = new HashSet<string>(StringComparer.Ordinal);
         for (var index = 0; index < branches.Length; index++)
         {
-            if (branchConstants[index].Length == 1) continue;
-            var branch = branches[index]!;
-            if (InferDiscriminatorValueFromVariantTitle(unionName, schema, branch, commonProperty) is not null)
+            if (branchConstants[index].Length == 1)
             {
+                var (propertyName, property, discriminatorSchema) = branchConstants[index][0];
+                var discriminatorValue = discriminatorSchema.Const;
+                if (propertyName != commonProperty ||
+                    !property.Required ||
+                    discriminatorSchema.Type?.HasFlag(JsonSchemaType.String) != true ||
+                    string.IsNullOrEmpty(discriminatorValue) ||
+                    !discriminatorValues.Add(discriminatorValue!))
+                {
+                    return null;
+                }
                 continue;
             }
 
-            return null;
+            var branch = branches[index]!;
+            if (InferDiscriminatorValueFromVariantTitle(unionName, schema, branch, commonProperty) is null)
+            {
+                return null;
+            }
         }
 
         return commonProperty;
@@ -951,10 +1093,16 @@ internal sealed class SchemaModelBuilder(
 
             siblingCount++;
             var properties = GetProperties(unionName, siblingSchema, new HashSet<string>(StringComparer.Ordinal));
-            if (!properties.TryGetValue(discriminatorName, out var property) ||
-                !property.Required ||
-                Resolve(property.Schema)?.Const is not { } value ||
-                !siblingValues.Add(value))
+            if (!properties.TryGetValue(discriminatorName, out var property) || !property.Required)
+            {
+                return null;
+            }
+
+            var discriminatorSchema = Resolve(property.Schema);
+            var discriminatorValue = discriminatorSchema?.Const;
+            if (discriminatorSchema?.Type?.HasFlag(JsonSchemaType.String) != true ||
+                string.IsNullOrEmpty(discriminatorValue) ||
+                !siblingValues.Add(discriminatorValue!))
             {
                 return null;
             }

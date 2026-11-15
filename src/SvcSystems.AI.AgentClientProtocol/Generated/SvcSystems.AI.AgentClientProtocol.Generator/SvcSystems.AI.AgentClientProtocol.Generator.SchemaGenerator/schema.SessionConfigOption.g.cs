@@ -3,7 +3,6 @@
 #nullable enable
 using global::SvcSystems.AI.AgentClientProtocol.Client.Models;
 using global::SvcSystems.AI.AgentClientProtocol.Agent.Models;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Models;
@@ -11,5 +10,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// A session configuration option selector and its current state.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(SessionConfigOptionJsonTypeClassifier))]
-public union SessionConfigOption(SessionConfigSelect, SessionConfigBoolean, JsonElement);
+[JsonUnion]
+public union SessionConfigOption(SessionConfigSelect, SessionConfigBoolean, SessionConfigOptionUnknown);

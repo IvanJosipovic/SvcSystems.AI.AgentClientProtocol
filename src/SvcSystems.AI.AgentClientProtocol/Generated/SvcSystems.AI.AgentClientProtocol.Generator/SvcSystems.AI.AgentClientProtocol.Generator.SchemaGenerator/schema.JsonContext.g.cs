@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 
-[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, AllowOutOfOrderMetadataProperties = true)]
+[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, AllowOutOfOrderMetadataProperties = true, TypeClassifiers = new[] { typeof(JsonContextUnionClassifierFactory) })]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.AgentAuthCapabilities))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.AgentCapabilities))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.AgentNotification))]
@@ -51,6 +51,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ConfigOptionUpdate))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Content))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlock))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentBlockUnknown))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ContentChunk))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.Cost))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Client.Models.CreateElicitationRequest))]
@@ -146,6 +147,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionCloseCapabilities))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigBoolean))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOption))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionUnknown))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigOptionsCapabilities))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigSelect))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionConfigSelectGroup))]
@@ -163,6 +165,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionSystemPromptModeCapabilities))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionSystemPromptOverrideCapabilities))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdate))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateUnknown))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant0UserMessageChunk))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant1AgentMessageChunk))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.SessionUpdateVariant2AgentThoughtChunk))]
@@ -187,6 +190,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Serialization;
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.TitledMultiSelectItems))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCall))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContent))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallContentUnknown))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallLocation))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallStatus))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Models.ToolCallUpdate))]

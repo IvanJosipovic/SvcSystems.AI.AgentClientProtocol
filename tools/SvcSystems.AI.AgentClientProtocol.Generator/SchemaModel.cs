@@ -52,12 +52,16 @@ internal sealed class UnionModel(
     IReadOnlyList<string> cases,
     string? defaultCaseName = null,
     IReadOnlyList<UnionCaseModel>? caseModels = null,
-    bool allowUnknownDiscriminator = false) : TypeModel(name)
+    bool allowUnknownDiscriminator = false,
+    string? discriminatorProperty = null,
+    string? unknownDiscriminatorFallbackCaseName = null) : TypeModel(name)
 {
     public IReadOnlyList<string> Cases { get; } = cases;
     public string? DefaultCaseName { get; } = defaultCaseName;
     public IReadOnlyList<UnionCaseModel> CaseModels { get; } = caseModels ?? [];
     public bool AllowUnknownDiscriminator { get; } = allowUnknownDiscriminator;
+    public string? DiscriminatorProperty { get; } = discriminatorProperty;
+    public string? UnknownDiscriminatorFallbackCaseName { get; } = unknownDiscriminatorFallbackCaseName;
     // Value-based tags and open fallbacks need behavior the structural classifier cannot express.
     public bool UsesStructuralClassifier => CaseModels.Count == Cases.Count &&
         Cases.Count > 1 &&

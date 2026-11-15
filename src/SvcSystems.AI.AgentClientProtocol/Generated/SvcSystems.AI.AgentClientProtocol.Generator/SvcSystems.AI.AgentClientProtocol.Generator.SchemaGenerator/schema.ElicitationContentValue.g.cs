@@ -10,5 +10,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// Allowed wire representations for `ElicitationContentValue`.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ElicitationContentValueJsonTypeClassifier))]
+[JsonUnion]
 public union ElicitationContentValue(string, long, double, bool, List<string>);

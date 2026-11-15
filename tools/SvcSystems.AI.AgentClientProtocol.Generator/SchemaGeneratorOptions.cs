@@ -9,11 +9,11 @@ internal sealed class SchemaGeneratorOptions
     private const string DefaultJsonContextName = "JsonContext";
 
     private readonly HashSet<string> _allowUnknownDiscriminators;
-    private readonly Dictionary<string, string> _defaultUnionCases;
+    private readonly HashSet<string> _unknownDiscriminatorFallbacks;
 
     private SchemaGeneratorOptions(
         HashSet<string> allowUnknownDiscriminators,
-        Dictionary<string, string> defaultUnionCases,
+        HashSet<string> unknownDiscriminatorFallbacks,
         string modelNamespace,
         string? clientNamespace,
         string? agentNamespace,
@@ -22,7 +22,7 @@ internal sealed class SchemaGeneratorOptions
         bool generateJsonContext)
     {
         _allowUnknownDiscriminators = allowUnknownDiscriminators;
-        _defaultUnionCases = defaultUnionCases;
+        _unknownDiscriminatorFallbacks = unknownDiscriminatorFallbacks;
         ModelNamespace = modelNamespace;
         ClientNamespace = clientNamespace;
         AgentNamespace = agentNamespace;
@@ -32,8 +32,7 @@ internal sealed class SchemaGeneratorOptions
     }
 
     public static SchemaGeneratorOptions Empty { get; } = new(
-        [], new(StringComparer.Ordinal),
-        DefaultModelNamespace, null, null, DefaultSerializationNamespace, DefaultJsonContextName, false);
+        [], [], DefaultModelNamespace, null, null, DefaultSerializationNamespace, DefaultJsonContextName, false);
 
     public string ModelNamespace { get; }
     public string? ClientNamespace { get; }
@@ -49,20 +48,11 @@ internal sealed class SchemaGeneratorOptions
         using var document = JsonDocument.Parse(json!);
         var root = document.RootElement;
         var allowUnknown = ReadNames(root, "allowUnknownDiscriminators");
-        var defaultUnionCases = new Dictionary<string, string>(StringComparer.Ordinal);
-        if (root.TryGetProperty("defaultUnionCases", out var defaultCasesElement) &&
-            defaultCasesElement.ValueKind == JsonValueKind.Object)
-        {
-            foreach (var union in defaultCasesElement.EnumerateObject())
-            {
-                if (union.Value.ValueKind == JsonValueKind.String && union.Value.GetString() is { Length: > 0 } caseName)
-                    defaultUnionCases[union.Name] = caseName;
-            }
-        }
+        var unknownDiscriminatorFallbacks = ReadNames(root, "unknownDiscriminatorFallbacks");
 
         return new SchemaGeneratorOptions(
             allowUnknown,
-            defaultUnionCases,
+            unknownDiscriminatorFallbacks,
             ReadString(root, "namespace") ?? DefaultModelNamespace,
             ReadString(root, "clientNamespace"),
             ReadString(root, "agentNamespace"),
@@ -73,8 +63,7 @@ internal sealed class SchemaGeneratorOptions
 
     public bool AllowsUnknownDiscriminators(string unionName) => _allowUnknownDiscriminators.Contains(unionName);
 
-    public string? GetDefaultUnionCase(string unionName) =>
-        _defaultUnionCases.TryGetValue(unionName, out var caseName) ? caseName : null;
+    public bool UsesDefaultCaseForUnknownDiscriminator(string unionName) => _unknownDiscriminatorFallbacks.Contains(unionName);
 
     private static HashSet<string> ReadNames(JsonElement root, string propertyName)
     {

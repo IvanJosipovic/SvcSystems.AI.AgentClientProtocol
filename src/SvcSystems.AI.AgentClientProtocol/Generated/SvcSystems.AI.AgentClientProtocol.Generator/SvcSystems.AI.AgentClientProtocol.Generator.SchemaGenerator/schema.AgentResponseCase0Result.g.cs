@@ -11,5 +11,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// Method-specific response data.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(AgentResponseCase0ResultJsonTypeClassifier))]
+[JsonUnion]
 internal union AgentResponseCase0Result(InitializeResponse, AuthenticateResponse, LogoutResponse, NewSessionResponse, LoadSessionResponse, ListSessionsResponse, DeleteSessionResponse, ResumeSessionResponse, CloseSessionResponse, SetSessionModeResponse, SetSessionConfigOptionResponse, PromptResponse, JsonElement);

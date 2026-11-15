@@ -67,6 +67,32 @@ public sealed class WireJsonTests
     }
 
     [Fact]
+    public void SetSessionConfigOptionUsesItsDefaultCaseForMissingAndUnknownStringTags()
+    {
+        using var unknownJson = JsonDocument.Parse(
+            """{"sessionId":"session-1","configId":"model","type":"future","value":"fast"}""");
+        var unknown = DeserializeJson<SetSessionConfigOptionRequest>(unknownJson.RootElement);
+        var unknownCase = Assert.IsType<SetSessionConfigOptionRequestCase1>(unknown.Value);
+        Assert.Equal("fast", unknownCase.Value);
+        Assert.Equal("future", unknownCase.ExtensionData!["type"].GetString());
+        using var roundTrippedUnknown = JsonDocument.Parse(SerializeJson(unknown));
+        Assert.Equal("future", roundTrippedUnknown.RootElement.GetProperty("type").GetString());
+
+        using var missingTypeJson = JsonDocument.Parse(
+            """{"sessionId":"session-1","configId":"model","value":"fast"}""");
+        var missingType = DeserializeJson<SetSessionConfigOptionRequest>(missingTypeJson.RootElement);
+        Assert.IsType<SetSessionConfigOptionRequestCase1>(missingType.Value);
+
+        using var invalidUnknownValueJson = JsonDocument.Parse(
+            """{"sessionId":"session-1","configId":"model","type":"future","value":42}""");
+        Assert.Throws<JsonException>(() => DeserializeJson<SetSessionConfigOptionRequest>(invalidUnknownValueJson.RootElement));
+
+        using var invalidKnownValueJson = JsonDocument.Parse(
+            """{"sessionId":"session-1","configId":"confirm","type":"boolean","value":"yes"}""");
+        Assert.Throws<JsonException>(() => DeserializeJson<SetSessionConfigOptionRequest>(invalidKnownValueJson.RootElement));
+    }
+
+    [Fact]
     public void SourceGeneratedUnionsRoundTripEveryDistinctJsonShape()
     {
         RequestId numericId = 42L;
@@ -196,10 +222,17 @@ public sealed class WireJsonTests
             "[{\"value\":\"fast\",\"name\":\"Fast\"}]",
             DeserializeJson<SessionConfigSelectOptions>,
             SerializeJson);
+        using var ungroupedOptionsJson = JsonDocument.Parse("[{\"value\":\"fast\",\"name\":\"Fast\"}]");
+        var ungroupedOptions = DeserializeJson<SessionConfigSelectOptions>(ungroupedOptionsJson.RootElement);
+        Assert.IsType<List<SessionConfigSelectOption>>(ungroupedOptions.Value);
+
         AssertUnionRoundTrip<SessionConfigSelectOptions>(
             "[{\"group\":\"recommended\",\"name\":\"Recommended\",\"options\":[{\"value\":\"fast\",\"name\":\"Fast\"}]}]",
             DeserializeJson<SessionConfigSelectOptions>,
             SerializeJson);
+        using var groupedOptionsJson = JsonDocument.Parse("[{\"group\":\"recommended\",\"name\":\"Recommended\",\"options\":[{\"value\":\"fast\",\"name\":\"Fast\"}]}]");
+        var groupedOptions = DeserializeJson<SessionConfigSelectOptions>(groupedOptionsJson.RootElement);
+        Assert.IsType<List<SessionConfigSelectGroup>>(groupedOptions.Value);
         AssertUnionRoundTrip<SessionConfigSelectOptions>(
             "[]",
             DeserializeJson<SessionConfigSelectOptions>,
@@ -218,10 +251,17 @@ public sealed class WireJsonTests
             "42",
             DeserializeJson<ElicitationContentValue>,
             SerializeJson);
+        using var integerValueJson = JsonDocument.Parse("42");
+        var integerValue = DeserializeJson<ElicitationContentValue>(integerValueJson.RootElement);
+        Assert.Equal(42L, Assert.IsType<long>(integerValue.Value));
+
         AssertUnionRoundTrip<ElicitationContentValue>(
             "42.5",
             DeserializeJson<ElicitationContentValue>,
             SerializeJson);
+        using var floatingValueJson = JsonDocument.Parse("42.5");
+        var floatingValue = DeserializeJson<ElicitationContentValue>(floatingValueJson.RootElement);
+        Assert.Equal(42.5, Assert.IsType<double>(floatingValue.Value));
     }
 
     [Fact]
@@ -230,6 +270,25 @@ public sealed class WireJsonTests
         AssertMcpServer("""{"type":"stdio","name":"local","command":"agent","args":["--stdio"],"env":[]}""", typeof(McpServerStdio));
         AssertMcpServer("""{"type":"http","name":"remote","url":"https://example.test/mcp","headers":[]}""", typeof(McpServerHttp));
         AssertMcpServer("""{"type":"sse","name":"events","url":"https://example.test/events","headers":[]}""", typeof(McpServerSse));
+    }
+
+    [Fact]
+    public void ClosedTaggedObjectVariantsRoundTripUnknownMembers()
+    {
+        const string cancelledJson = """{"outcome":"cancelled","vendor":{"preserve":true}}""";
+        using var cancelledDocument = JsonDocument.Parse(cancelledJson);
+        var cancelled = DeserializeJson<RequestPermissionOutcome>(cancelledDocument.RootElement);
+        var cancelledCase = Assert.IsType<RequestPermissionOutcomeVariant0Cancelled>(cancelled);
+        Assert.True(cancelledCase.ExtensionData!["vendor"].GetProperty("preserve").GetBoolean());
+        AssertJsonEqual(cancelledJson, SerializeJson(cancelled));
+
+        const string selectedJson = """{"outcome":"selected","optionId":"allow","vendor":{"revision":2}}""";
+        using var selectedDocument = JsonDocument.Parse(selectedJson);
+        var selected = DeserializeJson<RequestPermissionOutcome>(selectedDocument.RootElement);
+        var selectedCase = Assert.IsType<SelectedPermissionOutcome>(selected);
+        Assert.Equal("allow", selectedCase.OptionId);
+        Assert.Equal(2, selectedCase.ExtensionData!["vendor"].GetProperty("revision").GetInt32());
+        AssertJsonEqual(selectedJson, SerializeJson(selected));
     }
 
     [Fact]
@@ -434,35 +493,58 @@ public sealed class WireJsonTests
     }
 
     [Fact]
-    public void ToolCallReaderPreservesUnknownContentAsRawJson()
+    public void ToolCallReaderPreservesUnknownContentWithFallbackModel()
     {
+        const string contentJson = """{"type":"future_variant","payload":{"value":42}}""";
         using var notification = JsonDocument.Parse("""
             { "update": { "sessionUpdate": "tool_call", "toolCallId": "tool-1", "title": "Lookup", "content": [{ "type": "future_variant", "payload": { "value": 42 } }] } }
             """);
 
         var update = Assert.IsType<ToolCall>(WireJson.ReadSessionUpdate(notification.RootElement).Value);
-        var content = Assert.IsType<JsonElement>(Assert.Single(update.Content!).Value);
+        var contentUnion = Assert.Single(update.Content!);
+        var content = Assert.IsType<ToolCallContentUnknown>(contentUnion.Value);
 
-        Assert.Equal("future_variant", content.GetProperty("type").GetString());
-        Assert.Equal(42, content.GetProperty("payload").GetProperty("value").GetInt32());
+        Assert.Equal("future_variant", content.Type);
+        Assert.Equal(42, content.ExtensionData!["payload"].GetProperty("value").GetInt32());
+        AssertJsonEqual(contentJson, SerializeJson(contentUnion));
     }
 
     [Fact]
-    public void UnknownSessionUpdatesAndConfigOptionsRemainJsonElements()
+    public void UnknownSessionUpdatesAndConfigOptionsUseExtensionDataFallbacks()
     {
+        const string updateJson = """{"sessionUpdate":"future_update","payload":{"version":2}}""";
         using var notification = JsonDocument.Parse("""
             { "update": { "sessionUpdate": "future_update", "payload": { "version": 2 } } }
             """);
-        var update = Assert.IsType<JsonElement>(WireJson.ReadSessionUpdate(notification.RootElement).Value);
-        Assert.Equal("future_update", update.GetProperty("sessionUpdate").GetString());
-        Assert.Equal(2, update.GetProperty("payload").GetProperty("version").GetInt32());
+        var updateUnion = WireJson.ReadSessionUpdate(notification.RootElement);
+        var update = Assert.IsType<SessionUpdateUnknown>(updateUnion.Value);
+        Assert.Equal("future_update", update.SessionUpdate);
+        Assert.Equal(2, update.ExtensionData!["payload"].GetProperty("version").GetInt32());
+        AssertJsonEqual(updateJson, SerializeJson(updateUnion));
 
+        const string optionJson = """{"id":"future","type":"future_option","payload":{"enabled":true}}""";
         using var response = JsonDocument.Parse("""
             { "configOptions": [{ "id": "future", "type": "future_option", "payload": { "enabled": true } }] }
             """);
-        var option = Assert.IsType<JsonElement>(Assert.Single(WireJson.ReadConfigOptionsResponse(response.RootElement)).Value);
-        Assert.Equal("future_option", option.GetProperty("type").GetString());
-        Assert.True(option.GetProperty("payload").GetProperty("enabled").GetBoolean());
+        var optionUnion = Assert.Single(WireJson.ReadConfigOptionsResponse(response.RootElement));
+        var option = Assert.IsType<SessionConfigOptionUnknown>(optionUnion.Value);
+        Assert.Equal("future_option", option.Type);
+        Assert.Equal("future", option.ExtensionData!["id"].GetString());
+        Assert.True(option.ExtensionData["payload"].GetProperty("enabled").GetBoolean());
+        AssertJsonEqual(optionJson, SerializeJson(optionUnion));
+    }
+
+    [Fact]
+    public void UnknownContentBlockTagRoundTripsThroughExtensionDataFallback()
+    {
+        const string json = """{"type":"future_block","payload":{"version":3}}""";
+        using var document = JsonDocument.Parse(json);
+        var contentUnion = DeserializeJson<ContentBlock>(document.RootElement);
+        var content = Assert.IsType<ContentBlockUnknown>(contentUnion.Value);
+
+        Assert.Equal("future_block", content.Type);
+        Assert.Equal(3, content.ExtensionData!["payload"].GetProperty("version").GetInt32());
+        AssertJsonEqual(json, SerializeJson(contentUnion));
     }
 
     [Fact]

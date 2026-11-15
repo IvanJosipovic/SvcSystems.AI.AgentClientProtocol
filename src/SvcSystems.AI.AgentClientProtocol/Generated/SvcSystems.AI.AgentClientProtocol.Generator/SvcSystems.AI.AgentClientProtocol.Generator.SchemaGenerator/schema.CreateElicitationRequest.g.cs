@@ -14,5 +14,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Client.Models;
 /// either via a form or by directing them to a URL.
 /// Elicitations are tied to a session (optionally a tool call) or a request.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(CreateElicitationRequestJsonTypeClassifier))]
+[JsonUnion]
 public union CreateElicitationRequest(ElicitationFormMode, ElicitationUrlMode, CreateElicitationRequestCase2);

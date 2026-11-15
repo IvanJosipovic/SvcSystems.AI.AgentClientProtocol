@@ -68,6 +68,132 @@ public sealed class JsonSchemaSourceGeneratorTests
     }
 
     [Fact]
+    public void InfersPolymorphicHierarchyForRequiredStringConstObjectUnion()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "Message": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": { "type": "string", "const": "created" },
+                        "id": { "type": "string" }
+                      },
+                      "required": ["kind", "id"]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": { "type": "string", "const": "deleted" },
+                        "reason": { "type": "string" }
+                      },
+                      "required": ["kind", "reason"]
+                    }
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/closed-tagged-object-union.schema.json", useSystemTextJsonContext: true);
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var message = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "Message"));
+        Assert.Contains("[JsonPolymorphic(TypeDiscriminatorPropertyName = \"kind\")]", message, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(MessageVariant0Created), \"created\")]", message, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(MessageVariant1Deleted), \"deleted\")]", message, StringComparison.Ordinal);
+        Assert.Contains("public abstract class Message", message, StringComparison.Ordinal);
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("union Message(", StringComparison.Ordinal));
+
+        var created = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "MessageVariant0Created"));
+        Assert.Contains("public sealed class MessageVariant0Created : Message", created, StringComparison.Ordinal);
+        var deleted = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "MessageVariant1Deleted"));
+        Assert.Contains("public sealed class MessageVariant1Deleted : Message", deleted, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("optional-tag")]
+    [InlineData("numeric-tag")]
+    public void DoesNotInferPolymorphicHierarchyForOptionalOrNonStringTags(string caseId)
+    {
+        var schema = caseId switch
+        {
+            "optional-tag" => """
+                {
+                  "$defs": {
+                    "Message": {
+                      "oneOf": [
+                        { "type": "object", "properties": { "kind": { "type": "string", "const": "created" } } },
+                        { "type": "object", "properties": { "kind": { "type": "string", "const": "deleted" } } }
+                      ]
+                    }
+                  }
+                }
+                """,
+            "numeric-tag" => """
+                {
+                  "$defs": {
+                    "Message": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": { "kind": { "type": "integer" }, "count": { "type": "integer" } },
+                          "required": ["kind", "count"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": { "kind": { "type": "integer" }, "name": { "type": "string" } },
+                          "required": ["kind", "name"]
+                        }
+                      ]
+                    }
+                  }
+                }
+                """,
+            _ => throw new ArgumentOutOfRangeException(nameof(caseId), caseId, null)
+        };
+
+        var result = RunGenerator(schema, "fixtures/invalid-discriminator-candidate.schema.json", useSystemTextJsonContext: true);
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("JsonPolymorphic", StringComparison.Ordinal));
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("JsonDerivedType", StringComparison.Ordinal));
+        Assert.Contains(result.GeneratedSources, source => source.Contains("union Message(", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void KeepsJsonElementForUnconstrainedUnionAlternatives()
+    {
+        const string schema = """
+            {
+              "$defs": {
+                "Payload": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": { "kind": { "type": "string", "const": "known" } },
+                      "required": ["kind"]
+                    },
+                    {}
+                  ]
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/raw-union-fallback.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var union = Assert.Single(result.GeneratedSources, source => source.Contains("union Payload(", StringComparison.Ordinal));
+        Assert.Contains("JsonElement", union, StringComparison.Ordinal);
+        Assert.DoesNotContain(result.GeneratedSources, source => source.Contains("JsonPolymorphic", StringComparison.Ordinal));
+        var classifierDefinition = GetUnionClassifierDefinition(result.GeneratedSources, "Payload").Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("            null,\n            typeof(JsonElement),", classifierDefinition, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GeneratesValueAwareClassifiersForOverlappingNumericCases()
     {
         const string schema = """
@@ -104,33 +230,26 @@ public sealed class JsonSchemaSourceGeneratorTests
         var result = RunGenerator(schema, "fixtures/numeric-unions.schema.json");
 
         Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
-        var int32OrInt64 = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class Int32OrInt64JsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("TryGetInt32(out _)", int32OrInt64, StringComparison.Ordinal);
-        Assert.Contains("TryGetInt64(out _)", int32OrInt64, StringComparison.Ordinal);
-        Assert.True(int32OrInt64.IndexOf("TryGetInt32", StringComparison.Ordinal) <
-                    int32OrInt64.IndexOf("TryGetInt64", StringComparison.Ordinal));
+        var classifierFactory = GetSharedClassifierFactory(result.GeneratedSources);
+        Assert.Contains("TryGetInt32(out _)", classifierFactory, StringComparison.Ordinal);
+        Assert.Contains("TryGetInt64(out _)", classifierFactory, StringComparison.Ordinal);
+        Assert.Contains("TryGetUInt32(out _)", classifierFactory, StringComparison.Ordinal);
+        Assert.Contains("TryGetUInt64(out _)", classifierFactory, StringComparison.Ordinal);
+        Assert.Contains("TryGetSingle(out _)", classifierFactory, StringComparison.Ordinal);
+        Assert.Contains("TryGetDouble(out _)", classifierFactory, StringComparison.Ordinal);
 
-        var int32OrDouble = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class Int32OrDoubleJsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("TryGetInt32(out _)", int32OrDouble, StringComparison.Ordinal);
-        Assert.Contains("TryGetDouble(out _)", int32OrDouble, StringComparison.Ordinal);
-        Assert.True(int32OrDouble.IndexOf("TryGetInt32", StringComparison.Ordinal) <
-                    int32OrDouble.IndexOf("TryGetDouble", StringComparison.Ordinal));
+        var int32OrInt64 = GetUnionClassifierDefinition(result.GeneratedSources, "Int32OrInt64");
+        Assert.Contains("new Type[] { typeof(int), typeof(long) }", int32OrInt64, StringComparison.Ordinal);
 
-        var uint32OrUInt64 = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class UInt32OrUInt64JsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("TryGetUInt32(out _)", uint32OrUInt64, StringComparison.Ordinal);
-        Assert.Contains("TryGetUInt64(out _)", uint32OrUInt64, StringComparison.Ordinal);
-        Assert.True(uint32OrUInt64.IndexOf("TryGetUInt32", StringComparison.Ordinal) <
-                    uint32OrUInt64.IndexOf("TryGetUInt64", StringComparison.Ordinal));
+        var int32OrDouble = GetUnionClassifierDefinition(result.GeneratedSources, "Int32OrDouble");
+        Assert.Contains("new Type[] { typeof(int) }", int32OrDouble, StringComparison.Ordinal);
+        Assert.Contains("new Type[] { typeof(double) }", int32OrDouble, StringComparison.Ordinal);
 
-        var floatOrDouble = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class FloatOrDoubleJsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("TryGetSingle(out _)", floatOrDouble, StringComparison.Ordinal);
-        Assert.Contains("TryGetDouble(out _)", floatOrDouble, StringComparison.Ordinal);
-        Assert.True(floatOrDouble.IndexOf("TryGetDouble", StringComparison.Ordinal) <
-                    floatOrDouble.IndexOf("TryGetSingle", StringComparison.Ordinal));
+        var uint32OrUInt64 = GetUnionClassifierDefinition(result.GeneratedSources, "UInt32OrUInt64");
+        Assert.Contains("new Type[] { typeof(uint), typeof(ulong) }", uint32OrUInt64, StringComparison.Ordinal);
+
+        var floatOrDouble = GetUnionClassifierDefinition(result.GeneratedSources, "FloatOrDouble");
+        Assert.Contains("new Type[] { typeof(double), typeof(float) }", floatOrDouble, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -172,8 +291,6 @@ public sealed class JsonSchemaSourceGeneratorTests
             "[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]",
             union,
             StringComparison.Ordinal);
-        Assert.DoesNotContain(result.GeneratedSources, source =>
-            source.Contains("class RequiredShapeUnionJsonTypeClassifier", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -215,8 +332,6 @@ public sealed class JsonSchemaSourceGeneratorTests
             "[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]",
             union,
             StringComparison.Ordinal);
-        Assert.DoesNotContain(result.GeneratedSources, source =>
-            source.Contains("class ResourceUnionJsonTypeClassifier", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -251,11 +366,13 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
         var union = Assert.Single(result.GeneratedSources, source =>
             source.Contains("union ShadowedUnion(", StringComparison.Ordinal));
-        Assert.Contains(
-            "[JsonUnion(TypeClassifier = typeof(ShadowedUnionJsonTypeClassifier))]",
-            union,
-            StringComparison.Ordinal);
+        Assert.Contains("[JsonUnion]", union, StringComparison.Ordinal);
         Assert.DoesNotContain(union, "JsonUnionTypeStructuralClassifier", StringComparison.Ordinal);
+
+        var classifierDefinition = GetUnionClassifierDefinition(result.GeneratedSources, "ShadowedUnion");
+        Assert.DoesNotContain("typeof(JsonElement)", classifierDefinition, StringComparison.Ordinal);
+        Assert.Contains("\"extra\"", classifierDefinition, StringComparison.Ordinal);
+        Assert.Contains("new string[] { \"id\" }, new string[] {  }", classifierDefinition, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -1244,23 +1361,55 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains(result.GeneratedSources, source =>
             source.Contains("namespace SvcSystems.AI.AgentClientProtocol.Models;", StringComparison.Ordinal) &&
             source.Contains("class SessionUpdate", StringComparison.Ordinal));
-        Assert.Contains(result.GeneratedSources, source =>
-            source.Contains("class ContentBlockJsonTypeClassifier", StringComparison.Ordinal) &&
-            source.Contains("_ => typeof(JsonElement)", StringComparison.Ordinal));
-        var authMethodClassifier = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class AuthMethodJsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("return typeof(AuthMethodAgent);", authMethodClassifier, StringComparison.Ordinal);
-        Assert.DoesNotContain("ValueTextEquals(\"args\"u8)", authMethodClassifier, StringComparison.Ordinal);
-        var sessionUpdateClassifier = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class SessionUpdateJsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("\"user_message_chunk\" => typeof(SessionUpdateVariant0UserMessageChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
-        Assert.Contains("\"agent_message_chunk\" => typeof(SessionUpdateVariant1AgentMessageChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
-        Assert.Contains("\"agent_thought_chunk\" => typeof(SessionUpdateVariant2AgentThoughtChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
-        Assert.Contains("\"tool_call\" => typeof(ToolCall)", sessionUpdateClassifier, StringComparison.Ordinal);
-        var elicitationClassifier = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class CreateElicitationRequestJsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("ValueTextEquals(\"mode\"u8)", elicitationClassifier, StringComparison.Ordinal);
-        Assert.DoesNotContain("ValueTextEquals(\"requestedSchema\"u8)", elicitationClassifier, StringComparison.Ordinal);
+        var sharedClassifierFactory = GetSharedClassifierFactory(result.GeneratedSources);
+        Assert.Contains(": JsonTypeClassifierFactory", sharedClassifierFactory, StringComparison.Ordinal);
+        Assert.Contains("TypeClassifiers = new[] { typeof(", jsonContext, StringComparison.Ordinal);
+        foreach (var (unionName, discriminatorName) in new[]
+        {
+            ("ContentBlock", "type"),
+            ("SessionConfigOption", "type"),
+            ("SessionUpdate", "sessionUpdate"),
+            ("ToolCallContent", "type")
+        })
+        {
+            var union = Assert.Single(result.GeneratedSources, source =>
+                source.Contains($"public union {unionName}(", StringComparison.Ordinal));
+            Assert.Contains(unionName + "Unknown", union, StringComparison.Ordinal);
+            Assert.DoesNotContain("JsonElement", union, StringComparison.Ordinal);
+
+            var fallback = Assert.Single(result.GeneratedSources, source =>
+                ContainsClassDeclaration(source, unionName + "Unknown"));
+            Assert.Contains($"[JsonPropertyName(\"{discriminatorName}\")]", fallback, StringComparison.Ordinal);
+            Assert.Contains("public required string ", fallback, StringComparison.Ordinal);
+            Assert.Contains("[JsonExtensionData]", fallback, StringComparison.Ordinal);
+
+            Assert.Contains($"[typeof({unionName})] = new(", sharedClassifierFactory, StringComparison.Ordinal);
+            var classifierDefinition = GetUnionClassifierDefinition(result.GeneratedSources, unionName).Replace("\r\n", "\n", StringComparison.Ordinal);
+            Assert.Contains($"            typeof({unionName}Unknown),\n            null,", classifierDefinition, StringComparison.Ordinal);
+        }
+
+        var authMethodClassifier = GetUnionClassifierDefinition(result.GeneratedSources, "AuthMethod");
+        Assert.Contains("[\"terminal\"] = typeof(AuthMethodTerminal)", authMethodClassifier, StringComparison.Ordinal);
+        Assert.Contains("typeof(AuthMethodAgent)", authMethodClassifier, StringComparison.Ordinal);
+
+        var setConfigClassifier = GetUnionClassifierDefinition(result.GeneratedSources, "SetSessionConfigOptionRequest")
+            .Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.Contains("[\"boolean\"] = typeof(SetSessionConfigOptionRequestCase0)", setConfigClassifier, StringComparison.Ordinal);
+        Assert.Contains(
+            "            null,\n            null,\n            typeof(SetSessionConfigOptionRequestCase1),\n            typeof(SetSessionConfigOptionRequestCase1),",
+            setConfigClassifier,
+            StringComparison.Ordinal);
+
+        var sessionUpdateClassifier = GetUnionClassifierDefinition(result.GeneratedSources, "SessionUpdate");
+        Assert.Contains("[\"user_message_chunk\"] = typeof(SessionUpdateVariant0UserMessageChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
+        Assert.Contains("[\"agent_message_chunk\"] = typeof(SessionUpdateVariant1AgentMessageChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
+        Assert.Contains("[\"agent_thought_chunk\"] = typeof(SessionUpdateVariant2AgentThoughtChunk)", sessionUpdateClassifier, StringComparison.Ordinal);
+        Assert.Contains("[\"tool_call\"] = typeof(ToolCall)", sessionUpdateClassifier, StringComparison.Ordinal);
+
+        var elicitationClassifier = GetUnionClassifierDefinition(result.GeneratedSources, "CreateElicitationRequest");
+        Assert.Contains("\"mode\"", elicitationClassifier, StringComparison.Ordinal);
+        Assert.Contains("[\"form\"] = typeof(ElicitationFormMode)", elicitationClassifier, StringComparison.Ordinal);
+        Assert.Contains("[\"url\"] = typeof(ElicitationUrlMode)", elicitationClassifier, StringComparison.Ordinal);
         // Each elicitation mode is one flat object, so the mode payload is a class rather than a union, and
         // the enclosing request is the union that classifies the payload by mode.
         var elicitationFormMode = Assert.Single(result.GeneratedSources, source =>
@@ -1275,15 +1424,17 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains(result.GeneratedSources, source => source.Contains(
             "public union CreateElicitationRequest(ElicitationFormMode, ElicitationUrlMode, CreateElicitationRequestCase2);",
             StringComparison.Ordinal));
-        Assert.DoesNotContain(result.GeneratedSources, source =>
-            source.Contains("class ElicitationFormModeJsonTypeClassifier", StringComparison.Ordinal));
-        var untaggedClassifier = Assert.Single(result.GeneratedSources, source =>
-            source.Contains("class MultiSelectItemsJsonTypeClassifier", StringComparison.Ordinal));
-        Assert.Contains("ValueTextEquals(\"anyOf\"u8)", untaggedClassifier, StringComparison.Ordinal);
+        var multiSelectClassifier = GetUnionClassifierDefinition(result.GeneratedSources, "MultiSelectItems");
+        Assert.Contains("\"anyOf\"", multiSelectClassifier, StringComparison.Ordinal);
         Assert.Contains(result.GeneratedSources, source =>
             source.Contains("class McpServer", StringComparison.Ordinal) &&
             source.Contains("JsonDerivedType(typeof(McpServerStdio), \"stdio\")", StringComparison.Ordinal));
-        Assert.True(result.GeneratedSources.Length > 150);
+
+        var permissionOutcome = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "RequestPermissionOutcome"));
+        Assert.Contains("[JsonPolymorphic(TypeDiscriminatorPropertyName = \"outcome\")]", permissionOutcome, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(RequestPermissionOutcomeVariant0Cancelled), \"cancelled\")]", permissionOutcome, StringComparison.Ordinal);
+        Assert.Contains("[JsonDerivedType(typeof(SelectedPermissionOutcome), \"selected\")]", permissionOutcome, StringComparison.Ordinal);
 
         using var document = JsonDocument.Parse(schema);
         foreach (var definition in document.RootElement.GetProperty("$defs").EnumerateObject())
@@ -1347,6 +1498,26 @@ public sealed class JsonSchemaSourceGeneratorTests
         }
 
         return false;
+    }
+
+    private static string GetSharedClassifierFactory(ImmutableArray<string> generatedSources) =>
+        Assert.Single(generatedSources, source => source.Contains(": JsonTypeClassifierFactory", StringComparison.Ordinal));
+
+    private static string GetUnionClassifierDefinition(ImmutableArray<string> generatedSources, string unionName)
+    {
+        var factory = GetSharedClassifierFactory(generatedSources);
+        var startMarker = $"[typeof({unionName})] = new(";
+        var start = factory.IndexOf(startMarker, StringComparison.Ordinal);
+        if (start < 0)
+            throw new InvalidOperationException($"The shared classifier factory has no definition for {unionName}.");
+
+        var nextDefinition = factory.IndexOf("\n        [typeof(", start + startMarker.Length, StringComparison.Ordinal);
+        var dictionaryEnd = factory.IndexOf("\n    };", start, StringComparison.Ordinal);
+        var end = nextDefinition < 0 ? dictionaryEnd : nextDefinition;
+        if (end < 0)
+            throw new InvalidOperationException($"The shared classifier definition for {unionName} is incomplete.");
+
+        return factory[start..end];
     }
 
     private static GeneratorDriver CreateDriver(ImmutableArray<AdditionalText> additionalTexts, bool useSystemTextJsonContext = false)

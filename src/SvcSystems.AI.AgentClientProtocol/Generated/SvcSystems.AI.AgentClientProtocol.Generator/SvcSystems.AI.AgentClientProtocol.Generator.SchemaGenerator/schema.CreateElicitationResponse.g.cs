@@ -10,5 +10,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Client.Models;
 /// <summary>
 /// Response from the client to an elicitation request.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(CreateElicitationResponseJsonTypeClassifier))]
+[JsonUnion]
 public union CreateElicitationResponse(ElicitationAcceptAction, CreateElicitationResponseCase1, CreateElicitationResponseCase2, CreateElicitationResponseCase3);

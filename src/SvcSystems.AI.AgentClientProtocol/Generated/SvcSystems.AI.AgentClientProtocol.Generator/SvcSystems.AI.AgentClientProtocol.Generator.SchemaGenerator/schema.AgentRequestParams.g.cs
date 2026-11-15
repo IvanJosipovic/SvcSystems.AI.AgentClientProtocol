@@ -16,5 +16,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// 
 /// This enum encompasses all method calls from agent to client.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(AgentRequestParamsJsonTypeClassifier))]
+[JsonUnion]
 internal union AgentRequestParams(WriteTextFileRequest, ReadTextFileRequest, RequestPermissionRequest, CreateTerminalRequest, TerminalOutputRequest, ReleaseTerminalRequest, WaitForTerminalExitRequest, KillTerminalRequest, CreateElicitationRequest, JsonElement);

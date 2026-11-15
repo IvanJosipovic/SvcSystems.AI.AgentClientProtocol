@@ -6,7 +6,5 @@
   "serializationNamespace": "SvcSystems.AI.AgentClientProtocol.Serialization",
   "generateJsonContext": true,
   "allowUnknownDiscriminators": ["ContentBlock", "SessionConfigOption", "SessionUpdate", "ToolCallContent"],
-  "defaultUnionCases": {
-    "SessionConfigSelectOptions": "Ungrouped"
-  }
+  "unknownDiscriminatorFallbacks": ["SetSessionConfigOptionRequest"]
 }

@@ -10,5 +10,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// Items for a multi-select (array) property schema.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(MultiSelectItemsJsonTypeClassifier))]
+[JsonUnion]
 public union MultiSelectItems(StringMultiSelectItems, MultiSelectItemsCase1, TitledMultiSelectItems);
