@@ -20,6 +20,4 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// </summary>
 public sealed class RequestPermissionOutcomeVariant0Cancelled : RequestPermissionOutcome
 {
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

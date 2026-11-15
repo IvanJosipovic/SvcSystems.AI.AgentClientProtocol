@@ -21,7 +21,4 @@ public sealed partial class ElicitationRequestScope
     [JsonPropertyName("requestId")]
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required RequestId? RequestId { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

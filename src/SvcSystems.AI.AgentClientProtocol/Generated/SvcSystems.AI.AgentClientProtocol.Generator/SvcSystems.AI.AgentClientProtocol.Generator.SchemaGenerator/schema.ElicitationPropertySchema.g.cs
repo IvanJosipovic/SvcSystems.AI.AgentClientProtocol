@@ -14,5 +14,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// Single-select enums use `type: "string"` with `enum` or `oneOf` set.
 /// Multi-select enums use `type: "array"`.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ElicitationPropertySchemaJsonTypeClassifier))]
+[JsonUnion]
 public union ElicitationPropertySchema(StringPropertySchema, NumberPropertySchema, IntegerPropertySchema, BooleanPropertySchema, MultiSelectPropertySchema, ElicitationPropertySchemaCase5);

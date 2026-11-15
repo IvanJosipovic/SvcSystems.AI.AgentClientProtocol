@@ -52,7 +52,4 @@ public sealed partial class ImageContent
 
     [JsonPropertyName("type")]
     public string Type { get; } = "image";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

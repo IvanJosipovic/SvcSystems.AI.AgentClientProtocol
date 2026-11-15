@@ -79,8 +79,5 @@ public sealed partial class RegistryAgent
     /// Optional preview (unstable) release channel. Holds only the version and the artifact locations; all other metadata is shared with the stable entry.
     /// </summary>
     [JsonPropertyName("preview")]
-    public previewChannel? Preview { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
+    public PreviewChannel? Preview { get; init; }
 }

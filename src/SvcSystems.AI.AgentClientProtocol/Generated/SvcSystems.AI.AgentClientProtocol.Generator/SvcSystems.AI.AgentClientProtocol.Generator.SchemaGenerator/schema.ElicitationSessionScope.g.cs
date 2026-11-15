@@ -32,7 +32,4 @@ public sealed partial class ElicitationSessionScope
     /// </summary>
     [JsonPropertyName("toolCallId")]
     public string? ToolCallId { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

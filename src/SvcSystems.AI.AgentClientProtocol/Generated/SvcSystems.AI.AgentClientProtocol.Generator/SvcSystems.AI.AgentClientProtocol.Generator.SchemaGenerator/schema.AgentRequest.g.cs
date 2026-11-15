@@ -32,7 +32,4 @@ internal sealed partial class AgentRequest
     /// </summary>
     [JsonPropertyName("params")]
     public AgentRequestParams? Params { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

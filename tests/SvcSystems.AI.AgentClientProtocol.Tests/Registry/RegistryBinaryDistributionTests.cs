@@ -50,7 +50,7 @@ public sealed class RegistryBinaryDistributionTests
 
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
             json,
-            RegistryJsonContext.Default.binaryDistribution));
+            RegistryJsonContext.Default.BinaryDistribution));
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public sealed class RegistryBinaryDistributionTests
     {
         const string json = "{ \"linux-x86_64-musl\": { \"archive\": \"https://example.test/a.tar.gz\", \"cmd\": \"agent\" } }";
 
-        var distribution = JsonSerializer.Deserialize(json, RegistryJsonContext.Default.binaryDistribution)!;
+        var distribution = JsonSerializer.Deserialize(json, RegistryJsonContext.Default.BinaryDistribution)!;
 
         Assert.True(distribution.TryGetTarget("linux-x86_64-musl", out var target));
         Assert.Equal("agent", target!.Cmd);
@@ -72,7 +72,7 @@ public sealed class RegistryBinaryDistributionTests
     {
         var distribution = JsonSerializer.Deserialize(
             "{}",
-            RegistryJsonContext.Default.binaryDistribution)!;
+            RegistryJsonContext.Default.BinaryDistribution)!;
 
         Assert.Empty(distribution);
     }
@@ -82,14 +82,14 @@ public sealed class RegistryBinaryDistributionTests
     {
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize(
             "[]",
-            RegistryJsonContext.Default.binaryDistribution));
+            RegistryJsonContext.Default.BinaryDistribution));
     }
 
     [Fact]
     public void RegistryBinaryTargetsSerializeEmptyMapsAsObjects()
     {
         Assert.Equal("{}", JsonSerializer.Serialize(
-            new binaryDistribution(),
-            RegistryJsonContext.Default.binaryDistribution));
+            new BinaryDistribution(),
+            RegistryJsonContext.Default.BinaryDistribution));
     }
 }

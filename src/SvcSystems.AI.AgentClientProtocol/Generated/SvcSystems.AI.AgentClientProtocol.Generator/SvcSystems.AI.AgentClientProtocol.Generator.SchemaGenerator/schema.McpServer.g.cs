@@ -21,6 +21,6 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 [JsonDerivedType(typeof(McpServerHttp), "http")]
 [JsonDerivedType(typeof(McpServerSse), "sse")]
 [JsonDerivedType(typeof(McpServerStdio), "stdio")]
-public abstract class McpServer
+public closed class McpServer
 {
 }

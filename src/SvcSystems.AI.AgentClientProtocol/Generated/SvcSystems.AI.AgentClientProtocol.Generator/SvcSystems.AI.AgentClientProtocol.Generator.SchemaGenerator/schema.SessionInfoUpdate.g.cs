@@ -38,7 +38,4 @@ public sealed partial class SessionInfoUpdate
 
     [JsonPropertyName("sessionUpdate")]
     public string SessionUpdate { get; } = "session_info_update";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

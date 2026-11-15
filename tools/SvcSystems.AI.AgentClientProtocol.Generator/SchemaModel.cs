@@ -33,7 +33,9 @@ internal sealed class ClassModel(
     public string? BaseType { get; } = baseType;
     public string? DiscriminatorName { get; } = discriminatorName;
     public IReadOnlyList<DiscriminatorCase> DiscriminatorCases { get; } = discriminatorCases ?? [];
-    public bool HasExtensionData { get; } = hasExtensionData;
+    public bool HasExtensionData { get; private set; } = hasExtensionData;
+
+    public void EnableExtensionData() => HasExtensionData = true;
 }
 
 internal sealed class EnumModel(string name, IReadOnlyList<string> values) : TypeModel(name)
@@ -52,17 +54,50 @@ internal sealed class UnionModel(
     IReadOnlyList<string> cases,
     string? defaultCaseName = null,
     IReadOnlyList<UnionCaseModel>? caseModels = null,
-    bool allowUnknownDiscriminator = false) : TypeModel(name)
+    bool allowUnknownDiscriminator = false,
+    string? discriminatorProperty = null,
+    string? unknownDiscriminatorFallbackCaseName = null) : TypeModel(name)
 {
     public IReadOnlyList<string> Cases { get; } = cases;
     public string? DefaultCaseName { get; } = defaultCaseName;
     public IReadOnlyList<UnionCaseModel> CaseModels { get; } = caseModels ?? [];
     public bool AllowUnknownDiscriminator { get; } = allowUnknownDiscriminator;
+    public string? DiscriminatorProperty { get; } = discriminatorProperty;
+    public string? UnknownDiscriminatorFallbackCaseName { get; } = unknownDiscriminatorFallbackCaseName;
+    // Value-based tags and open fallbacks need behavior the structural classifier cannot express.
+    public bool UsesStructuralClassifier => CaseModels.Count == Cases.Count &&
+        Cases.Count > 1 &&
+        !AllowUnknownDiscriminator &&
+        DefaultCaseName is null &&
+        CaseModels.All(item => item.IsPlainObject && item.ConstProperties.Count == 0) &&
+        HasDistinguishableObjectCases();
     public bool HasGeneratedClassifier => CaseModels.Count == Cases.Count &&
+        !UsesStructuralClassifier &&
         (CaseModels.Any(item => item.ConstProperties.Count > 0) ||
          CaseModels.Any(item => item.UniqueProperties.Count > 0) ||
          DefaultCaseName is not null ||
          Cases.Count(item => item is "int" or "uint" or "long" or "ulong" or "double" or "float") > 1);
+
+    private bool HasDistinguishableObjectCases()
+    {
+        for (var firstIndex = 0; firstIndex < CaseModels.Count; firstIndex++)
+        {
+            for (var secondIndex = firstIndex + 1; secondIndex < CaseModels.Count; secondIndex++)
+            {
+                if (IsShadowedBy(CaseModels[firstIndex], CaseModels[secondIndex]) ||
+                    IsShadowedBy(CaseModels[secondIndex], CaseModels[firstIndex]))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsShadowedBy(UnionCaseModel candidate, UnionCaseModel other) =>
+        candidate.Properties.All(property => other.Properties.Contains(property, StringComparer.OrdinalIgnoreCase)) &&
+        other.RequiredProperties.All(property => candidate.RequiredProperties.Contains(property, StringComparer.OrdinalIgnoreCase));
 }
 
 internal sealed class UnionCaseModel(
@@ -70,13 +105,15 @@ internal sealed class UnionCaseModel(
     IReadOnlyDictionary<string, string> constProperties,
     IReadOnlyList<string> properties,
     IReadOnlyList<string> requiredProperties,
-    IReadOnlyList<string> uniqueProperties)
+    IReadOnlyList<string> uniqueProperties,
+    bool isPlainObject = false)
 {
     public string TypeName { get; } = typeName;
     public IReadOnlyDictionary<string, string> ConstProperties { get; } = constProperties;
     public IReadOnlyList<string> Properties { get; } = properties;
     public IReadOnlyList<string> RequiredProperties { get; } = requiredProperties;
     public IReadOnlyList<string> UniqueProperties { get; } = uniqueProperties;
+    public bool IsPlainObject { get; } = isPlainObject;
 }
 
 internal sealed class PropertyModel(

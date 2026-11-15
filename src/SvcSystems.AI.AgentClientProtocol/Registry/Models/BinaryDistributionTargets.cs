@@ -6,11 +6,11 @@ using SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Registry.Models;
 
 /// <summary>Platform-keyed targets for an agent binary distribution.</summary>
-public sealed partial class binaryDistribution
+public sealed partial class BinaryDistribution
 {
     /// <summary>Platform-specific binary targets keyed by registry RID (for example, <c>windows-x86_64</c>).</summary>
     [JsonIgnore]
-    public Dictionary<BinaryDistributionPropertyName, binaryTarget> Targets
+    public Dictionary<BinaryDistributionPropertyName, BinaryTarget> Targets
     {
         get => this;
         init
@@ -23,10 +23,10 @@ public sealed partial class binaryDistribution
         }
     }
 
-    internal bool TryGetTarget(RegistryPlatform platform, out binaryTarget? target) =>
+    internal bool TryGetTarget(RegistryPlatform platform, out BinaryTarget? target) =>
         TryGetTarget(platform.RegistryName, out target);
 
-    internal bool TryGetTarget(string registryPlatformName, out binaryTarget? target)
+    internal bool TryGetTarget(string registryPlatformName, out BinaryTarget? target)
     {
         if (TryParsePlatformName(registryPlatformName, out var platform))
         {

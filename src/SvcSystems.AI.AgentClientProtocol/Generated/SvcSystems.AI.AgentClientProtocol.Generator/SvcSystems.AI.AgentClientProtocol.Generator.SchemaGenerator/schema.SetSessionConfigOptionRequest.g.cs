@@ -10,5 +10,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Agent.Models;
 /// <summary>
 /// Request parameters for setting a session configuration option.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(SetSessionConfigOptionRequestJsonTypeClassifier))]
+[JsonUnion]
 public union SetSessionConfigOptionRequest(SetSessionConfigOptionRequestCase0, SetSessionConfigOptionRequestCase1);

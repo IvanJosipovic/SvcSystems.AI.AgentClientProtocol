@@ -285,18 +285,6 @@ public sealed class ClientOperationsTests
     }
 
     [Fact]
-    public async Task SessionCreationRejectsUnknownMcpServerTypes()
-    {
-        await using var transport = new TestTransport();
-        await using var client = await ConnectAsync(transport);
-
-        var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
-            () => client.CreateSessionAsync(Options(new UnknownMcpServer()), Token));
-
-        Assert.Contains("UnknownMcpServer", exception.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public async Task PermissionCallbackRejectsUnadvertisedOptions()
     {
         await using var transport = new TestTransport();
@@ -357,5 +345,4 @@ public sealed class ClientOperationsTests
         }
     }
 
-    private sealed class UnknownMcpServer : McpServer;
 }

@@ -152,7 +152,11 @@ and `PromptOptions.Metadata`. `Session.RawPayload` and `AuthenticationStatus.Raw
 vendor-specific data on otherwise typed payloads.
 
 `AcpJson` exposes the generated serializer contract (`Options`, `TypeInfo<T>()`, `SerializeToElement`,
-`SerializeToUtf8Bytes`, `Deserialize<T>`) so extension payloads use the same wire settings.
+`SerializeToUtf8Bytes`, `Deserialize<T>`) so extension payloads use the same wire settings. Generated
+polymorphic models declare their schema discriminator values with `JsonPolymorphic` and
+`JsonDerivedType` attributes, preserving ACP wire tags in both the generated context and model-only
+generator output. Use `AcpJson.Options` or `AcpJson.TypeInfo<T>()` when serializing or deserializing
+polymorphic ACP models.
 
 ## Registry
 

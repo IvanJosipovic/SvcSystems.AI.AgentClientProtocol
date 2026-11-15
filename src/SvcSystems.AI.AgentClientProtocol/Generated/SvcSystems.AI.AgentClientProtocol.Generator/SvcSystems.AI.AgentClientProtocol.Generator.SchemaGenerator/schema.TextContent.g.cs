@@ -41,7 +41,4 @@ public sealed partial class TextContent
 
     [JsonPropertyName("type")]
     public string Type { get; } = "text";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

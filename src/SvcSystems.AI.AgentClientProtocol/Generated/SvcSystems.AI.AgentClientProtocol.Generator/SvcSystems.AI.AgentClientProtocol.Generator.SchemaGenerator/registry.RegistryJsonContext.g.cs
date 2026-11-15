@@ -6,15 +6,15 @@ using System.Text.Json.Serialization;
 namespace SvcSystems.AI.AgentClientProtocol.Registry.Serialization;
 
 [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, AllowOutOfOrderMetadataProperties = true)]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.BinaryDistribution))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.BinaryDistributionPropertyName))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.BinaryTarget))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.PackageDistribution))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.PreviewChannel))]
+[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.PreviewChannelDistribution))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.RegistryAgent))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.RegistryAgentDistribution))]
 [JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.RegistryIndex))]
-[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.binaryDistribution))]
-[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.binaryTarget))]
-[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.packageDistribution))]
-[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.previewChannel))]
-[JsonSerializable(typeof(global::SvcSystems.AI.AgentClientProtocol.Registry.Models.previewChannelDistribution))]
 internal partial class RegistryJsonContext : JsonSerializerContext
 {
 }

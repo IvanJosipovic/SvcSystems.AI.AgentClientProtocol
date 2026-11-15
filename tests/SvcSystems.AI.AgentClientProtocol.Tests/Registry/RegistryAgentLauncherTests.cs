@@ -15,12 +15,12 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task PrefersNpxAndPassesPinnedPackageArgumentsAndEnvironment()
     {
-        var agent = CreateAgent("npm-agent", "1.2.3", npx: new packageDistribution
+        var agent = CreateAgent("npm-agent", "1.2.3", npx: new PackageDistribution
         {
             Package = "@scope/agent@1.2.3",
             Args = ["--acp", "two words"],
             Env = new Dictionary<string, string> { ["AGENT_MODE"] = "test" },
-        }, uvx: new packageDistribution { Package = "fallback==1.2.3" });
+        }, uvx: new PackageDistribution { Package = "fallback==1.2.3" });
         using var launcher = CreateLauncher((command, _) => Task.FromResult<string?>(command == NpxCommand ? "fake-npx" : "fake-uvx"));
 
         var process = await launcher.BuildProcessOptionsAsync(agent, cancellationToken: TestContext.Current.CancellationToken);
@@ -34,7 +34,7 @@ public sealed class RegistryAgentLauncherTests
     public async Task ChecksPackageRunnerAvailabilityBeforeBuildingOptions()
     {
         using var launcher = new RegistryAgentLauncher();
-        var agent = CreateAgent("npm-agent", "1.2.3", npx: new packageDistribution { Package = "agent@1.2.3" });
+        var agent = CreateAgent("npm-agent", "1.2.3", npx: new PackageDistribution { Package = "agent@1.2.3" });
         ProcessOptions process;
         try
         {
@@ -54,8 +54,8 @@ public sealed class RegistryAgentLauncherTests
     public async Task FallsBackToUvxWhenNpxIsUnavailableAndPreservesPipVersionSyntax()
     {
         var agent = CreateAgent("uv-agent", "0.10.1",
-            npx: new packageDistribution { Package = "unused@1.0.0" },
-            uvx: new packageDistribution { Package = "fast-agent-acp==0.10.1", Args = ["-x"] });
+            npx: new PackageDistribution { Package = "unused@1.0.0" },
+            uvx: new PackageDistribution { Package = "fast-agent-acp==0.10.1", Args = ["-x"] });
         using var launcher = CreateLauncher((command, _) =>
             Task.FromResult<string?>(command == "uvx" ? "fake-uvx" : null));
 
@@ -71,13 +71,13 @@ public sealed class RegistryAgentLauncherTests
         var agent = CreateAgent(
             "preview-agent",
             "1.0.0",
-            npx: new packageDistribution { Package = "preview-agent@1.0.0" },
-            preview: new previewChannel
+            npx: new PackageDistribution { Package = "preview-agent@1.0.0" },
+            preview: new PreviewChannel
             {
                 Version = "1.1.0-preview.2",
-                Distribution = new previewChannelDistribution
+                Distribution = new PreviewChannelDistribution
                 {
-                    Npx = new packageDistribution { Package = "preview-agent@1.1.0-preview.2", Args = ["--acp"] },
+                    Npx = new PackageDistribution { Package = "preview-agent@1.1.0-preview.2", Args = ["--acp"] },
                 },
             });
         using var launcher = CreateLauncher(
@@ -97,11 +97,11 @@ public sealed class RegistryAgentLauncherTests
         var agent = CreateAgent(
             "preview-binary-agent",
             "1.0.0",
-            npx: new packageDistribution { Package = "preview-binary-agent@1.0.0" },
-            preview: new previewChannel
+            npx: new PackageDistribution { Package = "preview-binary-agent@1.0.0" },
+            preview: new PreviewChannel
             {
                 Version = "1.1.0-preview.3",
-                Distribution = new previewChannelDistribution
+                Distribution = new PreviewChannelDistribution
                 {
                     Binary = CreateBinaryDistribution(platform.RegistryName, "https://registry.test/preview.zip", "agent.exe"),
                 },
@@ -131,7 +131,7 @@ public sealed class RegistryAgentLauncherTests
     [Fact]
     public async Task PreviewSelectionDoesNotSilentlyFallBackToStable()
     {
-        var agent = CreateAgent("stable-only", "1.0.0", npx: new packageDistribution { Package = "stable-only@1.0.0" });
+        var agent = CreateAgent("stable-only", "1.0.0", npx: new PackageDistribution { Package = "stable-only@1.0.0" });
         using var launcher = CreateLauncher(
             (_, _) => Task.FromResult<string?>("fake-npx"),
             new RegistryAgentLauncherOptions { ReleaseChannel = RegistryAgentReleaseChannel.Preview });
@@ -148,11 +148,11 @@ public sealed class RegistryAgentLauncherTests
         var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
         var sha256 = Convert.ToHexString(SHA256.HashData(zipBytes));
-        var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
+        var agent = CreateAgent("binary-agent", "1.2.3", binary: new BinaryDistribution
         {
-            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, BinaryTarget>
             {
-                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new BinaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Sha256 = sha256,
@@ -190,11 +190,11 @@ public sealed class RegistryAgentLauncherTests
     {
         var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
-        var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
+        var agent = CreateAgent("binary-agent", "1.2.3", binary: new BinaryDistribution
         {
-            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, BinaryTarget>
             {
-                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new BinaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Cmd = "agent.exe",
@@ -228,11 +228,11 @@ public sealed class RegistryAgentLauncherTests
     {
         var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
-        var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
+        var agent = CreateAgent("binary-agent", "1.2.3", binary: new BinaryDistribution
         {
-            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, BinaryTarget>
             {
-                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new BinaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Cmd = "agent.exe",
@@ -265,11 +265,11 @@ public sealed class RegistryAgentLauncherTests
     {
         var platform = GetCurrentPlatform();
         var zipBytes = CreateZip("agent.exe", "test executable");
-        var agent = CreateAgent("binary-agent", "1.2.3", binary: new binaryDistribution
+        var agent = CreateAgent("binary-agent", "1.2.3", binary: new BinaryDistribution
         {
-            Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
+            Targets = new Dictionary<BinaryDistributionPropertyName, BinaryTarget>
             {
-                [ParsePlatformName(platform.RegistryName)] = new binaryTarget
+                [ParsePlatformName(platform.RegistryName)] = new BinaryTarget
                 {
                     Archive = "https://registry.test/agent.zip",
                     Sha256 = new string('0', 64),
@@ -392,9 +392,9 @@ public sealed class RegistryAgentLauncherTests
     public async Task ExplainsMissingPackageManagersAndUnsupportedBinaryTarget()
     {
         var agent = CreateAgent("unsupported", "1.0.0",
-            npx: new packageDistribution { Package = "agent@1.0.0" },
-            uvx: new packageDistribution { Package = "agent==1.0.0" },
-            binary: new binaryDistribution());
+            npx: new PackageDistribution { Package = "agent@1.0.0" },
+            uvx: new PackageDistribution { Package = "agent==1.0.0" },
+            binary: new BinaryDistribution());
         using var launcher = CreateLauncher((_, _) => Task.FromResult<string?>(null));
 
         var exception = await Assert.ThrowsAsync<RegistryAgentLaunchException>(() =>
@@ -447,10 +447,10 @@ public sealed class RegistryAgentLauncherTests
     private static RegistryAgent CreateAgent(
         string id,
         string version,
-        packageDistribution? npx = null,
-        packageDistribution? uvx = null,
-        binaryDistribution? binary = null,
-        previewChannel? preview = null) => new()
+        PackageDistribution? npx = null,
+        PackageDistribution? uvx = null,
+        BinaryDistribution? binary = null,
+        PreviewChannel? preview = null) => new()
         {
             Id = id,
             Name = id,
@@ -460,11 +460,11 @@ public sealed class RegistryAgentLauncherTests
             Preview = preview,
         };
 
-    private static binaryDistribution CreateBinaryDistribution(string platform, string archive, string command) => new()
+    private static BinaryDistribution CreateBinaryDistribution(string platform, string archive, string command) => new()
     {
-        Targets = new Dictionary<BinaryDistributionPropertyName, binaryTarget>
+        Targets = new Dictionary<BinaryDistributionPropertyName, BinaryTarget>
         {
-            [ParsePlatformName(platform)] = new binaryTarget
+            [ParsePlatformName(platform)] = new BinaryTarget
             {
                 Archive = archive,
                 Cmd = command,
@@ -474,7 +474,7 @@ public sealed class RegistryAgentLauncherTests
 
     private static BinaryDistributionPropertyName ParsePlatformName(string value)
     {
-        Assert.True(binaryDistribution.TryParsePlatformName(value, out var platform));
+        Assert.True(BinaryDistribution.TryParsePlatformName(value, out var platform));
         return platform;
     }
 

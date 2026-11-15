@@ -46,7 +46,4 @@ public sealed partial class AudioContent
 
     [JsonPropertyName("type")]
     public string Type { get; } = "audio";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

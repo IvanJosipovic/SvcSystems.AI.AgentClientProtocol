@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Registry.Models;
 
-public sealed partial class binaryTarget
+public sealed partial class BinaryTarget
 {
     /// <summary>
     /// URL to download archive (.zip, .tar.gz, .tgz, .tar.bz2, .tbz2, or raw binary). Installer formats (.dmg, .pkg, .deb, .rpm) are not supported.

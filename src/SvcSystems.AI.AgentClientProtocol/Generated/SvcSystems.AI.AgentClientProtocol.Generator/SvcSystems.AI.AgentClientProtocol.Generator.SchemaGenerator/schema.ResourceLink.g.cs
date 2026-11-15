@@ -70,7 +70,4 @@ public sealed partial class ResourceLink
 
     [JsonPropertyName("type")]
     public string Type { get; } = "resource_link";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

@@ -3,7 +3,6 @@
 #nullable enable
 using global::SvcSystems.AI.AgentClientProtocol.Client.Models;
 using global::SvcSystems.AI.AgentClientProtocol.Agent.Models;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Models;
@@ -21,5 +20,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// 
 /// See protocol docs: [Content](https://agentclientprotocol.com/protocol/v1/content)
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ContentBlockJsonTypeClassifier))]
-public union ContentBlock(TextContent, ImageContent, AudioContent, ResourceLink, EmbeddedResource, JsonElement);
+[JsonUnion]
+public union ContentBlock(TextContent, ImageContent, AudioContent, ResourceLink, EmbeddedResource, ContentBlockUnknown);

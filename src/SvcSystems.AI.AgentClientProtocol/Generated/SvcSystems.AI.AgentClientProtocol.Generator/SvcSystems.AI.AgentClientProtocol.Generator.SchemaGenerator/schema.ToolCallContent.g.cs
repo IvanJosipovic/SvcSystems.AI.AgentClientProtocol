@@ -3,7 +3,6 @@
 #nullable enable
 using global::SvcSystems.AI.AgentClientProtocol.Client.Models;
 using global::SvcSystems.AI.AgentClientProtocol.Agent.Models;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Models;
@@ -16,5 +15,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// 
 /// See protocol docs: [Content](https://agentclientprotocol.com/protocol/v1/tool-calls#content)
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ToolCallContentJsonTypeClassifier))]
-public union ToolCallContent(Content, Diff, Terminal, JsonElement);
+[JsonUnion]
+public union ToolCallContent(Content, Diff, Terminal, ToolCallContentUnknown);

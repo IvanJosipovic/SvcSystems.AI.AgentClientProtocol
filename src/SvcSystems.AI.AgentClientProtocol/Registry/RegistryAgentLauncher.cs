@@ -116,7 +116,7 @@ public sealed class RegistryAgentLauncher : IDisposable
             $"Cannot launch ACP agent '{agent.Id}': {details}. Install the required package manager, select an available distribution, or update the registry entry.");
     }
 
-    private (string Version, packageDistribution? Npx, packageDistribution? Uvx, binaryDistribution? Binary) GetDistribution(RegistryAgent agent)
+    private (string Version, PackageDistribution? Npx, PackageDistribution? Uvx, BinaryDistribution? Binary) GetDistribution(RegistryAgent agent)
     {
         return _releaseChannel switch
         {

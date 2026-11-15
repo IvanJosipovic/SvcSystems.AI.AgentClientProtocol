@@ -45,10 +45,11 @@
       "items": { "type": "string", "minLength": 1, "description": "Exact name of a discriminated union definition in the paired JSON Schema." },
       "uniqueItems": true
     },
-    "defaultUnionCases": {
-      "description": "Selects which generated case represents the default value of a union. Each property name is a union definition name and its value is the generated case name. The selected case is initialized when the union is default-constructed; it does not affect which case is chosen when JSON is deserialized.",
-      "type": "object",
-      "additionalProperties": { "type": "string", "minLength": 1, "description": "Name of the generated union case to use as that union's default value." }
+    "unknownDiscriminatorFallbacks": {
+      "description": "Names of union definitions whose inferred default case should also handle unrecognized string discriminator values. This is separate from the missing-discriminator default: only listed unions use that case for an unknown tag. Each union must have a string discriminator and one inferred default case.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "description": "Exact name of a union definition in the paired JSON Schema." },
+      "uniqueItems": true
     }
   },
   "propertyNames": {

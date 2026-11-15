@@ -11,5 +11,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// Method-specific response data.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ClientResponseCase0ResultJsonTypeClassifier))]
+[JsonUnion]
 internal union ClientResponseCase0Result(WriteTextFileResponse, ReadTextFileResponse, RequestPermissionResponse, CreateTerminalResponse, TerminalOutputResponse, ReleaseTerminalResponse, WaitForTerminalExitResponse, KillTerminalResponse, CreateElicitationResponse, JsonElement);

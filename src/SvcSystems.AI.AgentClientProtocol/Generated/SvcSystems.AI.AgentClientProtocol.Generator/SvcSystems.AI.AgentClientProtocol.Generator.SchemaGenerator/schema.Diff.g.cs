@@ -44,7 +44,4 @@ public sealed partial class Diff
 
     [JsonPropertyName("type")]
     public string Type { get; } = "diff";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }
