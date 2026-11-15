@@ -80,7 +80,4 @@ public sealed partial class RegistryAgent
     /// </summary>
     [JsonPropertyName("preview")]
     public previewChannel? Preview { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

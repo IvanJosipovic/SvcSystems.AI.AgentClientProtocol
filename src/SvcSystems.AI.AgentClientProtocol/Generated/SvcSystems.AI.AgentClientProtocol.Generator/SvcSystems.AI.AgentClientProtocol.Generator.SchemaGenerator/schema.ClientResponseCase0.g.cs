@@ -26,7 +26,4 @@ internal sealed partial class ClientResponseCase0
     /// </summary>
     [JsonPropertyName("result")]
     public required ClientResponseCase0Result Result { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

@@ -46,6 +46,31 @@ public sealed class WireJsonTests
     }
 
     [Fact]
+    public void JsonRpcResponsesIgnoreUnknownFieldsButRetainDeclaredErrorData()
+    {
+        using var json = JsonDocument.Parse("""{"id":1,"error":{"code":-32600,"message":"Invalid Request","data":{"details":"kept"},"errorExtra":true},"envelopeExtra":true}""");
+        var response = DeserializeJson<ClientResponse>(json.RootElement);
+
+        using var roundTripped = JsonDocument.Parse(SerializeJson(response));
+        Assert.False(roundTripped.RootElement.TryGetProperty("envelopeExtra", out _));
+        var error = roundTripped.RootElement.GetProperty("error");
+        Assert.False(error.TryGetProperty("errorExtra", out _));
+        Assert.Equal("kept", error.GetProperty("data").GetProperty("details").GetString());
+    }
+
+    [Fact]
+    public void AgentCapabilitiesIgnoreUnknownFieldsButRetainMeta()
+    {
+        using var json = JsonDocument.Parse("""{"loadSession":true,"_meta":{"trace":{"revision":1}},"futureCapability":{"enabled":true}}""");
+        var capabilities = DeserializeJson<global::SvcSystems.AI.AgentClientProtocol.Models.AgentCapabilities>(json.RootElement);
+
+        using var roundTripped = JsonDocument.Parse(SerializeJson(capabilities));
+        Assert.True(roundTripped.RootElement.GetProperty("loadSession").GetBoolean());
+        Assert.Equal(1, roundTripped.RootElement.GetProperty("_meta").GetProperty("trace").GetProperty("revision").GetInt32());
+        Assert.False(roundTripped.RootElement.TryGetProperty("futureCapability", out _));
+    }
+
+    [Fact]
     public void AuthMethodClassifierUsesSchemaTagAndDefault()
     {
         using var terminalJson = JsonDocument.Parse("""{"id":"terminal","name":"Terminal","type":"terminal"}""");
@@ -117,7 +142,7 @@ public sealed class WireJsonTests
 
         MultiSelectItems stringItems = new StringMultiSelectItems { Enum = ["red", "blue"] };
         AssertUnionRoundTrip<MultiSelectItems>(
-            "{\"enum\":[\"red\",\"blue\"]}",
+            "{\"enum\":[\"red\",\"blue\"],\"type\":\"string\"}",
             SerializeJson(stringItems),
             SerializeJson,
             DeserializeJson<MultiSelectItems>);
@@ -247,6 +272,14 @@ public sealed class WireJsonTests
             DeserializeJson<ElicitationPropertySchema>,
             SerializeJson);
 
+        const string futurePropertySchemaJson = """{"type":"future","vendorKeyword":{"revision":2}}""";
+        using var futurePropertySchemaDocument = JsonDocument.Parse(futurePropertySchemaJson);
+        var futurePropertySchema = DeserializeJson<ElicitationPropertySchema>(futurePropertySchemaDocument.RootElement);
+        var futurePropertySchemaCase = Assert.IsType<ElicitationPropertySchemaCase5>(futurePropertySchema.Value);
+        Assert.Equal("future", futurePropertySchemaCase.Type);
+        Assert.Equal(2, futurePropertySchemaCase.ExtensionData!["vendorKeyword"].GetProperty("revision").GetInt32());
+        AssertJsonEqual(futurePropertySchemaJson, SerializeJson(futurePropertySchema));
+
         AssertUnionRoundTrip<ElicitationContentValue>(
             "42",
             DeserializeJson<ElicitationContentValue>,
@@ -273,22 +306,21 @@ public sealed class WireJsonTests
     }
 
     [Fact]
-    public void ClosedTaggedObjectVariantsRoundTripUnknownMembers()
+    public void ClosedTaggedObjectVariantsIgnoreUnknownMembers()
     {
         const string cancelledJson = """{"outcome":"cancelled","vendor":{"preserve":true}}""";
         using var cancelledDocument = JsonDocument.Parse(cancelledJson);
         var cancelled = DeserializeJson<RequestPermissionOutcome>(cancelledDocument.RootElement);
-        var cancelledCase = Assert.IsType<RequestPermissionOutcomeVariant0Cancelled>(cancelled);
-        Assert.True(cancelledCase.ExtensionData!["vendor"].GetProperty("preserve").GetBoolean());
-        AssertJsonEqual(cancelledJson, SerializeJson(cancelled));
+        Assert.IsType<RequestPermissionOutcomeVariant0Cancelled>(cancelled);
+        using var cancelledRoundTripped = JsonDocument.Parse(SerializeJson(cancelled));
+        Assert.False(cancelledRoundTripped.RootElement.TryGetProperty("vendor", out _));
 
         const string selectedJson = """{"outcome":"selected","optionId":"allow","vendor":{"revision":2}}""";
         using var selectedDocument = JsonDocument.Parse(selectedJson);
         var selected = DeserializeJson<RequestPermissionOutcome>(selectedDocument.RootElement);
-        var selectedCase = Assert.IsType<SelectedPermissionOutcome>(selected);
-        Assert.Equal("allow", selectedCase.OptionId);
-        Assert.Equal(2, selectedCase.ExtensionData!["vendor"].GetProperty("revision").GetInt32());
-        AssertJsonEqual(selectedJson, SerializeJson(selected));
+        Assert.Equal("allow", Assert.IsType<SelectedPermissionOutcome>(selected).OptionId);
+        using var selectedRoundTripped = JsonDocument.Parse(SerializeJson(selected));
+        Assert.False(selectedRoundTripped.RootElement.TryGetProperty("vendor", out _));
     }
 
     [Fact]

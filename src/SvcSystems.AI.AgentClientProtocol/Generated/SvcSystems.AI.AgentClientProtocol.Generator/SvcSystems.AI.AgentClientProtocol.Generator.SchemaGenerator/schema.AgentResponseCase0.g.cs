@@ -26,7 +26,4 @@ internal sealed partial class AgentResponseCase0
     /// </summary>
     [JsonPropertyName("result")]
     public required AgentResponseCase0Result Result { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

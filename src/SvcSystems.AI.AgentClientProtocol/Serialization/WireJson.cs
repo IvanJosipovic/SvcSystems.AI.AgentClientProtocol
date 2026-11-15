@@ -81,12 +81,10 @@ internal static class WireJson
                 Auth = capabilities?.Auth,
                 Session = session,
                 Elicitation = elicitation,
-                Meta = capabilities?.Meta,
-                ExtensionData = capabilities?.ExtensionData
+                Meta = capabilities?.Meta
             },
             ClientInfo = clientInfo,
-            Meta = request.Meta,
-            ExtensionData = request.ExtensionData
+            Meta = request.Meta
         }, JsonContext.Default.InitializeRequest);
     }
 
@@ -98,16 +96,14 @@ internal static class WireJson
             {
                 Cwd = request.Cwd,
                 McpServers = request.McpServers,
-                Meta = request.Meta,
-                ExtensionData = request.ExtensionData
+                Meta = request.Meta
             }
             : new NewSessionRequest
             {
                 Cwd = request.Cwd,
                 McpServers = request.McpServers,
                 AdditionalDirectories = additionalDirectories,
-                Meta = request.Meta,
-                ExtensionData = request.ExtensionData
+                Meta = request.Meta
             };
         return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.NewSessionRequest);
     }
@@ -121,8 +117,7 @@ internal static class WireJson
                 SessionId = request.SessionId,
                 Cwd = request.Cwd,
                 McpServers = request.McpServers,
-                Meta = request.Meta,
-                ExtensionData = request.ExtensionData
+                Meta = request.Meta
             }
             : new LoadSessionRequest
             {
@@ -130,8 +125,7 @@ internal static class WireJson
                 Cwd = request.Cwd,
                 McpServers = request.McpServers,
                 AdditionalDirectories = additionalDirectories,
-                Meta = request.Meta,
-                ExtensionData = request.ExtensionData
+                Meta = request.Meta
             };
         return JsonSerializer.SerializeToUtf8Bytes(wireRequest, JsonContext.Default.LoadSessionRequest);
     }
@@ -218,14 +212,31 @@ internal static class WireJson
     /// </summary>
     public static byte[] WriteEmptyObject() => "{}"u8.ToArray();
 
-    public static byte[] WriteTerminalExitStatusResponse(TerminalExitStatus status) =>
-        JsonSerializer.SerializeToUtf8Bytes(new TerminalExitStatus
+    public static byte[] WriteTerminalExitStatusResponse(TerminalExitStatus status)
+    {
+        var buffer = new ArrayBufferWriter<byte>();
+        using (var writer = new Utf8JsonWriter(buffer))
         {
-            ExitCode = status.ExitCode,
-            Signal = status.Signal,
-            Meta = status.Meta,
-            ExtensionData = MergeNullOptionalValues(status.ExtensionData, status.ExitCode is null, status.Signal is null)
-        }, JsonContext.Default.TerminalExitStatus);
+            writer.WriteStartObject();
+            if (status.ExitCode is { } exitCode) writer.WriteNumber("exitCode", exitCode);
+            else writer.WriteNull("exitCode");
+            if (status.Signal is { } signal) writer.WriteString("signal", signal);
+            else writer.WriteNull("signal");
+            if (status.Meta is { } meta)
+            {
+                writer.WritePropertyName("_meta");
+                writer.WriteStartObject();
+                foreach (var (key, value) in meta)
+                {
+                    writer.WritePropertyName(key);
+                    value.WriteTo(writer);
+                }
+                writer.WriteEndObject();
+            }
+            writer.WriteEndObject();
+        }
+        return buffer.WrittenSpan.ToArray();
+    }
 
     public static byte[] WriteElicitationResponse(CreateElicitationResponse response) =>
         JsonSerializer.SerializeToUtf8Bytes(response, JsonContext.Default.CreateElicitationResponse);
@@ -252,18 +263,6 @@ internal static class WireJson
 
     public static IReadOnlyList<SessionConfigOption> ReadConfigOptionsResponse(JsonElement response) =>
         response.Deserialize(JsonContext.Default.SetSessionConfigOptionResponse)!.ConfigOptions;
-
-    private static Dictionary<string, JsonElement>? MergeNullOptionalValues(Dictionary<string, JsonElement>? extensionData, bool exitCode, bool signal)
-    {
-        if (!exitCode && !signal) return extensionData;
-        using var nullDocument = JsonDocument.Parse("null");
-        var result = extensionData is null
-            ? new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-            : new Dictionary<string, JsonElement>(extensionData, StringComparer.Ordinal);
-        if (exitCode) result.TryAdd("exitCode", nullDocument.RootElement.Clone());
-        if (signal) result.TryAdd("signal", nullDocument.RootElement.Clone());
-        return result;
-    }
 
     private static string? ReadString(JsonElement element, string propertyName) =>
         element.ValueKind == JsonValueKind.Object && element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String

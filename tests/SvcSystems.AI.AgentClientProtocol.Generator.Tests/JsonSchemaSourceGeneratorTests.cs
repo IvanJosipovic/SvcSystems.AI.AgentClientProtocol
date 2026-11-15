@@ -1436,6 +1436,32 @@ public sealed class JsonSchemaSourceGeneratorTests
         Assert.Contains("[JsonDerivedType(typeof(RequestPermissionOutcomeVariant0Cancelled), \"cancelled\")]", permissionOutcome, StringComparison.Ordinal);
         Assert.Contains("[JsonDerivedType(typeof(SelectedPermissionOutcome), \"selected\")]", permissionOutcome, StringComparison.Ordinal);
 
+        foreach (var modelName in new[]
+        {
+            "AgentCapabilities",
+            "ClientResponseCase1",
+            "Error",
+            "RequestPermissionOutcomeVariant0Cancelled",
+            "SelectedPermissionOutcome"
+        })
+        {
+            var model = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, modelName));
+            Assert.DoesNotContain("[JsonExtensionData]", model, StringComparison.Ordinal);
+        }
+
+        var stringPropertySchema = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "StringPropertySchema"));
+        Assert.Contains("public string Type { get; } = \"string\";", stringPropertySchema, StringComparison.Ordinal);
+        Assert.DoesNotContain("[JsonExtensionData]", stringPropertySchema, StringComparison.Ordinal);
+
+        var elicitationPropertyFallback = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "ElicitationPropertySchemaCase5"));
+        Assert.Contains("[JsonExtensionData]", elicitationPropertyFallback, StringComparison.Ordinal);
+
+        var configuredFallback = Assert.Single(result.GeneratedSources, source =>
+            ContainsClassDeclaration(source, "SetSessionConfigOptionRequestCase1"));
+        Assert.Contains("[JsonExtensionData]", configuredFallback, StringComparison.Ordinal);
+
         using var document = JsonDocument.Parse(schema);
         foreach (var definition in document.RootElement.GetProperty("$defs").EnumerateObject())
         {

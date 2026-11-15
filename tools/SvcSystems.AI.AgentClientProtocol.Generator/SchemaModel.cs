@@ -33,7 +33,9 @@ internal sealed class ClassModel(
     public string? BaseType { get; } = baseType;
     public string? DiscriminatorName { get; } = discriminatorName;
     public IReadOnlyList<DiscriminatorCase> DiscriminatorCases { get; } = discriminatorCases ?? [];
-    public bool HasExtensionData { get; } = hasExtensionData;
+    public bool HasExtensionData { get; private set; } = hasExtensionData;
+
+    public void EnableExtensionData() => HasExtensionData = true;
 }
 
 internal sealed class EnumModel(string name, IReadOnlyList<string> values) : TypeModel(name)

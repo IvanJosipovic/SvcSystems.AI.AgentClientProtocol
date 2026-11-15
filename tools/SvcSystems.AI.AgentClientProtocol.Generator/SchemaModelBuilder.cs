@@ -281,6 +281,17 @@ internal sealed class SchemaModelBuilder(
                     .All(other => !other.ContainsKey(propertyName)))
                 .ToArray();
             var caseType = _model.Types.OfType<ClassModel>().FirstOrDefault(type => type.Name == caseName);
+            var branchSchema = Resolve(branches[index]);
+            var isTagFallbackCase = discriminatorProperty is not null &&
+                caseName != defaultCaseName &&
+                properties.TryGetValue(discriminatorProperty, out var tagProperty) &&
+                tagProperty.Required && Resolve(tagProperty.Schema)?.Const is null;
+            if (caseType is not null &&
+                branchSchema is { AdditionalPropertiesAllowed: true, AdditionalProperties: null } &&
+                (caseName == unknownDiscriminatorFallbackCaseName || isTagFallbackCase))
+            {
+                caseType.EnableExtensionData();
+            }
             var isPlainObject = caseType is not null && caseType.BaseType is null &&
                 caseType.DiscriminatorName is null && caseType.DiscriminatorCases.Count == 0;
             return new UnionCaseModel(
@@ -322,10 +333,7 @@ internal sealed class SchemaModelBuilder(
     {
         if (GetMergedPropertyBag(name, schema, branches) is not { } properties) return false;
 
-        _model.Types.Add(new ClassModel(
-            name,
-            properties,
-            hasExtensionData: schema.Properties is { Count: > 0 } && schema.AdditionalPropertiesAllowed && schema.AdditionalProperties is null)
+        _model.Types.Add(new ClassModel(name, properties)
         {
             Description = schema.Description
         });
@@ -408,17 +416,14 @@ internal sealed class SchemaModelBuilder(
     }
 
     /// <summary>
-    /// Copies the properties a union's own schema declares next to its branches onto the generated case
-    /// models, along with the properties a branch adds around a reused <c>allOf</c> reference.
+    /// Copies properties declared by a union and its branches onto generated case models.
     /// </summary>
     /// <remarks>
-    /// ACP writes these properties on the enclosing JSON object rather than inside the variant object, so
-    /// they belong to every case model: <c>SetSessionConfigOptionRequest</c> keeps the required
-    /// <c>sessionId</c>/<c>configId</c> beside its value union, and <c>CreateElicitationResponse</c> keeps
-    /// the <c>action</c> discriminator beside the reused <c>ElicitationAcceptAction</c> body. Dropping them
-    /// makes the model unable to express a valid payload (the round trip then has to smuggle them through
-    /// <c>ExtensionData</c>). Only unions that fully own their case models are changed, so a case built from
-    /// a definition that other unions share is left untouched.
+    /// This keeps branch-level discriminator constants and enclosing fields on the flattened wire object.
+    /// For example, <c>SetSessionConfigOptionRequest</c> keeps <c>sessionId</c>/<c>configId</c> beside its
+    /// value union, and <c>CreateElicitationResponse</c> keeps the <c>action</c> discriminator beside the
+    /// reused <c>ElicitationAcceptAction</c> body. Only unions that fully own their case models are changed;
+    /// a case built from a definition shared by other unions is left untouched.
     /// </remarks>
     private void InheritEnclosingPropertiesIntoCaseModels(
         string name,
@@ -426,8 +431,6 @@ internal sealed class SchemaModelBuilder(
         IReadOnlyList<IOpenApiSchema> branches,
         IReadOnlyList<string> caseNames)
     {
-        if (schema.Properties is not { Count: > 0 }) return;
-
         for (var index = 0; index < caseNames.Count; index++)
         {
             var caseName = caseNames[index];
@@ -655,7 +658,7 @@ internal sealed class SchemaModelBuilder(
                 variantName,
                 effectiveVariantProperties,
                 baseType: allowsUnknown ? null : name,
-                hasExtensionData: existing?.HasExtensionData ?? (branchSchema.AdditionalPropertiesAllowed && branchSchema.AdditionalProperties is null))
+                hasExtensionData: existing?.HasExtensionData ?? false)
             {
                 Description = branchSchema.Description
             };
@@ -756,8 +759,7 @@ internal sealed class SchemaModelBuilder(
         var properties = BuildProperties(name, schema, excludedProperties: []);
         return new ClassModel(
             name,
-            properties,
-            hasExtensionData: schema.Properties is { Count: > 0 } && schema.AdditionalPropertiesAllowed && schema.AdditionalProperties is null)
+            properties)
         {
             Description = schema.Description
         };

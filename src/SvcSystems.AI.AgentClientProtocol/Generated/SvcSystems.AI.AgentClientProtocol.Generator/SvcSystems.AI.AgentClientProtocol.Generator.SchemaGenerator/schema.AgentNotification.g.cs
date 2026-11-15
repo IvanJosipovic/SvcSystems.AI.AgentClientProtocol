@@ -25,7 +25,4 @@ internal sealed partial class AgentNotification
     /// </summary>
     [JsonPropertyName("params")]
     public AgentNotificationParams? Params { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

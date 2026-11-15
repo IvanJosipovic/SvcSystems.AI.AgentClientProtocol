@@ -133,7 +133,6 @@ public sealed class Agent : IAsyncDisposable
                     AuthMethods = response.AuthMethods,
                     AgentInfo = response.AgentInfo,
                     Meta = response.Meta,
-                    ExtensionData = response.ExtensionData,
                 };
             return JsonSerializer.SerializeToUtf8Bytes(negotiated, JsonContext.Default.InitializeResponse);
         });

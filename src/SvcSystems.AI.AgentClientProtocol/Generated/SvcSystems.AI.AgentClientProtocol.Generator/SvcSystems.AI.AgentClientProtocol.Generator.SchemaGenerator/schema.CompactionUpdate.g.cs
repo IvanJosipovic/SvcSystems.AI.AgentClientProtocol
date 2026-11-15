@@ -49,7 +49,4 @@ public sealed partial class CompactionUpdate
 
     [JsonPropertyName("sessionUpdate")]
     public string SessionUpdate { get; } = "compaction_update";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

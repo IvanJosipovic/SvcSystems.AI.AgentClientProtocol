@@ -23,7 +23,4 @@ public sealed partial class MultiSelectItemsCase1
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

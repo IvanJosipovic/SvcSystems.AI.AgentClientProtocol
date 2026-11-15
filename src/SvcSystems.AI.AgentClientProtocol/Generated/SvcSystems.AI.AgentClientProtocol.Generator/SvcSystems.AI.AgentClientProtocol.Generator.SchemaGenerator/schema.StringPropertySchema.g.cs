@@ -101,6 +101,6 @@ public sealed partial class StringPropertySchema
     [JsonPropertyName("_meta")]
     public Dictionary<string, JsonElement>? Meta { get; init; }
 
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
+    [JsonPropertyName("type")]
+    public string Type { get; } = "string";
 }
