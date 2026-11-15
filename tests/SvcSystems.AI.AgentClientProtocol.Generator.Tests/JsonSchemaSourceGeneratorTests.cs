@@ -10,6 +10,62 @@ namespace SvcSystems.AI.AgentClientProtocol.Generator.Tests;
 public sealed class JsonSchemaSourceGeneratorTests
 {
     [Fact]
+    public void PascalCasesLowerCamelDefinitionNamesAndReferences()
+    {
+        const string schema = """
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$defs": {
+                "binaryTarget": {
+                  "type": "object",
+                  "properties": { "archive": { "type": "string" } }
+                },
+                "binaryDistribution": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/$defs/binaryTarget" }
+                },
+                "packageDistribution": {
+                  "type": "object",
+                  "properties": { "package": { "type": "string" } }
+                },
+                "previewChannelDistribution": {
+                  "type": "object",
+                  "properties": {
+                    "binary": { "$ref": "#/$defs/binaryDistribution" },
+                    "npx": { "$ref": "#/$defs/packageDistribution" }
+                  }
+                },
+                "previewChannel": {
+                  "type": "object",
+                  "properties": { "distribution": { "$ref": "#/$defs/previewChannelDistribution" } }
+                }
+              }
+            }
+            """;
+
+        var result = RunGenerator(schema, "fixtures/lower-camel-definitions.schema.json");
+
+        Assert.Empty(result.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        foreach (var typeName in new[]
+                 {
+                     "BinaryDistribution",
+                     "BinaryTarget",
+                     "PackageDistribution",
+                     "PreviewChannel",
+                     "PreviewChannelDistribution",
+                 })
+        {
+            Assert.Contains(result.GeneratedSources, source => ContainsClassDeclaration(source, typeName));
+        }
+
+        var distribution = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "PreviewChannelDistribution"));
+        Assert.Contains("BinaryDistribution? Binary", distribution, StringComparison.Ordinal);
+        Assert.Contains("PackageDistribution? Npx", distribution, StringComparison.Ordinal);
+        var preview = Assert.Single(result.GeneratedSources, source => ContainsClassDeclaration(source, "PreviewChannel"));
+        Assert.Contains("PreviewChannelDistribution? Distribution", preview, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GeneratesModelsFromAnyJsonSchemaAdditionalFile()
     {
         const string schema = """

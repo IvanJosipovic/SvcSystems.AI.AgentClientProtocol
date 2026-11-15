@@ -10,14 +10,14 @@ namespace SvcSystems.AI.AgentClientProtocol.Registry.Models;
 /// <summary>
 /// Preview artifact locations.
 /// </summary>
-public sealed partial class previewChannelDistribution
+public sealed partial class PreviewChannelDistribution
 {
     [JsonPropertyName("binary")]
-    public binaryDistribution? Binary { get; init; }
+    public BinaryDistribution? Binary { get; init; }
 
     [JsonPropertyName("npx")]
-    public packageDistribution? Npx { get; init; }
+    public PackageDistribution? Npx { get; init; }
 
     [JsonPropertyName("uvx")]
-    public packageDistribution? Uvx { get; init; }
+    public PackageDistribution? Uvx { get; init; }
 }

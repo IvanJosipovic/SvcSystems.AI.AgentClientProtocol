@@ -10,11 +10,11 @@ namespace SvcSystems.AI.AgentClientProtocol.Registry.Models;
 public sealed partial class RegistryAgentDistribution
 {
     [JsonPropertyName("binary")]
-    public binaryDistribution? Binary { get; init; }
+    public BinaryDistribution? Binary { get; init; }
 
     [JsonPropertyName("npx")]
-    public packageDistribution? Npx { get; init; }
+    public PackageDistribution? Npx { get; init; }
 
     [JsonPropertyName("uvx")]
-    public packageDistribution? Uvx { get; init; }
+    public PackageDistribution? Uvx { get; init; }
 }

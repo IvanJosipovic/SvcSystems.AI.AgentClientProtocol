@@ -7,6 +7,6 @@ using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Registry.Models;
 
-public sealed partial class binaryDistribution : Dictionary<BinaryDistributionPropertyName, binaryTarget>
+public sealed partial class BinaryDistribution : Dictionary<BinaryDistributionPropertyName, BinaryTarget>
 {
 }

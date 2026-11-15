@@ -10,7 +10,7 @@ namespace SvcSystems.AI.AgentClientProtocol.Registry.Models;
 /// <summary>
 /// Optional preview (unstable) release channel. Holds only the version and the artifact locations; all other metadata is shared with the stable entry.
 /// </summary>
-public sealed partial class previewChannel
+public sealed partial class PreviewChannel
 {
     /// <summary>
     /// Newest known version for the preview channel: X.Y.Z-preview.N, or a plain X.Y.Z release when the stable channel is ahead of the preview line
@@ -22,5 +22,5 @@ public sealed partial class previewChannel
     /// Preview artifact locations.
     /// </summary>
     [JsonPropertyName("distribution")]
-    public required previewChannelDistribution Distribution { get; init; }
+    public required PreviewChannelDistribution Distribution { get; init; }
 }

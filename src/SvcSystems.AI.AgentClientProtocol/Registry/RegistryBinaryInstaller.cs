@@ -41,7 +41,7 @@ internal sealed class RegistryBinaryInstaller
         RegistryAgent agent,
         string version,
         RegistryPlatform platform,
-        binaryTarget target,
+        BinaryTarget target,
         string? workingDirectory,
         CancellationToken cancellationToken)
     {

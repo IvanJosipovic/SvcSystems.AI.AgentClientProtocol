@@ -22,7 +22,7 @@ internal sealed class SchemaModelBuilder(
     {
         foreach (var definition in root.Definitions ?? new Dictionary<string, IOpenApiSchema>())
         {
-            var definitionName = Identifier(definition.Key);
+            var definitionName = Identifier(UppercaseFirst(definition.Key));
             if (_definitions.ContainsKey(definitionName))
             {
                 ReportUnsupported(definitionName, "definition name collides with another generated type name");
@@ -1157,7 +1157,7 @@ internal sealed class SchemaModelBuilder(
         if (string.IsNullOrWhiteSpace(id)) return null;
         var referenceId = id!;
         var slash = referenceId.LastIndexOf('/');
-        return Identifier(slash >= 0 ? referenceId.Substring(slash + 1) : referenceId);
+        return Identifier(UppercaseFirst(slash >= 0 ? referenceId.Substring(slash + 1) : referenceId));
     }
 
     private static bool IsObject(OpenApiSchema schema) =>
@@ -1341,6 +1341,9 @@ internal sealed class SchemaModelBuilder(
 
     private static string ApplyNullability(string type, bool nullable) =>
         !nullable || type.EndsWith("?", StringComparison.Ordinal) ? type : type + "?";
+
+    private static string UppercaseFirst(string value) =>
+        value.Length == 0 ? value : char.ToUpperInvariant(value[0]) + value.Substring(1);
 
     private static string Pascal(string value) => string.Concat(value.Split(new[] { '_', '-', '.', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(part => char.ToUpperInvariant(part[0]) + part.Substring(1)));
 
