@@ -13,5 +13,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// The `type` field acts as the discriminator in the serialized JSON form.
 /// When no `type` is present, the method is treated as `agent`.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(AuthMethodJsonTypeClassifier))]
+[JsonUnion]
 public union AuthMethod(AuthMethodTerminal, AuthMethodAgent);

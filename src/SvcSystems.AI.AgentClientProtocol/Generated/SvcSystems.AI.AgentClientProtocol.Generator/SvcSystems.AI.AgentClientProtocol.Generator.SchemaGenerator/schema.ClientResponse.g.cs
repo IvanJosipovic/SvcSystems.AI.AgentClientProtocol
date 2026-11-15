@@ -10,5 +10,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// A JSON-RPC response object.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ClientResponseJsonTypeClassifier))]
+[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]
 internal union ClientResponse(ClientResponseCase0, ClientResponseCase1);

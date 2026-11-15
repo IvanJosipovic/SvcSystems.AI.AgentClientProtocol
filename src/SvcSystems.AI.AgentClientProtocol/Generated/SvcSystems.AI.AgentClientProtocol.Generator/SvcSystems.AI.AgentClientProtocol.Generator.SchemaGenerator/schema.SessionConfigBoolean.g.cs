@@ -56,7 +56,4 @@ public sealed partial class SessionConfigBoolean
 
     [JsonPropertyName("type")]
     public string Type { get; } = "boolean";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

@@ -37,7 +37,4 @@ public sealed partial class CompactionSummaryChunk
 
     [JsonPropertyName("sessionUpdate")]
     public string SessionUpdate { get; } = "compaction_summary_chunk";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

@@ -32,7 +32,4 @@ public sealed partial class Content
 
     [JsonPropertyName("type")]
     public string Type { get; } = "content";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

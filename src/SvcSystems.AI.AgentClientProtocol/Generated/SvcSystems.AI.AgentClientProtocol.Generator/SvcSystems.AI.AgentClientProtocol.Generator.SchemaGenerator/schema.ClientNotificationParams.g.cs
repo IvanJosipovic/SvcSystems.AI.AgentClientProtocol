@@ -16,5 +16,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// 
 /// Notifications do not expect a response.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(ClientNotificationParamsJsonTypeClassifier))]
+[JsonUnion]
 internal union ClientNotificationParams(CancelNotification, JsonElement);

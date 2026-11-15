@@ -102,7 +102,7 @@ public static class ClientRequestExtensions
         this IAgentContext context,
         RequestPermissionRequest request,
         CancellationToken cancellationToken = default) =>
-        SendAsync(context, Methods.SessionRequestPermission, request, JsonContext.Default.RequestPermissionRequest, JsonContext.Default.RequestPermissionResponse, cancellationToken);
+        SendAsync(context, Methods.SessionRequestPermission, request, JsonContext.Default.RequestPermissionRequest, AcpJson.TypeInfo<RequestPermissionResponse>(), cancellationToken);
 
     /// <summary>Requests user input from the client (<c>elicitation/create</c>).</summary>
     /// <param name="context">The agent context for the active session.</param>

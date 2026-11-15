@@ -62,7 +62,4 @@ public sealed partial class SessionConfigSelect
 
     [JsonPropertyName("type")]
     public string Type { get; } = "select";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

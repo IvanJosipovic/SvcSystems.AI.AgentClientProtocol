@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Registry.Models;
 
-public sealed partial class packageDistribution
+public sealed partial class PackageDistribution
 {
     /// <summary>
     /// Package name (with optional version)

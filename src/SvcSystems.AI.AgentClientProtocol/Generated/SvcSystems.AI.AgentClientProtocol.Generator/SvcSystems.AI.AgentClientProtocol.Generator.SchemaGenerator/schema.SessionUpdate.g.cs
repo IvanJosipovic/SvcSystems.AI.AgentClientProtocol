@@ -3,7 +3,6 @@
 #nullable enable
 using global::SvcSystems.AI.AgentClientProtocol.Client.Models;
 using global::SvcSystems.AI.AgentClientProtocol.Agent.Models;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SvcSystems.AI.AgentClientProtocol.Models;
@@ -15,5 +14,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// 
 /// See protocol docs: [Agent Reports Output](https://agentclientprotocol.com/protocol/v1/prompt-turn#3-agent-reports-output)
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(SessionUpdateJsonTypeClassifier))]
-public union SessionUpdate(SessionUpdateVariant0UserMessageChunk, SessionUpdateVariant1AgentMessageChunk, SessionUpdateVariant2AgentThoughtChunk, ToolCall, ToolCallUpdate, Plan, AvailableCommandsUpdate, CurrentModeUpdate, ConfigOptionUpdate, SessionInfoUpdate, UsageUpdate, Notice, CompactionUpdate, CompactionSummaryChunk, JsonElement);
+[JsonUnion]
+public union SessionUpdate(SessionUpdateVariant0UserMessageChunk, SessionUpdateVariant1AgentMessageChunk, SessionUpdateVariant2AgentThoughtChunk, ToolCall, ToolCallUpdate, Plan, AvailableCommandsUpdate, CurrentModeUpdate, ConfigOptionUpdate, SessionInfoUpdate, UsageUpdate, Notice, CompactionUpdate, CompactionSummaryChunk, SessionUpdateUnknown);

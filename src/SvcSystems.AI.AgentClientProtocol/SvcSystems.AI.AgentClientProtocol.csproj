@@ -3,7 +3,7 @@
     <TargetFramework>net11.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <PackageId>SvcSystems.AI.AgentClientProtocol</PackageId>
-    <Authors>SVCSystems</Authors>
+    <Authors>Ivan Josipovic</Authors>
     <Description>A NativeAOT-compatible .NET client for the Agent Client Protocol.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

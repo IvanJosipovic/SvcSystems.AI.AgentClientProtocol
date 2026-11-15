@@ -85,7 +85,4 @@ public sealed partial class ToolCall
 
     [JsonPropertyName("sessionUpdate")]
     public string SessionUpdate { get; } = "tool_call";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

@@ -182,8 +182,7 @@ public sealed class Session
                 {
                     CurrentModeId = mode.CurrentModeId,
                     AvailableModes = state.AvailableModes,
-                    Meta = state.Meta,
-                    ExtensionData = state.ExtensionData
+                    Meta = state.Meta
                 });
                 break;
             case CurrentModeUpdate mode:

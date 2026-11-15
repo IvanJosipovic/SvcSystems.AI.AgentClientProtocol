@@ -32,7 +32,4 @@ public sealed partial class AvailableCommandsUpdate
 
     [JsonPropertyName("sessionUpdate")]
     public string SessionUpdate { get; } = "available_commands_update";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

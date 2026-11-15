@@ -10,5 +10,5 @@ namespace SvcSystems.AI.AgentClientProtocol.Models;
 /// <summary>
 /// Resource content that can be embedded in a message.
 /// </summary>
-[JsonUnion(TypeClassifier = typeof(EmbeddedResourceResourceJsonTypeClassifier))]
+[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]
 public union EmbeddedResourceResource(TextResourceContents, BlobResourceContents);

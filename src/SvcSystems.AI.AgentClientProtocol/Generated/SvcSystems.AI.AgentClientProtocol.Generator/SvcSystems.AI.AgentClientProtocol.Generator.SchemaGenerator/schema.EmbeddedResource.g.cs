@@ -42,7 +42,4 @@ public sealed partial class EmbeddedResource
 
     [JsonPropertyName("type")]
     public string Type { get; } = "resource";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }

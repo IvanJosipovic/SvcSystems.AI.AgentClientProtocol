@@ -18,20 +18,20 @@ internal static class ModelRenderer
 
     public static IReadOnlyList<GeneratedSource> RenderModels(SchemaModel model, SchemaGeneratorOptions options)
     {
-        var sources = new List<GeneratedSource>(model.Types.Count + 1);
+        var sources = new List<GeneratedSource>(model.Types.Count + 2);
         var modelNamespaces = GetModelNamespaces(model, options);
         foreach (var type in model.Types)
         {
             var modelNamespace = GetModelNamespace(type, options);
             sources.Add(new GeneratedSource(
                 type.Name + ".g.cs",
-                RenderType(type, modelNamespace, modelNamespaces)));
-            if (type is UnionModel union && union.HasGeneratedClassifier)
-            {
-                sources.Add(new GeneratedSource(
-                    type.Name + ".JsonTypeClassifier.g.cs",
-                    RenderUnionClassifier(union, modelNamespace, modelNamespaces)));
-            }
+                RenderType(type, modelNamespace, modelNamespaces, model, options)));
+        }
+        if (model.Types.OfType<UnionModel>().Any(union => union.HasGeneratedClassifier))
+        {
+            sources.Add(new GeneratedSource(
+                UnionClassifierRenderer.FactoryName(model, options) + ".g.cs",
+                UnionClassifierRenderer.Render(model, options, modelNamespaces)));
         }
         if (options.GenerateJsonContext)
         {
@@ -68,7 +68,14 @@ internal static class ModelRenderer
             .AppendLine()
             .Append("namespace ").Append(serializationNamespace).AppendLine(";")
             .AppendLine()
-            .AppendLine("[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, AllowOutOfOrderMetadataProperties = true)]");
+            .Append("[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, AllowOutOfOrderMetadataProperties = true");
+        if (model.Types.OfType<UnionModel>().Any(union => union.HasGeneratedClassifier))
+        {
+            code.Append(", TypeClassifiers = new[] { typeof(")
+                .Append(UnionClassifierRenderer.FactoryName(model, options))
+                .Append(") }");
+        }
+        code.AppendLine(")]");
         foreach (var type in model.Types)
         {
             code.Append("[JsonSerializable(typeof(global::").Append(GetModelNamespace(type, options)).Append('.').Append(type.Name).AppendLine("))]");
@@ -194,13 +201,13 @@ internal static class ModelRenderer
         return code.ToString();
     }
 
-    private static string RenderType(TypeModel type, string modelNamespace, IReadOnlyList<string> namespaces)
+    private static string RenderType(TypeModel type, string modelNamespace, IReadOnlyList<string> namespaces, SchemaModel schemaModel, SchemaGeneratorOptions options)
     {
-        if (type is UnionModel union) return RenderUnion(union, modelNamespace, namespaces);
+            if (type is UnionModel union) return RenderUnion(union, modelNamespace, namespaces, schemaModel, options);
 
         var member = type switch
         {
-            ClassModel classModel => RenderClass(classModel),
+            ClassModel classModel => RenderClass(classModel, options),
             DictionaryModel dictionaryModel => RenderDictionary(dictionaryModel),
             EnumModel enumModel => RenderEnum(enumModel),
             _ => throw new InvalidOperationException("Unknown protocol model: " + type.GetType().Name)
@@ -241,14 +248,16 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
-    private static MemberDeclarationSyntax RenderClass(ClassModel model)
+    private static MemberDeclarationSyntax RenderClass(ClassModel model, SchemaGeneratorOptions options)
     {
         var declaration = SyntaxFactory.ClassDeclaration(model.Name)
             .AddModifiers(SyntaxFactory.Token(model.IsInternal ? SyntaxKind.InternalKeyword : SyntaxKind.PublicKeyword));
 
         if (model.DiscriminatorName is not null)
         {
-            declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.AbstractKeyword));
+            var isClosedHierarchy = options.GenerateJsonContext && model.DiscriminatorCases.Count > 0;
+            declaration = declaration.AddModifiers(SyntaxFactory.Token(
+                isClosedHierarchy ? SyntaxKind.ClosedKeyword : SyntaxKind.AbstractKeyword));
             declaration = declaration.AddAttributeLists(AttributeList(
                 "JsonPolymorphic",
                 NameArgument("TypeDiscriminatorPropertyName", StringExpression(model.DiscriminatorName))));
@@ -348,7 +357,7 @@ internal static class ModelRenderer
         return declaration.WithLeadingTrivia(SummaryTrivia(model.Description));
     }
 
-    private static string RenderUnion(UnionModel model, string modelNamespace, IReadOnlyList<string> namespaces)
+    private static string RenderUnion(UnionModel model, string modelNamespace, IReadOnlyList<string> namespaces, SchemaModel schemaModel, SchemaGeneratorOptions options)
     {
         var code = new StringBuilder(GeneratedHeaderText());
         AppendNamespaceUsings(code, namespaces, modelNamespace);
@@ -359,235 +368,26 @@ internal static class ModelRenderer
             .Append("namespace ").Append(modelNamespace).AppendLine(";")
             .AppendLine();
         AppendSummary(code, model.Description);
-        if (model.HasGeneratedClassifier)
+        if (model.UsesStructuralClassifier)
         {
-            code.Append("[JsonUnion(TypeClassifier = typeof(").Append(model.Name).AppendLine("JsonTypeClassifier))]");
+            code.AppendLine("[JsonUnion(TypeClassifier = typeof(JsonUnionTypeStructuralClassifier))]");
+        }
+        else if (model.HasGeneratedClassifier)
+        {
+            if (options.GenerateJsonContext)
+            {
+                code.AppendLine("[JsonUnion]");
+            }
+            else
+            {
+                code.Append("[JsonUnion(TypeClassifier = typeof(global::")
+                    .Append(options.SerializationNamespace).Append('.').Append(UnionClassifierRenderer.FactoryName(schemaModel, options))
+                    .AppendLine("))]");
+            }
         }
         code.Append(model.IsInternal ? "internal union " : "public union ").Append(model.Name).Append('(').Append(string.Join(", ", model.Cases)).AppendLine(");");
         return code.ToString();
     }
-
-    private static string RenderUnionClassifier(UnionModel model, string modelNamespace, IReadOnlyList<string> namespaces)
-    {
-        if (model.Cases.All(item => item.StartsWith("List<", StringComparison.Ordinal)))
-            return RenderArrayUnionClassifier(model, modelNamespace, namespaces);
-
-        var discriminatorProperty = model.CaseModels
-            .SelectMany(item => item.ConstProperties.Keys)
-            .Distinct(StringComparer.Ordinal)
-            .Select(property => new
-            {
-                Property = property,
-                Values = model.CaseModels
-                    .Where(item => item.ConstProperties.ContainsKey(property))
-                    .Select(item => item.ConstProperties[property])
-                    .Distinct(StringComparer.Ordinal)
-                    .ToArray()
-            })
-            .Where(item => item.Values.Length > 0)
-            .OrderByDescending(item => item.Values.Length)
-            .FirstOrDefault();
-        var tagFallback = discriminatorProperty is null
-            ? null
-            : model.CaseModels.FirstOrDefault(item =>
-                item.TypeName != model.DefaultCaseName &&
-                item.Properties.Contains(discriminatorProperty.Property, StringComparer.Ordinal) &&
-                item.RequiredProperties.Contains(discriminatorProperty.Property, StringComparer.Ordinal) &&
-                !item.ConstProperties.ContainsKey(discriminatorProperty.Property));
-        var rawFallback = model.Cases.FirstOrDefault(item => item == "JsonElement");
-        var discriminatorIsComplete = discriminatorProperty is not null &&
-            (model.DefaultCaseName is not null || model.CaseModels.All(item =>
-                item.RequiredProperties.Contains(discriminatorProperty.Property, StringComparer.Ordinal)));
-        var needsStructuralFallback = !model.AllowUnknownDiscriminator && !discriminatorIsComplete;
-
-        var code = new StringBuilder(GeneratedHeaderText());
-        AppendNamespaceUsings(code, namespaces, modelNamespace);
-        code.AppendLine("using System.Text.Json;")
-            .AppendLine("using System.Text.Json.Serialization;")
-            .AppendLine()
-            .Append("namespace ").Append(modelNamespace).AppendLine(";")
-            .AppendLine()
-            .Append("internal sealed class ").Append(model.Name).Append("JsonTypeClassifier : JsonTypeClassifierFactory<")
-            .Append(model.Name).AppendLine(">")
-            .AppendLine("{")
-            .Append("    public ").Append(model.Name).AppendLine("JsonTypeClassifier() { }")
-            .AppendLine()
-            .AppendLine("    public override JsonTypeClassifier CreateJsonClassifier(JsonTypeClassifierContext context, JsonSerializerOptions options)")
-            .AppendLine("    {")
-            .AppendLine("        return static (ref Utf8JsonReader reader) =>")
-            .AppendLine("        {")
-            .AppendLine("            // JSON token kinds identify scalar cases before object-shape rules.");
-
-        var numericCases = model.Cases.Where(IsNumericType).ToArray();
-        if (model.Cases.Contains("string", StringComparer.Ordinal))
-            code.AppendLine("            if (reader.TokenType == JsonTokenType.String) return typeof(string);");
-        if (model.Cases.Contains("bool", StringComparer.Ordinal))
-            code.AppendLine("            if (reader.TokenType is JsonTokenType.True or JsonTokenType.False) return typeof(bool);");
-        if (numericCases.Length > 0)
-        {
-            code.AppendLine("            if (reader.TokenType == JsonTokenType.Number)");
-            code.AppendLine("            {");
-            if (numericCases.Contains("long", StringComparer.Ordinal) && numericCases.Contains("double", StringComparer.Ordinal))
-                code.AppendLine("                return reader.TryGetInt64(out _) ? typeof(long) : typeof(double);");
-            else
-                code.Append("                return typeof(").Append(numericCases[0]).AppendLine(");");
-            code.AppendLine("            }");
-        }
-        var listCases = model.Cases.Where(item => item.StartsWith("List<", StringComparison.Ordinal)).ToArray();
-        if (listCases.Length == 1)
-            code.Append("            if (reader.TokenType == JsonTokenType.StartArray) return typeof(").Append(listCases[0]).AppendLine(");");
-        code.Append("            if (reader.TokenType != JsonTokenType.StartObject) return ")
-            .Append(rawFallback is not null && !model.AllowUnknownDiscriminator ? "typeof(JsonElement);" : "null;").AppendLine();
-
-        if (discriminatorProperty is not null)
-        {
-            code.Append("            // Schema discriminator values select recognized cases.").AppendLine();
-        }
-        if (needsStructuralFallback)
-            code.AppendLine("            var matchedCase = -1;");
-        code.AppendLine("            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)")
-            .AppendLine("            {")
-            .AppendLine("                if (reader.TokenType != JsonTokenType.PropertyName) continue;");
-
-        if (discriminatorProperty is not null)
-        {
-            code.Append("                if (reader.ValueTextEquals(").Append(ByteLiteral(discriminatorProperty.Property)).AppendLine("))")
-                .AppendLine("                {")
-                .AppendLine("                    if (!reader.Read() || reader.TokenType != JsonTokenType.String) return null;")
-                .AppendLine("                    return reader.GetString() switch")
-                .AppendLine("                    {");
-            foreach (var caseModel in model.CaseModels)
-            {
-                if (caseModel.ConstProperties.TryGetValue(discriminatorProperty.Property, out var constValue))
-                {
-                    code.Append("                        ").Append(SymbolDisplay.FormatLiteral(constValue, true)).Append(" => typeof(")
-                        .Append(caseModel.TypeName).AppendLine("),");
-                }
-            }
-            if (rawFallback is not null)
-                code.AppendLine("                        _ => typeof(JsonElement),");
-            else if (tagFallback is not null)
-                code.Append("                        _ => typeof(").Append(tagFallback.TypeName).AppendLine("),");
-            else
-                code.AppendLine("                        _ => null,");
-            code.AppendLine("                    };")
-                .AppendLine("                }");
-        }
-
-        if (needsStructuralFallback)
-        {
-            foreach (var caseModel in model.CaseModels.Select((item, index) => (item, index)))
-            {
-                foreach (var property in caseModel.item.UniqueProperties)
-                {
-                    code.Append("                if (reader.ValueTextEquals(").Append(ByteLiteral(property)).AppendLine("))")
-                        .AppendLine("                {")
-                        .Append("                    if (matchedCase >= 0 && matchedCase != ").Append(caseModel.index).AppendLine(") return null;")
-                        .Append("                    matchedCase = ").Append(caseModel.index).AppendLine(";")
-                        .AppendLine("                }");
-                }
-            }
-        }
-
-        code.AppendLine("                if (!reader.Read()) return null;")
-            .AppendLine("                reader.Skip();")
-            .AppendLine("            }");
-        if (model.AllowUnknownDiscriminator)
-        {
-            code.AppendLine("            return null;");
-        }
-        else if (discriminatorProperty is not null && model.DefaultCaseName is { } taggedDefaultCase)
-        {
-            code.Append("            return typeof(").Append(taggedDefaultCase).AppendLine(");");
-        }
-        else if (discriminatorIsComplete)
-        {
-            code.AppendLine("            return null;");
-        }
-        else
-        {
-            code.AppendLine("            return matchedCase switch")
-                .AppendLine("            {");
-            for (var index = 0; index < model.CaseModels.Count; index++)
-            {
-                code.Append("                ").Append(index).Append(" => typeof(").Append(model.CaseModels[index].TypeName).AppendLine("),");
-            }
-            if (rawFallback is not null)
-                code.AppendLine("                _ => typeof(JsonElement),");
-            else if (model.DefaultCaseName is { } defaultCaseName)
-                code.Append("                _ => typeof(").Append(defaultCaseName).AppendLine("),");
-            else
-                code.AppendLine("                _ => null,");
-            code.AppendLine("            };");
-        }
-        code.AppendLine("        };")
-            .AppendLine("    }")
-            .AppendLine("}");
-        return code.ToString();
-    }
-
-    private static string RenderArrayUnionClassifier(UnionModel model, string modelNamespace, IReadOnlyList<string> namespaces)
-    {
-        var code = new StringBuilder(GeneratedHeaderText());
-        AppendNamespaceUsings(code, namespaces, modelNamespace);
-        code.AppendLine("using System.Text.Json;")
-            .AppendLine("using System.Text.Json.Serialization;")
-            .AppendLine()
-            .Append("namespace ").Append(modelNamespace).AppendLine(";")
-            .AppendLine()
-            .Append("internal sealed class ").Append(model.Name).Append("JsonTypeClassifier : JsonTypeClassifierFactory<")
-            .Append(model.Name).AppendLine(">")
-            .AppendLine("{")
-            .Append("    public ").Append(model.Name).AppendLine("JsonTypeClassifier() { }")
-            .AppendLine()
-            .AppendLine("    public override JsonTypeClassifier CreateJsonClassifier(JsonTypeClassifierContext context, JsonSerializerOptions options)")
-            .AppendLine("    {")
-            .AppendLine("        return static (ref Utf8JsonReader reader) =>")
-            .AppendLine("        {")
-            .AppendLine("            if (reader.TokenType != JsonTokenType.StartArray || !reader.Read()) return null;")
-            .Append("            if (reader.TokenType == JsonTokenType.EndArray) return typeof(")
-            .Append(model.DefaultCaseName ?? model.Cases[0]).AppendLine(");")
-            .AppendLine("            if (reader.TokenType != JsonTokenType.StartObject) return null;")
-            .AppendLine("            var matchedCase = -1;")
-            .AppendLine("            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)")
-            .AppendLine("            {")
-            .AppendLine("                if (reader.TokenType != JsonTokenType.PropertyName) continue;");
-
-        foreach (var caseModel in model.CaseModels.Select((item, index) => (item, index)))
-        {
-            foreach (var property in caseModel.item.UniqueProperties)
-            {
-                code.Append("                if (reader.ValueTextEquals(").Append(ByteLiteral(property)).AppendLine("))")
-                    .AppendLine("                {")
-                    .Append("                    if (matchedCase >= 0 && matchedCase != ").Append(caseModel.index).AppendLine(") return null;")
-                    .Append("                    matchedCase = ").Append(caseModel.index).AppendLine(";")
-                    .AppendLine("                }");
-            }
-        }
-
-        code.AppendLine("                if (!reader.Read()) return null;")
-            .AppendLine("                reader.Skip();")
-            .AppendLine("            }")
-            .AppendLine("            return matchedCase switch")
-            .AppendLine("            {");
-        for (var index = 0; index < model.CaseModels.Count; index++)
-            code.Append("                ").Append(index).Append(" => typeof(").Append(model.CaseModels[index].TypeName).AppendLine("),");
-        if (model.DefaultCaseName is { } defaultCaseName)
-            code.Append("                _ => typeof(").Append(defaultCaseName).AppendLine("),");
-        else
-            code.AppendLine("                _ => null,");
-        code.AppendLine("            };")
-            .AppendLine("        };")
-            .AppendLine("    }")
-            .AppendLine("}");
-        return code.ToString();
-    }
-
-    private static string ByteLiteral(string value) =>
-        SymbolDisplay.FormatLiteral(value, quote: true) + "u8";
-
-    private static bool IsNumericType(string typeName) =>
-        typeName is "int" or "uint" or "long" or "ulong" or "double" or "float";
 
     private static AccessorListSyntax InitAccessors() => SyntaxFactory.AccessorList(
         SyntaxFactory.List([

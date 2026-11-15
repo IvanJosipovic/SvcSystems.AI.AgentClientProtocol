@@ -39,7 +39,4 @@ public sealed partial class Error
     /// </summary>
     [JsonPropertyName("data")]
     public JsonElement? Data { get; init; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; init; }
 }
